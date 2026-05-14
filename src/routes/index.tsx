@@ -269,53 +269,64 @@ function Dashboard() {
         </div>
       </header>
 
-      {/* Task List */}
-      <div className="space-y-4">
+      {/* Task List grouped by Project */}
+      <div className="space-y-10">
         {tasks.length > 0 ? (
-          tasks.map(task => (
-            <Card key={task.id} className="p-5 bg-zinc-950 border-zinc-900 rounded-[1.5rem] border-l-4 border-l-blue-900/50 flex flex-col gap-3 transition-none group hover:bg-zinc-900/30">
-              <div className="flex justify-between items-start">
-                <div className="flex flex-col gap-1.5 flex-1 pr-4">
-                  <div className="flex items-center gap-2">
-                    {task.projetos && (
-                      <span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-zinc-500">
-                        <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: task.projetos.cor }} />
-                        {task.projetos.nome}
-                      </span>
-                    )}
-                    {task.repeticao !== 'none' && (
-                      <Badge variant="outline" className="text-[8px] h-4 bg-zinc-900 border-zinc-800 text-zinc-400 font-black uppercase py-0 px-1.5">
-                        <RotateCcw size={8} className="mr-1" /> {task.repeticao}
-                      </Badge>
-                    )}
-                  </div>
-                  <span className="font-bold text-lg leading-tight group-hover:text-blue-400 transition-colors">{task.titulo}</span>
-                  
-                  {task.tags && task.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-1">
-                      {task.tags.map((tag: string) => (
-                        <span key={tag} className="text-[9px] font-black text-zinc-600 uppercase flex items-center">
-                          <Hash size={8} className="mr-0.5" />{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                
-                <Button 
-                  size="icon" 
-                  className="h-12 w-12 rounded-2xl bg-zinc-900 text-white border border-zinc-800 hover:bg-white hover:text-black transition-none shrink-0"
-                  onClick={() => completeTask(task)}
-                >
-                  <Check size={20} />
-                </Button>
+          Object.entries(
+            tasks.reduce((acc: any, task) => {
+              const key = task.projetos?.nome || 'Geral';
+              if (!acc[key]) acc[key] = [];
+              acc[key].push(task);
+              return acc;
+            }, {})
+          ).map(([group, groupTasks]: [string, any]) => (
+            <div key={group} className="space-y-4">
+              <div className="flex items-center gap-2 px-1">
+                <div className="h-1 w-4 rounded-full bg-blue-900/50" />
+                <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{group}</h2>
               </div>
-            </Card>
+              <div className="space-y-4">
+                {groupTasks.map((task: any) => (
+                  <Card key={task.id} className="p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] border-l-4 border-l-blue-900/30 flex flex-col gap-3 transition-none group hover:bg-zinc-900/30">
+                    <div className="flex justify-between items-start">
+                      <div className="flex flex-col gap-1.5 flex-1 pr-4">
+                        <div className="flex items-center gap-2">
+                          {task.repeticao !== 'none' && (
+                            <Badge variant="outline" className="text-[8px] h-4 bg-zinc-900 border-zinc-800 text-zinc-400 font-black uppercase py-0 px-1.5">
+                              <RotateCcw size={8} className="mr-1" /> {task.repeticao}
+                            </Badge>
+                          )}
+                        </div>
+                        <span className="font-bold text-xl leading-tight group-hover:text-blue-400 transition-colors">{task.titulo}</span>
+                        
+                        {task.tags && task.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {task.tags.map((tag: string) => (
+                              <span key={tag} className="text-[9px] font-black text-zinc-600 uppercase flex items-center bg-zinc-900/50 px-2 py-1 rounded-md">
+                                <Hash size={8} className="mr-0.5" />{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <Button 
+                        size="icon" 
+                        className="h-14 w-14 rounded-2xl bg-zinc-900 text-white border border-zinc-800 hover:bg-white hover:text-black transition-none shrink-0"
+                        onClick={() => completeTask(task)}
+                      >
+                        <Check size={24} />
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
           ))
         ) : (
           <div className="text-center py-24 bg-zinc-950/30 rounded-[2.5rem] border border-dashed border-zinc-900">
             <Check className="mx-auto mb-4 text-zinc-800" size={40} />
-            <p className="text-zinc-600 font-black uppercase tracking-widest text-[10px]">Tudo limpo por hoje</p>
+            <p className="text-zinc-700 font-black uppercase tracking-widest text-[10px]">Território conquistado</p>
           </div>
         )}
       </div>
