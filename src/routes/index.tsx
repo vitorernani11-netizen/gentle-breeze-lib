@@ -349,7 +349,10 @@ function Dashboard() {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20 max-w-2xl mx-auto">
+    <div className={cn(
+      "min-h-screen p-6 pt-24 pb-20 max-w-2xl mx-auto transition-colors duration-1000",
+      isRecoveryMode ? "bg-zinc-900 text-zinc-300 grayscale-[0.5]" : "bg-black text-white"
+    )}>
       {isLocked && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
           <PowerOff size={80} className="text-zinc-800 mb-8 animate-pulse" />
@@ -362,6 +365,61 @@ function Dashboard() {
           </p>
         </div>
       )}
+
+      {/* Hardware Humano Widget */}
+      <section className="mb-12">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="h-1 w-4 rounded-full bg-blue-500" />
+          <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Hardware Humano</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <Card className={cn(
+            "p-4 border-zinc-800/50 flex items-center gap-4 transition-all",
+            isRecoveryMode ? "bg-zinc-800/50" : "bg-zinc-900/20"
+          )}>
+            <div className="h-10 w-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
+              <Droplets size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-0.5">Hidratação</p>
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-black truncate">{(hydration / 1000).toFixed(1)}L</span>
+                <Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-white" onClick={handleAddHydration}>
+                  <Plus size={14} />
+                </Button>
+              </div>
+            </div>
+          </Card>
+
+          <Card className={cn(
+            "p-4 border-zinc-800/50 flex items-center gap-4 transition-all",
+            isRecoveryMode ? "bg-zinc-800/50" : "bg-zinc-900/20"
+          )}>
+            <div className="h-10 w-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 shrink-0">
+              <Moon size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-0.5">Status do Sono</p>
+              <span className="text-lg font-black truncate">{hoursSleptToday ?? '--'}h</span>
+            </div>
+          </Card>
+
+          <Card className={cn(
+            "p-4 border-red-900/30 flex items-center gap-4 transition-all",
+            isRecoveryMode ? "bg-red-950/10" : "bg-red-950/20"
+          )}>
+            <div className="h-10 w-10 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
+              <Clock size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[8px] font-black uppercase tracking-widest text-red-500/60 mb-0.5">Prazo EAD</p>
+              <span className="text-sm font-black text-red-500 whitespace-nowrap">
+                {differenceInDays(new Date('2026-05-25'), new Date())} dias restantes
+              </span>
+            </div>
+          </Card>
+        </div>
+      </section>
 
       <header className="mb-12">
         <div className="flex justify-between items-start mb-8">
