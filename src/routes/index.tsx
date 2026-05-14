@@ -1,15 +1,25 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { BottomNav } from '@/components/BottomNav';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, ShoppingCart, Wallet, CreditCard, ChevronRight, Check, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { 
+  Plus, 
+  Calendar, 
+  Check, 
+  Hash, 
+  RotateCcw, 
+  Clock, 
+  ChevronRight,
+  Filter,
+  ArrowRight
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -20,10 +30,21 @@ function Dashboard() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showCheckin, setShowCheckin] = useState(false);
+  const [showAddTask, setShowAddTask] = useState(false);
   const [tasks, setTasks] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  
   const [checkin, setCheckin] = useState({
     horas_sono: '',
     marmitas_prontas: false,
+  });
+
+  const [newTask, setNewTask] = useState({
+    titulo: '',
+    projeto_id: '',
+    data_execucao: new Date().toISOString().split('T')[0],
+    repeticao: 'none',
+    tags: ''
   });
 
   useEffect(() => {
@@ -31,10 +52,32 @@ function Dashboard() {
       setSession(session);
       const userId = session?.user?.id || 'anonymous';
       checkTodayCheckin(userId);
-      fetchTodayTasks(userId);
+      fetchData(userId);
       setLoading(false);
     });
   }, []);
+
+  const fetchData = async (userId: string) => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Fetch today's tasks
+    const { data: tasksData } = await supabase
+      .from('tarefas')
+      .select('*, projetos(nome, cor)')
+      .eq('user_id', userId)
+      .eq('data_execucao', today)
+      .eq('status_concluido', false)
+      .order('created_at', { ascending: false });
+
+    // Fetch projects
+    const { data: projectsData } = await supabase
+      .from('projetos')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (tasksData) setTasks(tasksData);
+    if (projectsData) setProjects(projectsData);
+  };
 
   const checkTodayCheckin = async (userId: string) => {
     const today = new Date().toISOString().split('T')[0];
@@ -50,22 +93,8 @@ function Dashboard() {
     }
   };
 
-  const fetchTodayTasks = async (userId: string) => {
-    const { data } = await supabase
-      .from('tarefas')
-      .select('*')
-      .eq('user_id', userId)
-      .in('status', ['Entrada', 'Hoje'])
-      .order('created_at', { ascending: false });
-
-    if (data) setTasks(data);
-  };
-
   const handleSaveCheckin = async () => {
-    if (!session) {
-      setShowCheckin(false);
-      return;
-    }
+    if (!session) return setShowCheckin(false);
     const today = new Date().toISOString().split('T')[0];
     
     const { error } = await supabase
@@ -79,184 +108,249 @@ function Dashboard() {
 
     if (!error) {
       setShowCheckin(false);
-      toast.success('Check-in realizado!');
-    } else {
-      toast.error('Erro ao salvar check-in');
+      toast.success('Dia iniciado!');
     }
   };
 
-  const updateTaskStatus = async (id: string, status: 'Hoje' | 'Amanha') => {
-    const { error } = await supabase
-      .from('tarefas')
-      .update({ status })
-      .eq('id', id);
+  const handleCreateTask = async () => {
+    if (!newTask.titulo || !session) return;
 
-    if (!error) {
-      setTasks(tasks.filter(t => t.id !== id || status === 'Hoje'));
-      if (status === 'Hoje') {
-        setTasks(tasks.map(t => t.id === id ? { ...t, status } : t));
+    const tagsArray = newTask.tags.split(',').map(t => t.trim()).filter(t => t !== '');
+    
+    const { data, error } = await supabase
+      .from('tarefas')
+      .insert([{
+        user_id: session.user.id,
+        titulo: newTask.titulo,
+        projeto_id: newTask.projeto_id || null,
+        data_execucao: newTask.data_execucao,
+        repeticao: newTask.repeticao,
+        tags: tagsArray,
+        status: 'Hoje'
+      }])
+      .select('*, projetos(nome, cor)')
+      .single();
+
+    if (data) {
+      const today = new Date().toISOString().split('T')[0];
+      if (data.data_execucao === today) {
+        setTasks([data, ...tasks]);
       }
-      toast.success(status === 'Hoje' ? 'Tarefa para hoje' : 'Tarefa para amanhã');
+      setShowAddTask(false);
+      setNewTask({
+        titulo: '',
+        projeto_id: '',
+        data_execucao: new Date().toISOString().split('T')[0],
+        repeticao: 'none',
+        tags: ''
+      });
+      toast.success('Tarefa agendada');
     }
   };
 
-  const completeTask = async (id: string) => {
-    const { error } = await supabase
-      .from('tarefas')
-      .update({ status_concluido: true })
-      .eq('id', id);
+  const completeTask = async (task: any) => {
+    // If it's recurring, we don't just "complete" it, we move it to the next date
+    if (task.repeticao !== 'none') {
+      const currentDate = new Date(task.data_execucao);
+      let nextDate = new Date(currentDate);
 
-    if (!error) {
-      setTasks(tasks.filter(t => t.id !== id));
-      toast.success('Tarefa concluída!');
+      if (task.repeticao === 'daily') nextDate.setDate(currentDate.getDate() + 1);
+      if (task.repeticao === 'weekly') nextDate.setDate(currentDate.getDate() + 7);
+      if (task.repeticao === 'monthly') nextDate.setMonth(currentDate.getMonth() + 1);
+
+      const nextDateStr = nextDate.toISOString().split('T')[0];
+
+      const { error } = await supabase
+        .from('tarefas')
+        .update({ data_execucao: nextDateStr })
+        .eq('id', task.id);
+
+      if (!error) {
+        setTasks(tasks.filter(t => t.id !== task.id));
+        toast.success(`Recorrência agendada para ${nextDate.toLocaleDateString()}`);
+      }
+    } else {
+      const { error } = await supabase
+        .from('tarefas')
+        .update({ status_concluido: true })
+        .eq('id', task.id);
+
+      if (!error) {
+        setTasks(tasks.filter(t => t.id !== task.id));
+        toast.success('Tarefa concluída!');
+      }
     }
-  };
-
-  const quickAction = (action: string) => {
-    toast.info(`Ação: ${action}`);
-    // Here you would navigate to specific forms or open modals
-    if (action === 'Nova Tarefa') navigate({ to: '/tasks' });
-    if (action.includes('Gasto') || action.includes('Venda')) navigate({ to: '/finance' });
   };
 
   if (loading) return null;
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 pb-24">
-      <header className="mb-8 pt-4">
-        <h1 className="text-3xl font-bold tracking-tighter">Focus</h1>
-        <p className="text-muted-foreground text-sm uppercase tracking-widest font-medium mt-1">
-          {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
-        </p>
+    <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20">
+      <header className="mb-10">
+        <div className="flex items-center gap-2 text-blue-500 mb-2">
+          <Calendar size={20} />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Execução</span>
+        </div>
+        <div className="flex justify-between items-end">
+          <div>
+            <h1 className="text-4xl font-black tracking-tighter uppercase leading-none">Hoje</h1>
+            <p className="text-zinc-500 text-xs font-medium mt-2">
+              {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </p>
+          </div>
+          <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
+            <DialogTrigger asChild>
+              <Button size="icon" className="h-14 w-14 rounded-2xl bg-white text-black hover:bg-zinc-200 transition-none shadow-2xl shadow-white/10">
+                <Plus size={28} />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-zinc-950 border-zinc-900 rounded-[2.5rem] p-8 sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-center">Nova Missão</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-6 py-6">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">O que fazer?</Label>
+                  <Input 
+                    placeholder="Ex: Treino de pernas" 
+                    value={newTask.titulo}
+                    onChange={(e) => setNewTask({ ...newTask, titulo: e.target.value })}
+                    className="bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold focus-visible:ring-1 ring-zinc-700"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Projeto</Label>
+                    <Select value={newTask.projeto_id} onValueChange={(v) => setNewTask({ ...newTask, projeto_id: v })}>
+                      <SelectTrigger className="bg-zinc-900 border-none h-12 rounded-xl px-4 font-bold">
+                        <SelectValue placeholder="Geral" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                        <SelectItem value="none">Nenhum</SelectItem>
+                        {projects.map(p => (
+                          <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Repetição</Label>
+                    <Select value={newTask.repeticao} onValueChange={(v) => setNewTask({ ...newTask, repeticao: v })}>
+                      <SelectTrigger className="bg-zinc-900 border-none h-12 rounded-xl px-4 font-bold">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+                        <SelectItem value="none">Única</SelectItem>
+                        <SelectItem value="daily">Diária</SelectItem>
+                        <SelectItem value="weekly">Semanal</SelectItem>
+                        <SelectItem value="monthly">Mensal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Tags (separadas por vírgula)</Label>
+                  <Input 
+                    placeholder="foco, urgente" 
+                    value={newTask.tags}
+                    onChange={(e) => setNewTask({ ...newTask, tags: e.target.value })}
+                    className="bg-zinc-900 border-none h-12 rounded-xl px-4 font-bold"
+                  />
+                </div>
+
+                <Button onClick={handleCreateTask} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none">
+                  Agendar
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </header>
 
-      {/* Quick Action Grid */}
-      <div className="grid grid-cols-2 gap-4 mb-10">
-        <Button 
-          variant="secondary" 
-          className="h-24 flex flex-col gap-2 rounded-2xl bg-zinc-900 border-zinc-800 hover:bg-zinc-800 transition-none"
-          onClick={() => quickAction('Nova Tarefa')}
-        >
-          <Plus size={24} />
-          <span className="text-xs font-bold uppercase">Nova Tarefa</span>
-        </Button>
-        <Button 
-          variant="secondary" 
-          className="h-24 flex flex-col gap-2 rounded-2xl bg-zinc-900 border-zinc-800 hover:bg-zinc-800 transition-none"
-          onClick={() => quickAction('Venda Nabih')}
-        >
-          <ShoppingCart size={24} />
-          <span className="text-xs font-bold uppercase">Venda Nabih</span>
-        </Button>
-        <Button 
-          variant="secondary" 
-          className="h-24 flex flex-col gap-2 rounded-2xl bg-zinc-900 border-zinc-800 hover:bg-zinc-800 transition-none"
-          onClick={() => quickAction('Gasto Pessoal')}
-        >
-          <Wallet size={24} />
-          <span className="text-xs font-bold uppercase">Gasto Pessoal</span>
-        </Button>
-        <Button 
-          variant="secondary" 
-          className="h-24 flex flex-col gap-2 rounded-2xl bg-zinc-900 border-zinc-800 hover:bg-zinc-800 transition-none"
-          onClick={() => quickAction('Gasto Nabih')}
-        >
-          <CreditCard size={24} />
-          <span className="text-xs font-bold uppercase">Gasto Nabih</span>
-        </Button>
-      </div>
-
-      {/* Task Sections */}
-      <div className="space-y-8">
-        {/* Entrada Section */}
-        {tasks.some(t => t.status === 'Entrada') && (
-          <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-500 mb-4 px-1">Entrada</h2>
-            <div className="space-y-2">
-              {tasks.filter(t => t.status === 'Entrada').map(task => (
-                <Card key={task.id} className="p-4 bg-zinc-900 border-zinc-800 rounded-xl flex items-center justify-between transition-none">
-                  <span className="font-medium truncate pr-4">{task.titulo}</span>
-                  <div className="flex gap-2 shrink-0">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="text-[10px] font-bold uppercase h-8 px-2 border-zinc-700 transition-none"
-                      onClick={() => updateTaskStatus(task.id, 'Hoje')}
-                    >
-                      Hoje
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="text-[10px] font-bold uppercase h-8 px-2 border-zinc-700 transition-none"
-                      onClick={() => updateTaskStatus(task.id, 'Amanha')}
-                    >
-                      Amanhã
-                    </Button>
+      {/* Task List */}
+      <div className="space-y-4">
+        {tasks.length > 0 ? (
+          tasks.map(task => (
+            <Card key={task.id} className="p-5 bg-zinc-950 border-zinc-900 rounded-[1.5rem] border-l-4 border-l-blue-900/50 flex flex-col gap-3 transition-none group hover:bg-zinc-900/30">
+              <div className="flex justify-between items-start">
+                <div className="flex flex-col gap-1.5 flex-1 pr-4">
+                  <div className="flex items-center gap-2">
+                    {task.projetos && (
+                      <span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-zinc-500">
+                        <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: task.projetos.cor }} />
+                        {task.projetos.nome}
+                      </span>
+                    )}
+                    {task.repeticao !== 'none' && (
+                      <Badge variant="outline" className="text-[8px] h-4 bg-zinc-900 border-zinc-800 text-zinc-400 font-black uppercase py-0 px-1.5">
+                        <RotateCcw size={8} className="mr-1" /> {task.repeticao}
+                      </Badge>
+                    )}
                   </div>
-                </Card>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Hoje Section */}
-        <section>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-500 mb-4 px-1">Tarefas de Hoje</h2>
-          <div className="space-y-2">
-            {tasks.filter(t => t.status === 'Hoje').length > 0 ? (
-              tasks.filter(t => t.status === 'Hoje').map(task => (
-                <Card key={task.id} className="p-4 bg-zinc-900 border-zinc-800 rounded-xl flex items-center justify-between transition-none">
-                  <span className="font-medium">{task.titulo}</span>
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="h-8 w-8 rounded-full hover:bg-zinc-800 transition-none"
-                    onClick={() => completeTask(task.id)}
-                  >
-                    <Check size={18} className="text-zinc-400" />
-                  </Button>
-                </Card>
-              ))
-            ) : (
-              <p className="text-center py-8 text-zinc-600 text-sm italic font-medium">Nenhuma execução pendente.</p>
-            )}
+                  <span className="font-bold text-lg leading-tight group-hover:text-blue-400 transition-colors">{task.titulo}</span>
+                  
+                  {task.tags && task.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {task.tags.map((tag: string) => (
+                        <span key={tag} className="text-[9px] font-black text-zinc-600 uppercase flex items-center">
+                          <Hash size={8} className="mr-0.5" />{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                <Button 
+                  size="icon" 
+                  className="h-12 w-12 rounded-2xl bg-zinc-900 text-white border border-zinc-800 hover:bg-white hover:text-black transition-none shrink-0"
+                  onClick={() => completeTask(task)}
+                >
+                  <Check size={20} />
+                </Button>
+              </div>
+            </Card>
+          ))
+        ) : (
+          <div className="text-center py-24 bg-zinc-950/30 rounded-[2.5rem] border border-dashed border-zinc-900">
+            <Check className="mx-auto mb-4 text-zinc-800" size={40} />
+            <p className="text-zinc-600 font-black uppercase tracking-widest text-[10px]">Tudo limpo por hoje</p>
           </div>
-        </section>
+        )}
       </div>
 
       {/* Morning Check-in Modal */}
       <Dialog open={showCheckin} onOpenChange={setShowCheckin}>
-        <DialogContent className="w-[90%] rounded-3xl bg-zinc-950 border-zinc-800 p-8 sm:max-w-md">
+        <DialogContent className="w-[90%] rounded-[2.5rem] bg-zinc-950 border-zinc-900 p-8 sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black text-center uppercase tracking-tighter">Check-in Matinal</DialogTitle>
           </DialogHeader>
           <div className="space-y-8 py-6">
-            <div className="space-y-4">
-              <Label htmlFor="sono" className="text-xs font-bold uppercase tracking-widest text-zinc-500">Horas de Sono</Label>
+            <div className="space-y-4 text-center">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Horas de Sono</Label>
               <Input
-                id="sono"
                 type="number"
                 placeholder="0.0"
                 value={checkin.horas_sono}
                 onChange={(e) => setCheckin({ ...checkin, horas_sono: e.target.value })}
-                className="bg-zinc-900 border-none h-14 text-2xl font-bold rounded-2xl text-center focus-visible:ring-0"
+                className="bg-zinc-900 border-none h-20 text-4xl font-black rounded-3xl text-center focus-visible:ring-0"
               />
             </div>
 
-            <div className="flex items-center justify-between py-2">
-              <Label htmlFor="marmitas" className="text-xs font-bold uppercase tracking-widest text-zinc-500">Marmitas Prontas?</Label>
+            <div className="flex flex-col gap-4">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 text-center">Marmitas Prontas?</Label>
               <div className="flex gap-4">
                 <Button 
                   variant={checkin.marmitas_prontas ? 'default' : 'secondary'}
-                  className={`h-12 w-16 rounded-xl font-bold uppercase transition-none ${checkin.marmitas_prontas ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400'}`}
+                  className={`flex-1 h-16 rounded-2xl font-black uppercase transition-none ${checkin.marmitas_prontas ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-500'}`}
                   onClick={() => setCheckin({ ...checkin, marmitas_prontas: true })}
                 >
                   Sim
                 </Button>
                 <Button 
                   variant={!checkin.marmitas_prontas ? 'default' : 'secondary'}
-                  className={`h-12 w-16 rounded-xl font-bold uppercase transition-none ${!checkin.marmitas_prontas ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400'}`}
+                  className={`flex-1 h-16 rounded-2xl font-black uppercase transition-none ${!checkin.marmitas_prontas ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-500'}`}
                   onClick={() => setCheckin({ ...checkin, marmitas_prontas: false })}
                 >
                   Não
@@ -264,14 +358,12 @@ function Dashboard() {
               </div>
             </div>
 
-            <Button onClick={handleSaveCheckin} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg hover:bg-zinc-200 transition-none">
-              Iniciar Dia
+            <Button onClick={handleSaveCheckin} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none">
+              Iniciar o Jogo
             </Button>
           </div>
         </DialogContent>
       </Dialog>
-
-      <BottomNav />
     </div>
   );
 }
