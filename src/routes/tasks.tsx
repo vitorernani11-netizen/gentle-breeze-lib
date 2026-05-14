@@ -22,8 +22,8 @@ import { toast } from 'sonner';
 import { useTaskActions } from '@/hooks/useTaskActions';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { cn } from '@/lib/utils';
-import { SmartInput } from '@/components/tasks/SmartInput';
 import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
+import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
 
 const TASKS_KEY = 'hardware_humano_data';
 
@@ -41,6 +41,7 @@ function TasksPage() {
   const [errorState, setErrorState] = useState<string | null>(null);
   const [selectedStage, setSelectedStage] = useState<number | null>(null);
   const [detailTask, setDetailTask] = useState<any | null>(null);
+  const [isAddingTask, setIsAddingTask] = useState(false);
   
 
   const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask, updateTask } = useTaskActions(() => {
@@ -113,9 +114,10 @@ function TasksPage() {
         id: crypto.randomUUID(),
         titulo: taskData.titulo,
         descricao: '',
-        repeticao: taskData.recorrencia,
+        repeticao: taskData.recorrencia || 'none',
         data_execucao: taskData.vencimento,
-        prioridade: taskData.prioridade,
+        hora_vencimento: taskData.lembrete, // Using lembrete as time for now or explicitly
+        prioridade: taskData.prioridade || 4,
         triagem_stage: 1,
         user_id: 'local-user',
         status: 'Entrada',
@@ -187,31 +189,28 @@ function TasksPage() {
         </div>
       </header>
 
-      <SmartInput onAddTask={onSmartAddTask} />
+      {/* Input removido conforme Fase 1 */}
 
 
       {/* Triagem Section */}
-      <section className="mb-8">
-        <div className="border border-zinc-900 p-4 bg-zinc-950/50 rounded-2xl">
-          <h2 className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 mb-4 flex items-center gap-2">
-            <AlertCircle size={12} className="text-zinc-700" />
-            TRIAGEM DE ATIVIDADES
+      <section className="mb-6">
+        <div className="border border-zinc-900 p-3 bg-zinc-950/50 rounded-2xl">
+          <h2 className="text-[8px] font-bold uppercase tracking-[0.2em] text-zinc-700 mb-3 flex items-center gap-2">
+            <AlertCircle size={10} className="text-zinc-800" />
+            TRIAGEM
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="flex flex-row overflow-x-auto gap-2 pb-1 scrollbar-none">
             {triagemStages.map((stage) => (
               <button 
                 key={stage.num} 
                 onClick={() => setSelectedStage(selectedStage === stage.num ? null : stage.num)}
                 className={cn(
-                  "border border-zinc-900 p-3 flex flex-col gap-1 transition-all text-left rounded-xl", 
+                  "border border-zinc-900 px-4 py-2 flex items-center gap-2 transition-all rounded-xl shrink-0", 
                   selectedStage === stage.num ? "bg-zinc-100 text-black border-white" : "hover:bg-zinc-900/50"
                 )}
               >
-                <div className="flex justify-between items-center mb-1">
-                  <span className={cn("text-xs font-black italic", selectedStage === stage.num ? "opacity-100" : "opacity-30")}>#{stage.num}</span>
-                  {selectedStage === stage.num && <Check size={12} className="text-black" />}
-                </div>
-                <span className="font-bold uppercase tracking-tight text-[10px]">{stage.label}</span>
+                <span className={cn("text-[10px] font-black italic", selectedStage === stage.num ? "opacity-100" : "opacity-30")}>#{stage.num}</span>
+                <span className="font-bold uppercase tracking-tight text-[10px] whitespace-nowrap">{stage.label}</span>
               </button>
             ))}
           </div>
@@ -385,6 +384,20 @@ function TasksPage() {
         onClose={() => setDetailTask(null)}
         onUpdate={updateTask}
       />
+
+      <AddTaskOverlay
+        open={isAddingTask}
+        onClose={() => setIsAddingTask(false)}
+        onAddTask={onSmartAddTask}
+      />
+
+      <Button
+        onClick={() => setIsAddingTask(true)}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-black border-2 border-[#ff00ff] text-[#ff00ff] shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-110 hover:bg-[#ff00ff] hover:text-black transition-all z-50 flex items-center justify-center p-0"
+        aria-label="Adicionar nova tarefa"
+      >
+        <Plus size={32} strokeWidth={3} />
+      </Button>
     </div>
   );
 }
