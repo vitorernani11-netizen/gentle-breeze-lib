@@ -184,6 +184,7 @@ function Dashboard() {
         data_execucao: newTask.data_execucao,
         repeticao: newTask.repeticao,
         tags: tagsArray,
+        lembrete_ead_48h: newTask.lembrete_ead_48h,
         status: 'Entrada' // Todas as novas tarefas caem na Entrada por padrão
       }])
       .select('*, projetos(nome, cor)')
