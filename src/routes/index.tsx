@@ -108,7 +108,7 @@ function Dashboard() {
     lembrete_ead_48h: false
   });
 
-  const { completeTask, deletePermanent, moveTask, updateTriagemStage, updateTask } = useTaskActions(() => {
+  const { completeTask, deletePermanent, moveTask, updateTriagemStage, updateTask, addTask } = useTaskActions(() => {
     fetchData();
   });
 
