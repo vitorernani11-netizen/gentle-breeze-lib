@@ -34,6 +34,7 @@ function Dashboard() {
   const [showAddTask, setShowAddTask] = useState(false);
   const [tasks, setTasks] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
+  const [eliminatedCount, setEliminatedCount] = useState(0);
   
   const [checkin, setCheckin] = useState({
     horas_sono: '',
@@ -83,8 +84,16 @@ function Dashboard() {
       .select('*')
       .eq('user_id', userId);
 
+    // Fetch eliminated count
+    const { count } = await supabase
+      .from('tarefas')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('deletado_por_inercia', true);
+
     if (tasksData) setTasks(tasksData);
     if (projectsData) setProjects(projectsData);
+    if (count !== null) setEliminatedCount(count);
   };
 
   const checkTodayCheckin = async (userId: string) => {
@@ -172,7 +181,12 @@ function Dashboard() {
               {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
           </div>
-          <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <span className="text-[8px] font-black uppercase tracking-widest text-zinc-500 block">Itens Eliminados por Inércia</span>
+              <span className="text-xl font-black text-red-500">{eliminatedCount}</span>
+            </div>
+            <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
             <DialogTrigger asChild>
               <Button size="icon" className="h-14 w-14 rounded-2xl bg-white text-black hover:bg-zinc-200 transition-none shadow-2xl shadow-white/10">
                 <Plus size={28} />
@@ -241,7 +255,8 @@ function Dashboard() {
             </DialogContent>
           </Dialog>
         </div>
-      </header>
+      </div>
+    </header>
 
       {/* Task List grouped by Project */}
       <div className="space-y-10">

@@ -43,18 +43,21 @@ export const useTaskActions = (onSuccess?: () => void) => {
     }
   };
 
-  const rescheduleTask = async (task: any) => {
+  const rescheduleTask = async (task: any, newDate?: string) => {
     const newCount = (task.contagem_adiamentos || 0) + 1;
     
     if (newCount >= 3) {
       // Hard delete after 3 postponements
       const { error } = await supabase
         .from('tarefas')
-        .delete()
+        .update({ 
+          deletado_por_inercia: true,
+          status_concluido: true // Mark as finished but flagged as inertia
+        })
         .eq('id', task.id);
 
       if (!error) {
-        toast.error(`Tarefa "${task.titulo}" deletada por inércia.`, {
+        toast.error(`Tarefa "${task.titulo}" eliminada por inércia.`, {
           style: { background: '#7f1d1d', color: '#fff', border: 'none' }
         });
         if (onSuccess) onSuccess();
@@ -63,17 +66,24 @@ export const useTaskActions = (onSuccess?: () => void) => {
     }
 
     const today = new Date().toISOString().split('T')[0];
+    const targetDate = newDate || today;
+    
+    // We only use 'Hoje' or the date will handle the visibility
+    // Since 'Amanha' exists in the type, if it's not today, we can use Tomorrow logic 
+    // or just keep it as a scheduled task. Let's use 'Hoje' if it is today, 
+    // or we'll need to check the exact type allowed.
     const { error } = await supabase
       .from('tarefas')
       .update({ 
-        data_execucao: today, 
-        status: 'Hoje',
-        contagem_adiamentos: newCount
+        data_execucao: targetDate, 
+        status: targetDate === today ? 'Hoje' : 'Amanha',
+        contagem_adiamentos: newCount,
+        data_adiamento: new Date().toISOString()
       })
       .eq('id', task.id);
 
     if (!error) {
-      toast.warning(`Reagendada. Aviso: ${newCount}/3 adiamentos.`);
+      toast.warning(`Reagendada para ${new Date(targetDate).toLocaleDateString('pt-BR')}. Aviso: ${newCount}/3 adiamentos.`);
       if (onSuccess) onSuccess();
     }
   };
