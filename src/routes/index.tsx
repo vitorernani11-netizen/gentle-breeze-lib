@@ -339,75 +339,66 @@ function Dashboard() {
 
   return (
     <div className={cn(
-      "min-h-screen p-6 pt-24 pb-20 max-w-2xl mx-auto transition-colors duration-1000",
-      isRecoveryMode ? "bg-zinc-900 text-zinc-300 grayscale-[0.5]" : "bg-black text-white"
+      "min-h-screen p-4 pt-12 pb-16 max-w-xl mx-auto transition-colors duration-1000",
+      isRecoveryMode ? "bg-zinc-950 text-zinc-400 grayscale-[0.8]" : "bg-black text-zinc-100"
     )}>
-      <div className="fixed top-6 right-6 flex items-center gap-2 bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800 z-50">
-        <WifiOff size={14} className="text-zinc-500" />
-        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Modo Offline: Local</span>
+      <div className="fixed top-4 right-4 flex items-center gap-2 bg-zinc-900/30 px-3 py-1 rounded-full border border-zinc-800/50 z-50">
+        <WifiOff size={10} className="text-zinc-600" />
+        <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-600">Local</span>
       </div>
 
       {isLocked && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
-          <PowerOff size={80} className="text-zinc-800 mb-8 animate-pulse" />
-          <h2 className="text-3xl font-black tracking-tighter uppercase mb-4">Hardware exausto</h2>
-          <p className="text-zinc-500 font-bold uppercase tracking-widest text-sm max-w-xs">
+          <PowerOff size={48} className="text-zinc-900 mb-6 animate-pulse" />
+          <h2 className="text-xl font-black tracking-tighter uppercase mb-2">Hardware exausto</h2>
+          <p className="text-zinc-600 font-bold uppercase tracking-widest text-[10px] max-w-xs">
             PROJETO X: DESLIGAMENTO OBRIGATÓRIO.
-          </p>
-          <p className="text-zinc-700 text-[10px] font-black uppercase tracking-[0.3em] mt-12">
-            Acesso liberado às 06:00 após Check-in
           </p>
         </div>
       )}
 
-      <section className="mb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="p-6 bg-emerald-950/20 border-emerald-900/50 rounded-[2rem] border-t-4 border-t-emerald-500">
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 block mb-2">Impacto Positivo</span>
-            <div className="flex items-end gap-2">
-              <span className="text-4xl font-black text-white">{stats.positive}</span>
-              <span className="text-[10px] font-bold text-emerald-600 uppercase mb-1">Pontos Gerados</span>
+      <section className="mb-8">
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="p-4 bg-zinc-900/20 border-zinc-800/50 rounded-2xl border-t-2 border-t-emerald-500/50">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500/70 block mb-1">Impacto</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-white">{stats.positive}</span>
+              <span className="text-[8px] font-bold text-zinc-600 uppercase">PTS</span>
             </div>
-            <p className="text-[9px] text-zinc-500 mt-2 uppercase font-medium">Nabih + Faculdade + Treino + Sono</p>
           </Card>
           
-          <Card className="p-6 bg-red-950/20 border-red-900/50 rounded-[2rem] border-t-4 border-t-red-500">
-            <span className="text-[10px] font-black uppercase tracking-widest text-red-500 block mb-2">Vazamentos (Negativo)</span>
-            <div className="flex items-end gap-2">
-              <span className="text-4xl font-black text-white">{stats.negative}</span>
-              <span className="text-[10px] font-bold text-red-600 uppercase mb-1">Pontos Perdidos</span>
+          <Card className="p-4 bg-zinc-900/20 border-zinc-800/50 rounded-2xl border-t-2 border-t-red-500/50">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-red-500/70 block mb-1">Vazamentos</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-white">{stats.negative}</span>
+              <span className="text-[8px] font-bold text-zinc-600 uppercase">PTS</span>
             </div>
-            <p className="text-[9px] text-zinc-500 mt-2 uppercase font-medium">Inércia + Gastos + Redes Sociais</p>
           </Card>
         </div>
       </section>
 
-      <section className="mb-12">
-        <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] overflow-hidden">
-          <div className="flex justify-between items-end mb-4">
+      <section className="mb-8">
+        <Card className="p-5 bg-zinc-950 border-zinc-900 rounded-2xl overflow-hidden">
+          <div className="flex justify-between items-end mb-3">
             <div>
-              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">Velocidade de Carreira</h2>
-              <span className="text-xl font-black uppercase tracking-tighter">Rumo aos R$ 7.000,00</span>
+              <h2 className="text-[9px] font-bold uppercase tracking-wider text-zinc-600 mb-0.5">Progresso Carreira</h2>
+              <span className="text-sm font-bold tracking-tight text-zinc-300">Target R$ 7k</span>
             </div>
-            <span className="text-2xl font-black text-blue-500">{stats.careerSpeed.toFixed(1)}%</span>
+            <span className="text-lg font-black text-blue-500/80">{stats.careerSpeed.toFixed(1)}%</span>
           </div>
-          <div className="h-3 w-full bg-zinc-900 rounded-full overflow-hidden border border-zinc-800">
+          <div className="h-1.5 w-full bg-zinc-900/50 rounded-full overflow-hidden border border-zinc-800/30">
             <div 
-              className="h-full bg-blue-600 rounded-full transition-all duration-1000 shadow-[0_0_20px_rgba(37,99,235,0.4)]" 
+              className="h-full bg-blue-600/80 rounded-full transition-all duration-1000" 
               style={{ width: `${stats.careerSpeed}%` }}
             />
-          </div>
-          <div className="flex justify-between mt-3">
-            <span className="text-[8px] font-black text-zinc-600 uppercase">Hardware Ativo</span>
-            <span className="text-[8px] font-black text-zinc-600 uppercase">Mercado Target: SR/PL</span>
           </div>
         </Card>
       </section>
 
-      <section className="mt-12">
+      <section className="mt-8">
         <div className="flex justify-center">
-           <Button onClick={() => setShowAddTask(true)} className="bg-white text-black hover:bg-zinc-200 rounded-full h-12 px-8 font-black uppercase tracking-tighter">
-             <Plus className="mr-2" /> Adicionar Captura
+           <Button onClick={() => setShowAddTask(true)} className="bg-zinc-100 text-black hover:bg-white rounded-full h-10 px-6 text-xs font-bold uppercase tracking-tight">
+             <Plus size={14} className="mr-2" /> Capturar
            </Button>
         </div>
       </section>

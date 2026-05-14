@@ -160,24 +160,24 @@ function TasksPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-4 sm:p-6 pt-24 pb-20 font-mono">
-      <div className="fixed top-6 right-6 flex items-center gap-2 bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800 z-50">
-        <WifiOff size={14} className="text-zinc-500" />
-        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Hardware Local</span>
+    <div className="min-h-screen bg-black text-zinc-100 p-4 sm:p-6 pt-12 pb-20 font-sans">
+      <div className="fixed top-4 right-4 flex items-center gap-2 bg-zinc-900/30 px-3 py-1 rounded-full border border-zinc-800/50 z-50">
+        <WifiOff size={10} className="text-zinc-600" />
+        <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-600">Hardware Local</span>
       </div>
 
-      <header className="mb-10 flex items-center justify-between gap-4">
+      <header className="mb-8 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button 
             aria-label="Voltar para Dashboard"
             variant="ghost" 
             size="icon" 
             onClick={() => navigate({ to: '/' })} 
-            className="border-2 border-white rounded-none hover:bg-white hover:text-black transition-none w-12 h-12 shrink-0"
+            className="border border-zinc-800 rounded-xl hover:bg-zinc-900 transition-all w-10 h-10 shrink-0"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
           </Button>
-          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter italic">Entrada</h1>
+          <h1 className="text-2xl font-black uppercase tracking-tight italic">Entrada</h1>
         </div>
       </header>
 
@@ -185,40 +185,30 @@ function TasksPage() {
 
 
       {/* Triagem Section */}
-      <section className="mb-12">
-        <div className="border-4 border-white p-4 sm:p-6 bg-zinc-950">
-          <h2 className="text-[12px] font-black uppercase tracking-[0.3em] text-white mb-6 flex items-center gap-2">
-            <AlertCircle size={14} className="text-[#ff00ff]" />
-            REGISTRAR: Triagem de Atividades
+      <section className="mb-8">
+        <div className="border border-zinc-900 p-4 bg-zinc-950/50 rounded-2xl">
+          <h2 className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 mb-4 flex items-center gap-2">
+            <AlertCircle size={12} className="text-zinc-700" />
+            TRIAGEM DE ATIVIDADES
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {triagemStages.map((stage) => (
               <button 
                 key={stage.num} 
                 onClick={() => setSelectedStage(selectedStage === stage.num ? null : stage.num)}
                 className={cn(
-                  "border-2 p-3 sm:p-4 flex flex-col gap-1 transition-all text-left", 
-                  stage.color,
-                  selectedStage === stage.num ? "bg-white text-black scale-105 z-10" : "hover:border-[#00ff41] hover:bg-zinc-900"
+                  "border border-zinc-900 p-3 flex flex-col gap-1 transition-all text-left rounded-xl", 
+                  selectedStage === stage.num ? "bg-zinc-100 text-black border-white" : "hover:bg-zinc-900/50"
                 )}
               >
-                <div className="flex justify-between items-center">
-                  <span className={cn("text-xl sm:text-2xl font-black italic", selectedStage === stage.num ? "opacity-100" : "opacity-50")}>#{stage.num}</span>
-                  {selectedStage === stage.num && <Check size={16} className="text-[#00ff41]" />}
+                <div className="flex justify-between items-center mb-1">
+                  <span className={cn("text-xs font-black italic", selectedStage === stage.num ? "opacity-100" : "opacity-30")}>#{stage.num}</span>
+                  {selectedStage === stage.num && <Check size={12} className="text-black" />}
                 </div>
-                <span className="font-black uppercase tracking-tighter text-[10px] sm:text-sm">{stage.label}</span>
-                <span className={cn("text-[8px] sm:text-[9px] uppercase font-bold", selectedStage === stage.num ? "text-zinc-500" : "text-zinc-500")}>{stage.desc}</span>
+                <span className="font-bold uppercase tracking-tight text-[10px]">{stage.label}</span>
               </button>
             ))}
           </div>
-          {selectedStage && (
-            <button 
-              onClick={() => setSelectedStage(null)}
-              className="mt-4 text-[10px] font-black uppercase text-[#00ff41] hover:underline"
-            >
-              [ Limpar Filtro de Triagem ]
-            </button>
-          )}
         </div>
       </section>
 
@@ -227,29 +217,29 @@ function TasksPage() {
           activeTasks
             .filter(task => !selectedStage || (task.triagem_stage || 1) === selectedStage)
             .map((task) => (
-            <Card key={task.id} className="bg-zinc-950 border-2 border-white p-4 sm:p-6 rounded-none flex flex-col sm:flex-row sm:items-center justify-between group hover:border-[#00ff41] transition-none relative overflow-hidden gap-6">
-              {task.prioridade === 1 && (
-                <div className="absolute top-0 left-0 w-1 sm:w-2 h-full bg-[#ff0055]" />
-              )}
-              
+            <Card key={task.id} className="bg-zinc-950/30 border border-zinc-900/50 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between group hover:border-zinc-800 transition-all gap-4">
               <div className="flex flex-col gap-2 flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={cn("text-[9px] font-black uppercase px-2 py-0.5 border", getPriorityColor(task.prioridade))}>
+                  <span className={cn("text-[8px] font-bold uppercase px-1.5 py-0.5 border rounded-md", 
+                    task.prioridade === 1 ? "text-red-500 border-red-500/20 bg-red-500/5" :
+                    task.prioridade === 2 ? "text-orange-500 border-orange-500/20 bg-orange-500/5" :
+                    task.prioridade === 3 ? "text-blue-500 border-blue-500/20 bg-blue-500/5" :
+                    "text-zinc-600 border-zinc-900"
+                  )}>
                     P{task.prioridade || 4}
                   </span>
                   
-                  {/* Triagem Stage Selector */}
-                  <div className="flex border border-zinc-800 bg-zinc-900 p-0.5 rounded-none">
+                  <div className="flex border border-zinc-900/50 bg-black/40 p-0.5 rounded-lg">
                     {[1, 2, 3, 4].map((s) => (
                       <button
                         key={s}
                         aria-label={`Mover para estágio ${s}`}
                         onClick={() => updateTriagemStage(task.id, s)}
                         className={cn(
-                          "w-5 h-5 text-[8px] font-black flex items-center justify-center transition-none",
+                          "w-5 h-5 text-[8px] font-bold flex items-center justify-center rounded-md transition-all",
                           (task.triagem_stage || 1) === s 
-                            ? "bg-white text-black" 
-                            : "text-zinc-600 hover:text-white"
+                            ? "bg-zinc-100 text-black" 
+                            : "text-zinc-700 hover:text-zinc-400"
                         )}
                       >
                         {s}
@@ -258,46 +248,46 @@ function TasksPage() {
                   </div>
 
                   {task.repeticao !== 'none' && (
-                    <span className="text-[9px] font-black uppercase bg-zinc-900 text-zinc-400 px-2 py-0.5 border border-zinc-800 flex items-center gap-1">
-                      <Clock size={10} /> {task.repeticao === 'daily' ? 'DIÁRIO' : 'SEMANAL'}
+                    <span className="text-[8px] font-bold uppercase text-zinc-600 flex items-center gap-1">
+                      <Clock size={10} /> {task.repeticao === 'daily' ? 'DIA' : 'SEM'}
                     </span>
                   )}
                 </div>
                 
-                <h3 className="font-black text-xl sm:text-2xl uppercase italic tracking-tighter truncate leading-none">
+                <h3 className="font-bold text-lg uppercase tracking-tight truncate leading-tight">
                   {task.titulo}
                 </h3>
                 
                 {task.descricao && (
-                  <p className="text-zinc-500 text-[10px] font-bold uppercase leading-tight line-clamp-2 italic">
+                  <p className="text-zinc-600 text-[9px] font-medium uppercase leading-tight line-clamp-2 italic">
                     {task.descricao}
                   </p>
                 )}
                 
-                <div className="flex items-center gap-4 mt-1">
-                  <span className="text-[9px] font-black text-zinc-600 uppercase flex items-center gap-1">
+                <div className="flex items-center gap-3 mt-1">
+                  <span className="text-[8px] font-bold text-zinc-700 uppercase flex items-center gap-1">
                     <Calendar size={10} /> {task.data_execucao}
                   </span>
                   {task.lembrete && (
-                    <span className="text-[9px] font-black text-[#00ff41] uppercase flex items-center gap-1">
+                    <span className="text-[8px] font-bold text-zinc-600 uppercase flex items-center gap-1">
                       <Clock size={10} /> {task.lembrete}
                     </span>
                   )}
                 </div>
               </div>
               
-              <div className="flex gap-2 sm:shrink-0 h-12">
+              <div className="flex gap-2 sm:shrink-0 h-10">
                 <Button 
                   aria-label="Concluir tarefa"
                   size="icon"
-                  className="bg-[#00ff41] text-black hover:bg-green-400 font-black rounded-none border-b-4 border-r-4 border-green-900 w-12 h-12 transition-none"
+                  className="bg-zinc-100 text-black hover:bg-white font-bold rounded-xl w-10 h-10 transition-all active:scale-95"
                   onClick={() => completeTask(task)}
                 >
-                  <Check size={20} />
+                  <Check size={18} />
                 </Button>
                 <Button 
                   aria-label="Mover para Hoje"
-                  className="bg-white text-black hover:bg-[#ff00ff] hover:text-white text-[10px] font-black uppercase rounded-none border-b-4 border-r-4 border-zinc-400 h-12 px-4 transition-none"
+                  className="bg-zinc-900 text-zinc-400 hover:text-zinc-100 text-[9px] font-bold uppercase rounded-xl border border-zinc-800 h-10 px-3 transition-all"
                   onClick={() => moveTask(task.id, 'Hoje')}
                 >
                   Hoje
@@ -305,10 +295,11 @@ function TasksPage() {
                 <Button 
                   aria-label="Deletar registro"
                   size="icon"
-                  className="bg-zinc-900 text-zinc-500 hover:bg-[#ff0055] hover:text-white text-[10px] font-black uppercase rounded-none border-2 border-zinc-800 w-12 h-12 transition-none"
+                  variant="ghost"
+                  className="text-zinc-700 hover:text-red-500 h-10 w-10"
                   onClick={() => deletePermanent(task.id)}
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={16} />
                 </Button>
               </div>
             </Card>
