@@ -23,14 +23,11 @@ function TasksPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (!session) {
-        navigate({ to: '/login' });
-      } else {
-        fetchTasks(session.user.id);
-      }
+      // Login requirement removed as per request
+      fetchTasks(session?.user?.id || 'anonymous');
       setLoading(false);
     });
-  }, [navigate]);
+  }, []);
 
   const fetchTasks = async (userId: string) => {
     const { data, error } = await supabase

@@ -29,14 +29,11 @@ function FinancePage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (!session) {
-        navigate({ to: '/login' });
-      } else {
-        fetchRecords(session.user.id);
-      }
+      // Login requirement removed as per request
+      fetchRecords(session?.user?.id || 'anonymous');
       setLoading(false);
     });
-  }, [navigate]);
+  }, []);
 
   const fetchRecords = async (userId: string) => {
     const { data, error } = await supabase
