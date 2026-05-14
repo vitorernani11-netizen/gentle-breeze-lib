@@ -621,40 +621,51 @@ function Dashboard() {
                 <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{group}</h2>
               </div>
               <div className="space-y-4">
-                {groupTasks.map((task: any) => (
-                  <Card key={task.id} className="p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] border-l-4 border-l-blue-900/30 flex flex-col gap-3 transition-none group hover:bg-zinc-900/30">
-                    <div className="flex justify-between items-start">
-                      <div className="flex flex-col gap-1.5 flex-1 pr-4">
-                        <div className="flex items-center gap-2">
-                          {task.repeticao !== 'none' && (
-                            <Badge variant="outline" className="text-[8px] h-4 bg-zinc-900 border-zinc-800 text-zinc-400 font-black uppercase py-0 px-1.5">
-                              <RotateCcw size={8} className="mr-1" /> {task.repeticao}
-                            </Badge>
+                {groupTasks.map((task: any) => {
+                  const isComplex = task.tags?.includes('Estudo Complexo') || group === 'Estudo Complexo';
+                  const isMitigated = hoursSleptToday !== null && hoursSleptToday < 6 && isComplex;
+                  
+                  return (
+                    <Card key={task.id} className={`p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] border-l-4 border-l-blue-900/30 flex flex-col gap-3 transition-all group ${isMitigated ? 'opacity-40 grayscale pointer-events-none' : 'hover:bg-zinc-900/30'}`}>
+                      <div className="flex justify-between items-start">
+                        <div className="flex flex-col gap-1.5 flex-1 pr-4">
+                          <div className="flex items-center gap-2">
+                            {task.repeticao !== 'none' && (
+                              <Badge variant="outline" className="text-[8px] h-4 bg-zinc-900 border-zinc-800 text-zinc-400 font-black uppercase py-0 px-1.5">
+                                <RotateCcw size={8} className="mr-1" /> {task.repeticao}
+                              </Badge>
+                            )}
+                            {isMitigated && (
+                              <Badge variant="outline" className="text-[8px] h-4 bg-red-950 border-red-900 text-red-500 font-black uppercase py-0 px-1.5">
+                                BLOQUEADO (SONO BAIXO)
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="font-bold text-xl leading-tight group-hover:text-blue-400 transition-colors">{task.titulo}</span>
+                          
+                          {task.tags && task.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {task.tags.map((tag: string) => (
+                                <span key={tag} className={`text-[9px] font-black uppercase flex items-center px-2 py-1 rounded-md ${tag === 'Estudo Complexo' ? 'text-indigo-400 bg-indigo-950/30' : 'text-zinc-600 bg-zinc-900/50'}`}>
+                                  <Hash size={8} className="mr-0.5" />{tag}
+                                </span>
+                              ))}
+                            </div>
                           )}
                         </div>
-                        <span className="font-bold text-xl leading-tight group-hover:text-blue-400 transition-colors">{task.titulo}</span>
                         
-                        {task.tags && task.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {task.tags.map((tag: string) => (
-                              <span key={tag} className="text-[9px] font-black text-zinc-600 uppercase flex items-center bg-zinc-900/50 px-2 py-1 rounded-md">
-                                <Hash size={8} className="mr-0.5" />{tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                        <Button 
+                          size="icon" 
+                          disabled={isMitigated}
+                          className="h-14 w-14 rounded-2xl bg-zinc-900 text-white border border-zinc-800 hover:bg-white hover:text-black transition-none shrink-0"
+                          onClick={() => completeTask(task)}
+                        >
+                          <Check size={24} />
+                        </Button>
                       </div>
-                      
-                      <Button 
-                        size="icon" 
-                        className="h-14 w-14 rounded-2xl bg-zinc-900 text-white border border-zinc-800 hover:bg-white hover:text-black transition-none shrink-0"
-                        onClick={() => completeTask(task)}
-                      >
-                        <Check size={24} />
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           ))
