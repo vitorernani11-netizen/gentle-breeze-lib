@@ -46,7 +46,7 @@ function TasksPage() {
   const [isAddingTask, setIsAddingTask] = useState(false);
   
 
-  const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask, updateTask } = useTaskActions(() => {
+  const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask, updateTask, rescheduleTask } = useTaskActions(() => {
     fetchTasks();
     if (location.pathname === '/tasks' && window.location.hash === '#redirect-to-today') {
        navigate({ to: '/' });
