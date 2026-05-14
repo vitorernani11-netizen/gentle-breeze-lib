@@ -38,23 +38,42 @@ function Projects() {
 
   const addProject = async () => {
     if (!newProjectName.trim()) return;
-    const { data: { session } } = await supabase.auth.getSession();
+    setLoading(true);
     
-    const { data, error } = await supabase
-      .from('projetos')
-      .insert([{ 
-        nome: newProjectName, 
-        user_id: session?.user?.id || 'anonymous',
-        cor: '#' + Math.floor(Math.random()*16777215).toString(16)
-      }])
-      .select()
-      .single();
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Sessão não encontrada');
+        setLoading(false);
+        return;
+      }
+      
+      const { data, error } = await supabase
+        .from('projetos')
+        .insert([{ 
+          nome: newProjectName, 
+          user_id: session.user.id,
+          cor: '#' + Math.floor(Math.random()*16777215).toString(16)
+        }])
+        .select()
+        .single();
 
-    if (data) {
-      setProjects([data, ...projects]);
-      setNewProjectName('');
-      setShowAdd(false);
-      toast.success('Projeto criado');
+      if (error) throw error;
+
+      if (data) {
+        setProjects([data, ...projects]);
+        setNewProjectName('');
+        setShowAdd(false);
+        toast.success('Projeto criado com sucesso');
+        fetchProjects(); // Garantir que os contadores de tarefas estejam atualizados
+      }
+    } catch (error: any) {
+      console.error('Erro ao criar projeto:', error);
+      toast.error('Erro ao criar projeto: ' + (error.message || 'Falha na conexão'), {
+        style: { background: '#7f1d1d', color: '#fff', border: 'none' }
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
