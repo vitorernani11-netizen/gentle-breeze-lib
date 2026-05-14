@@ -113,7 +113,7 @@ function MenuPage() {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 pb-24">
+    <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20">
       <header className="mb-8 pt-4">
         <h1 className="text-3xl font-black uppercase tracking-tighter text-white">Cardápio</h1>
         <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mt-1">
