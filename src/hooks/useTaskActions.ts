@@ -87,7 +87,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
     const { error } = await supabase
       .from('tarefas')
       .update({ 
-        status: status === 'Hoje' ? 'Hoje' : 'Agendada', // 'Amanha' no UI mapeia para 'Agendada' ou apenas mantemos a data
+        status: status, 
         data_execucao: status === 'Hoje' ? today : tomorrowStr 
       })
       .eq('id', id);
