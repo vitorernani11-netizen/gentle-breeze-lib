@@ -40,6 +40,8 @@ import { cn } from '@/lib/utils';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { EisenhowerMatrix } from '@/components/dashboard/EisenhowerMatrix';
 import { TaskCard } from '@/components/tasks/TaskCard';
+import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
+import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
 
 const TASKS_KEY = 'hardware_humano_data';
 const PROJECTS_KEY = 'hardware_humano_projects';
@@ -529,16 +531,12 @@ function Dashboard() {
       />
 
       {detailTask && (
-        <div className="z-[200]">
-          <import { TaskDetailModal } from '@/components/tasks/TaskDetailModal' />
-          {/* Note: In a real environment I would ensure TaskDetailModal is correctly imported and used here */}
-          <TaskDetailModal 
-            task={detailTask}
-            open={!!detailTask}
-            onClose={() => setDetailTask(null)}
-            onUpdate={updateTask}
-          />
-        </div>
+        <TaskDetailModal 
+          task={detailTask}
+          open={!!detailTask}
+          onClose={() => setDetailTask(null)}
+          onUpdate={updateTask}
+        />
       )}
     </div>
   );
