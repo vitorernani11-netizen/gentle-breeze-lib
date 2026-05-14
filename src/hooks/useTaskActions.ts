@@ -78,5 +78,25 @@ export const useTaskActions = (onSuccess?: () => void) => {
     }
   };
 
-  return { completeTask, rescheduleTask };
+  const moveTask = async (id: string, status: 'Hoje' | 'Amanha') => {
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    const { error } = await supabase
+      .from('tarefas')
+      .update({ 
+        status: status === 'Hoje' ? 'Hoje' : 'Agendada', // 'Amanha' no UI mapeia para 'Agendada' ou apenas mantemos a data
+        data_execucao: status === 'Hoje' ? today : tomorrowStr 
+      })
+      .eq('id', id);
+
+    if (!error) {
+      toast.success(status === 'Hoje' ? 'Movida para Hoje' : 'Movida para Amanhã');
+      if (onSuccess) onSuccess();
+    }
+  };
+
+  return { completeTask, rescheduleTask, moveTask };
 };
