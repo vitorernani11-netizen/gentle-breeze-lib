@@ -294,7 +294,7 @@ function Dashboard() {
                     <div className="flex flex-col gap-1.5 flex-1 pr-4">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-[8px] h-4 bg-red-600 border-none text-white font-black uppercase py-0 px-1.5">
-                          ENTREGA HOJE
+                          {differenceInDays(parseISO(activity.data_entrega), new Date()) <= 0 ? 'ENTREGA HOJE' : 'ENTREGA AMANHÃ'}
                         </Badge>
                         <span className="text-[9px] font-black text-red-400 uppercase flex items-center">
                           <GraduationCap size={10} className="mr-1" /> Acadêmico
