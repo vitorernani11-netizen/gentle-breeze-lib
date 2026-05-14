@@ -268,6 +268,11 @@ function TasksPage() {
                   <span className="text-[9px] font-black text-zinc-600 uppercase flex items-center gap-1">
                     <Calendar size={10} /> {task.data_execucao}
                   </span>
+                  {task.lembrete && (
+                    <span className="text-[9px] font-black text-[#00ff41] uppercase flex items-center gap-1">
+                      <Clock size={10} /> {task.lembrete}
+                    </span>
+                  )}
                 </div>
               </div>
               
