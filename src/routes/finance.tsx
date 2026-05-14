@@ -1,10 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { BottomNav } from '@/components/BottomNav';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, Plus, Wallet, Building2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Plus, Wallet, Building2, Landmark } from 'lucide-react';
 import { BarChart, Bar, Tooltip, ResponsiveContainer, Cell, XAxis, YAxis } from 'recharts';
 
 export const Route = createFileRoute('/finance')({
@@ -76,47 +75,50 @@ function FinancePage() {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 pb-24">
-      <header className="mb-8 pt-4">
-        <h1 className="text-3xl font-black uppercase tracking-tighter">Financeiro</h1>
+    <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20">
+      <header className="mb-10">
+        <div className="flex items-center gap-2 text-yellow-500 mb-2">
+          <Landmark size={20} />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Fluxo</span>
+        </div>
+        <h1 className="text-4xl font-black tracking-tighter uppercase leading-none">Finanças</h1>
       </header>
 
-      <div className="grid grid-cols-1 gap-4 mb-8">
-        <Card className="p-6 bg-zinc-900 border-zinc-800 rounded-3xl">
+      <div className="grid grid-cols-1 gap-4 mb-10">
+        <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] flex flex-col gap-1 border-l-4 border-l-blue-900">
           <div className="flex justify-between items-start mb-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Conta Pessoal</span>
-            <Wallet className="text-zinc-500" size={16} />
+            <Wallet className="text-zinc-700" size={16} />
           </div>
-          <p className={`text-3xl font-black tracking-tighter ${personalBalance >= 0 ? 'text-white' : 'text-red-500'}`}>
+          <p className={`text-4xl font-black tracking-tighter ${personalBalance >= 0 ? 'text-white' : 'text-red-500'}`}>
             R$ {personalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </Card>
 
-        <Card className="p-6 bg-white border-none rounded-3xl">
+        <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] flex flex-col gap-1 border-l-4 border-l-white">
           <div className="flex justify-between items-start mb-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Caixa Nabih</span>
-            <Building2 className="text-zinc-400" size={16} />
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Caixa Nabih</span>
+            <Building2 className="text-zinc-700" size={16} />
           </div>
-          <p className={`text-3xl font-black tracking-tighter ${nabihBalance >= 0 ? 'text-black' : 'text-red-600'}`}>
+          <p className={`text-4xl font-black tracking-tighter ${nabihBalance >= 0 ? 'text-white' : 'text-red-500'}`}>
             R$ {nabihBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
         </Card>
       </div>
 
-      <section className="mb-10">
+      <section className="mb-12">
         <div className="flex justify-between items-end mb-4 px-1">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-500">Meta Semanal (Nabih)</h2>
-          <span className="text-[10px] font-black text-zinc-400 uppercase">Últimos 7 dias</span>
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Performance Semanal (Nabih)</h2>
         </div>
-        <Card className="p-4 bg-zinc-900 border-zinc-800 rounded-3xl h-48">
+        <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] h-56 flex items-center justify-center">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
               <Tooltip 
-                cursor={{fill: 'transparent'}}
-                contentStyle={{ backgroundColor: '#18181b', border: 'none', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}
+                cursor={{fill: 'rgba(255,255,255,0.05)'}}
+                contentStyle={{ backgroundColor: '#09090b', border: '1px solid #18181b', borderRadius: '16px', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase' }}
                 itemStyle={{ color: '#fff' }}
               />
-              <Bar dataKey="lucro" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="lucro" radius={[6, 6, 0, 0]}>
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.lucro >= 0 ? '#fff' : '#ef4444'} />
                 ))}
@@ -129,35 +131,30 @@ function FinancePage() {
       </section>
 
       <section>
-        <div className="flex justify-between items-center mb-4 px-1">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-500">Histórico</h2>
-          <Button variant="ghost" size="sm" className="text-[10px] font-black uppercase transition-none h-auto p-0 hover:bg-transparent">
-            Ver Tudo
-          </Button>
+        <div className="flex justify-between items-center mb-6 px-1">
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Histórico Recente</h2>
         </div>
-        <div className="space-y-2">
-          {records.slice(0, 10).map((record) => (
-            <Card key={record.id} className="p-4 bg-zinc-900 border-zinc-800 rounded-2xl flex items-center justify-between transition-none">
-              <div className="flex items-center gap-3 overflow-hidden">
-                <div className={`p-2 rounded-xl shrink-0 ${record.tipo === 'Entrada' ? 'bg-zinc-800 text-white' : 'bg-zinc-800 text-zinc-500'}`}>
+        <div className="space-y-3">
+          {records.slice(0, 8).map((record) => (
+            <Card key={record.id} className="p-5 bg-zinc-950 border-zinc-900 rounded-2xl flex items-center justify-between transition-none group hover:bg-zinc-900/30">
+              <div className="flex items-center gap-4 overflow-hidden">
+                <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${record.tipo === 'Entrada' ? 'bg-zinc-900 text-white border border-zinc-800' : 'bg-zinc-900 text-zinc-700 border border-zinc-900'}`}>
                   {record.tipo === 'Entrada' ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
                 </div>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="font-bold truncate text-sm">{record.descricao || 'Sem descrição'}</span>
-                  <span className={`text-[10px] font-black uppercase tracking-tighter ${record.conta === 'Nabih' ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                    {record.conta}
+                  <span className="font-bold truncate text-sm">{record.descricao || 'Transação'}</span>
+                  <span className={`text-[9px] font-black uppercase tracking-widest ${record.conta === 'Nabih' ? 'text-zinc-500' : 'text-zinc-600'}`}>
+                    {record.conta} • {new Date(record.data).toLocaleDateString('pt-BR')}
                   </span>
                 </div>
               </div>
-              <span className={`font-black tracking-tight whitespace-nowrap ${record.tipo === 'Entrada' ? 'text-white' : 'text-zinc-500'}`}>
-                {record.tipo === 'Entrada' ? '+' : '-'} {parseFloat(record.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              <span className={`font-black tracking-tighter text-lg ${record.tipo === 'Entrada' ? 'text-white' : 'text-zinc-600'}`}>
+                {record.tipo === 'Entrada' ? '+' : '-'} {parseFloat(record.valor).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
               </span>
             </Card>
           ))}
         </div>
       </section>
-
-      <BottomNav />
     </div>
   );
 }

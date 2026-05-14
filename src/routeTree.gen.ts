@@ -10,6 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as RoutinesRouteImport } from './routes/routines'
+import { Route as PurgatoryRouteImport } from './routes/purgatory'
+import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as LoginRouteImport } from './routes/login'
@@ -19,6 +22,21 @@ import { Route as IndexRouteImport } from './routes/index'
 const TasksRoute = TasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RoutinesRoute = RoutinesRouteImport.update({
+  id: '/routines',
+  path: '/routines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PurgatoryRoute = PurgatoryRouteImport.update({
+  id: '/purgatory',
+  path: '/purgatory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -53,6 +71,9 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
+  '/purgatory': typeof PurgatoryRoute
+  '/routines': typeof RoutinesRoute
   '/tasks': typeof TasksRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +82,9 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
+  '/purgatory': typeof PurgatoryRoute
+  '/routines': typeof RoutinesRoute
   '/tasks': typeof TasksRoute
 }
 export interface FileRoutesById {
@@ -70,14 +94,45 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
+  '/purgatory': typeof PurgatoryRoute
+  '/routines': typeof RoutinesRoute
   '/tasks': typeof TasksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/finance' | '/login' | '/menu' | '/profile' | '/tasks'
+  fullPaths:
+    | '/'
+    | '/finance'
+    | '/login'
+    | '/menu'
+    | '/profile'
+    | '/projects'
+    | '/purgatory'
+    | '/routines'
+    | '/tasks'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/finance' | '/login' | '/menu' | '/profile' | '/tasks'
-  id: '__root__' | '/' | '/finance' | '/login' | '/menu' | '/profile' | '/tasks'
+  to:
+    | '/'
+    | '/finance'
+    | '/login'
+    | '/menu'
+    | '/profile'
+    | '/projects'
+    | '/purgatory'
+    | '/routines'
+    | '/tasks'
+  id:
+    | '__root__'
+    | '/'
+    | '/finance'
+    | '/login'
+    | '/menu'
+    | '/profile'
+    | '/projects'
+    | '/purgatory'
+    | '/routines'
+    | '/tasks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -86,6 +141,9 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MenuRoute: typeof MenuRoute
   ProfileRoute: typeof ProfileRoute
+  ProjectsRoute: typeof ProjectsRoute
+  PurgatoryRoute: typeof PurgatoryRoute
+  RoutinesRoute: typeof RoutinesRoute
   TasksRoute: typeof TasksRoute
 }
 
@@ -96,6 +154,27 @@ declare module '@tanstack/react-router' {
       path: '/tasks'
       fullPath: '/tasks'
       preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/routines': {
+      id: '/routines'
+      path: '/routines'
+      fullPath: '/routines'
+      preLoaderRoute: typeof RoutinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/purgatory': {
+      id: '/purgatory'
+      path: '/purgatory'
+      fullPath: '/purgatory'
+      preLoaderRoute: typeof PurgatoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -142,6 +221,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MenuRoute: MenuRoute,
   ProfileRoute: ProfileRoute,
+  ProjectsRoute: ProjectsRoute,
+  PurgatoryRoute: PurgatoryRoute,
+  RoutinesRoute: RoutinesRoute,
   TasksRoute: TasksRoute,
 }
 export const routeTree = rootRouteImport

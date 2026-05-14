@@ -80,6 +80,30 @@ export type Database = {
         }
         Relationships: []
       }
+      projetos: {
+        Row: {
+          cor: string | null
+          created_at: string | null
+          id: string
+          nome: string
+          user_id: string
+        }
+        Insert: {
+          cor?: string | null
+          created_at?: string | null
+          id?: string
+          nome: string
+          user_id: string
+        }
+        Update: {
+          cor?: string | null
+          created_at?: string | null
+          id?: string
+          nome?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       receitas: {
         Row: {
           created_at: string | null
@@ -110,14 +134,77 @@ export type Database = {
         }
         Relationships: []
       }
+      rotina_conclusoes: {
+        Row: {
+          created_at: string | null
+          data: string
+          id: string
+          itens_concluidos: string[] | null
+          rotina_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          data?: string
+          id?: string
+          itens_concluidos?: string[] | null
+          rotina_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          data?: string
+          id?: string
+          itens_concluidos?: string[] | null
+          rotina_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rotina_conclusoes_rotina_id_fkey"
+            columns: ["rotina_id"]
+            isOneToOne: false
+            referencedRelation: "rotinas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rotinas: {
+        Row: {
+          created_at: string | null
+          id: string
+          itens: Json | null
+          titulo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          itens?: Json | null
+          titulo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          itens?: Json | null
+          titulo?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tarefas: {
         Row: {
           categoria: string | null
           created_at: string | null
+          data_base: string | null
           data_execucao: string | null
           id: string
+          projeto_id: string | null
+          repeticao: string | null
           status: Database["public"]["Enums"]["tarefa_status"] | null
           status_concluido: boolean | null
+          tags: string[] | null
           titulo: string
           updated_at: string | null
           user_id: string
@@ -125,10 +212,14 @@ export type Database = {
         Insert: {
           categoria?: string | null
           created_at?: string | null
+          data_base?: string | null
           data_execucao?: string | null
           id?: string
+          projeto_id?: string | null
+          repeticao?: string | null
           status?: Database["public"]["Enums"]["tarefa_status"] | null
           status_concluido?: boolean | null
+          tags?: string[] | null
           titulo: string
           updated_at?: string | null
           user_id: string
@@ -136,15 +227,27 @@ export type Database = {
         Update: {
           categoria?: string | null
           created_at?: string | null
+          data_base?: string | null
           data_execucao?: string | null
           id?: string
+          projeto_id?: string | null
+          repeticao?: string | null
           status?: Database["public"]["Enums"]["tarefa_status"] | null
           status_concluido?: boolean | null
+          tags?: string[] | null
           titulo?: string
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tarefas_projeto_id_fkey"
+            columns: ["projeto_id"]
+            isOneToOne: false
+            referencedRelation: "projetos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

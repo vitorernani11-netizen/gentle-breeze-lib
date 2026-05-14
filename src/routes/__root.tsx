@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { Toaster } from "sonner";
+import { AppSidebar } from "@/components/AppSidebar";
 
 import appCss from "../styles.css?url";
 
@@ -40,7 +41,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="bg-black">
         {children}
         <Scripts />
       </body>
@@ -53,7 +54,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <AppSidebar />
+      <div className="flex flex-col min-h-screen">
+        <Outlet />
+      </div>
       <Toaster position="top-center" theme="dark" />
     </QueryClientProvider>
   );
