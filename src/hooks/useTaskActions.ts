@@ -48,6 +48,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
       });
 
       saveToLocal(TASKS_KEY, updatedTasks);
+      window.dispatchEvent(new Event('storage'));
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Erro ao completar tarefa:', error);
@@ -121,6 +122,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
       });
 
       saveToLocal(TASKS_KEY, updatedTasks);
+      window.dispatchEvent(new Event('storage'));
       toast.success(status === 'Hoje' ? 'Mover: Hoje' : 'Mover: Amanhã');
       if (onSuccess) onSuccess();
     } catch (error) {
@@ -177,6 +179,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
         t.id === taskId ? { ...t, ...updates, updated_at: new Date().toISOString() } : t
       );
       saveToLocal(TASKS_KEY, updatedTasks);
+      window.dispatchEvent(new Event('storage'));
       console.log('[Task:Update]', { taskId, updates });
       if (onSuccess) onSuccess();
     } catch (error) {
@@ -200,6 +203,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
       
       const updatedTasks = [newTask, ...allTasks];
       saveToLocal(TASKS_KEY, updatedTasks);
+      window.dispatchEvent(new Event('storage'));
       console.log('[Hardware:Sync]', updatedTasks.length);
       if (onSuccess) onSuccess();
       return newTask;

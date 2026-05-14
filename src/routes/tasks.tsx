@@ -55,6 +55,13 @@ function TasksPage() {
 
   useEffect(() => {
     fetchTasks();
+    // Add event listener for local storage changes from other components/pages
+    const handleStorageChange = () => {
+      console.log('[Hardware:Sync] Storage change detected');
+      fetchTasks();
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const fetchTasks = () => {
