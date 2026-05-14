@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as PurgatoryRouteImport } from './routes/purgatory'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as LoginRouteImport } from './routes/login'
@@ -19,6 +20,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const TasksRoute = TasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PurgatoryRoute = PurgatoryRouteImport.update({
+  id: '/purgatory',
+  path: '/purgatory',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
   '/profile': typeof ProfileRoute
+  '/purgatory': typeof PurgatoryRoute
   '/tasks': typeof TasksRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
   '/profile': typeof ProfileRoute
+  '/purgatory': typeof PurgatoryRoute
   '/tasks': typeof TasksRoute
 }
 export interface FileRoutesById {
@@ -70,14 +78,37 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
   '/profile': typeof ProfileRoute
+  '/purgatory': typeof PurgatoryRoute
   '/tasks': typeof TasksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/finance' | '/login' | '/menu' | '/profile' | '/tasks'
+  fullPaths:
+    | '/'
+    | '/finance'
+    | '/login'
+    | '/menu'
+    | '/profile'
+    | '/purgatory'
+    | '/tasks'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/finance' | '/login' | '/menu' | '/profile' | '/tasks'
-  id: '__root__' | '/' | '/finance' | '/login' | '/menu' | '/profile' | '/tasks'
+  to:
+    | '/'
+    | '/finance'
+    | '/login'
+    | '/menu'
+    | '/profile'
+    | '/purgatory'
+    | '/tasks'
+  id:
+    | '__root__'
+    | '/'
+    | '/finance'
+    | '/login'
+    | '/menu'
+    | '/profile'
+    | '/purgatory'
+    | '/tasks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -86,6 +117,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MenuRoute: typeof MenuRoute
   ProfileRoute: typeof ProfileRoute
+  PurgatoryRoute: typeof PurgatoryRoute
   TasksRoute: typeof TasksRoute
 }
 
@@ -96,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/tasks'
       fullPath: '/tasks'
       preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/purgatory': {
+      id: '/purgatory'
+      path: '/purgatory'
+      fullPath: '/purgatory'
+      preLoaderRoute: typeof PurgatoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -142,8 +181,19 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MenuRoute: MenuRoute,
   ProfileRoute: ProfileRoute,
+  PurgatoryRoute: PurgatoryRoute,
   TasksRoute: TasksRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
