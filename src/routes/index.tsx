@@ -20,6 +20,7 @@ import {
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTaskActions } from '@/hooks/useTaskActions';
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -45,6 +46,12 @@ function Dashboard() {
     data_execucao: new Date().toISOString().split('T')[0],
     repeticao: 'none',
     tags: ''
+  });
+
+  const { completeTask } = useTaskActions(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) fetchData(session.user.id);
+    });
   });
 
   useEffect(() => {
@@ -147,39 +154,7 @@ function Dashboard() {
     }
   };
 
-  const completeTask = async (task: any) => {
-    // If it's recurring, we don't just "complete" it, we move it to the next date
-    if (task.repeticao !== 'none') {
-      const currentDate = new Date(task.data_execucao);
-      let nextDate = new Date(currentDate);
-
-      if (task.repeticao === 'daily') nextDate.setDate(currentDate.getDate() + 1);
-      if (task.repeticao === 'weekly') nextDate.setDate(currentDate.getDate() + 7);
-      if (task.repeticao === 'monthly') nextDate.setMonth(currentDate.getMonth() + 1);
-
-      const nextDateStr = nextDate.toISOString().split('T')[0];
-
-      const { error } = await supabase
-        .from('tarefas')
-        .update({ data_execucao: nextDateStr })
-        .eq('id', task.id);
-
-      if (!error) {
-        setTasks(tasks.filter(t => t.id !== task.id));
-        toast.success(`Recorrência agendada para ${nextDate.toLocaleDateString()}`);
-      }
-    } else {
-      const { error } = await supabase
-        .from('tarefas')
-        .update({ status_concluido: true })
-        .eq('id', task.id);
-
-      if (!error) {
-        setTasks(tasks.filter(t => t.id !== task.id));
-        toast.success('Tarefa concluída!');
-      }
-    }
-  };
+  // Logic moved to useTaskActions hook
 
   if (loading) return null;
 
