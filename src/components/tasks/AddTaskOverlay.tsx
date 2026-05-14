@@ -18,6 +18,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { parseNLP, NLPResult } from '@/utils/nlpParser';
 import { TimePickerPopover } from './TimePickerPopover';
+import { CalendarPopover } from './CalendarPopover';
+import { ReminderManager } from './ReminderManager';
 
 interface AddTaskOverlayProps {
   open: boolean;
@@ -28,6 +30,7 @@ interface AddTaskOverlayProps {
     recorrencia: string;
     prioridade: number;
     lembrete: string | null;
+    reminders: any[];
     descricao?: string;
     hora_vencimento?: string | null;
   }) => void;
@@ -39,6 +42,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   const [vencimento, setVencimento] = useState<Date>(startOfToday());
   const [prioridade, setPrioridade] = useState(4);
   const [lembrete, setLembrete] = useState<string | null>(null);
+  const [reminders, setReminders] = useState<any[]>([]);
   const [nlpData, setNlpData] = useState<NLPResult | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -51,6 +55,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       setVencimento(startOfToday());
       setPrioridade(4);
       setLembrete(null);
+      setReminders([]);
       setNlpData(null);
     }
   }, [open]);
@@ -94,6 +99,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       recorrencia: result.recurrence || 'none',
       prioridade,
       lembrete: lembrete,
+      reminders: reminders,
       descricao,
       hora_vencimento: horaVencISO
     });
@@ -147,37 +153,27 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-4">
           <div className="flex items-center gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" className={cn("h-9 px-3 rounded-xl border border-zinc-900", vencimento && "text-[#00ff41] border-[#00ff41]/20")}>
-                  <CalendarIcon size={18} />
-                  <span className="ml-2 text-[10px] font-bold uppercase whitespace-nowrap">
-                    {format(vencimento, "dd MMM", { locale: ptBR })}
-                  </span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-zinc-950 border-zinc-900 z-[110]">
-                <Calendar
-                  mode="single"
-                  selected={vencimento}
-                  onSelect={(date) => date && setVencimento(date)}
-                  locale={ptBR}
-                />
-              </PopoverContent>
-            </Popover>
+            <CalendarPopover selectedDate={vencimento} onSelect={setVencimento}>
+              <Button variant="ghost" className={cn("h-9 px-3 rounded-xl border border-zinc-900", vencimento && "text-[#00ff41] border-[#00ff41]/20")}>
+                <CalendarIcon size={18} />
+                <span className="ml-2 text-[10px] font-bold uppercase whitespace-nowrap">
+                  {format(vencimento, "dd MMM", { locale: ptBR })}
+                </span>
+              </Button>
+            </CalendarPopover>
 
-            <TimePickerPopover selectedTime={lembrete} onSelect={setLembrete}>
+            <ReminderManager reminders={reminders} onUpdate={setReminders}>
               <Button 
                 variant="ghost" 
                 className={cn(
                   "h-9 px-3 rounded-xl border border-zinc-900 transition-all", 
-                  lembrete && "text-[#00ff41] border-[#00ff41] shadow-[0_0_10px_rgba(0,255,65,0.2)]"
+                  reminders.length > 0 && "text-[#00ff41] border-[#00ff41] shadow-[0_0_10px_rgba(0,255,65,0.2)]"
                 )}
               >
                 <Clock size={18} />
-                {lembrete && <span className="ml-2 text-[10px] font-black tracking-tighter">{lembrete}</span>}
+                {reminders.length > 0 && <span className="ml-2 text-[10px] font-black tracking-tighter">{reminders.length}</span>}
               </Button>
-            </TimePickerPopover>
+            </ReminderManager>
 
             <Popover>
               <PopoverTrigger asChild>

@@ -185,5 +185,30 @@ export const useTaskActions = (onSuccess?: () => void) => {
     }
   };
 
-  return { completeTask, rescheduleTask, moveTask, updateTriagemStage, restoreTask, deletePermanent, updateTask };
+  const addTask = (taskData: any) => {
+    try {
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
+      const newTask = {
+        id: crypto.randomUUID(),
+        created_at: new Date().toISOString(),
+        status_concluido: false,
+        triagem_stage: 1,
+        user_id: 'local-user',
+        tags: [],
+        ...taskData
+      };
+      
+      const updatedTasks = [newTask, ...allTasks];
+      saveToLocal(TASKS_KEY, updatedTasks);
+      console.log('[Hardware:Sync]', updatedTasks.length);
+      if (onSuccess) onSuccess();
+      return newTask;
+    } catch (error) {
+      console.error('Erro ao adicionar tarefa:', error);
+      toast.error('Erro ao salvar nova tarefa.');
+      return null;
+    }
+  };
+
+  return { completeTask, rescheduleTask, moveTask, updateTriagemStage, restoreTask, deletePermanent, updateTask, addTask };
 };
