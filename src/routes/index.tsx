@@ -507,7 +507,57 @@ function Dashboard() {
           </Dialog>
         </div>
       </div>
-    </header>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2.5rem] flex flex-col gap-4 overflow-hidden">
+          <div className="flex justify-between items-center">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5">
+              <Bed size={12} className="text-indigo-500" /> Saldo de Sono (Meta: 7h)
+            </h3>
+            {hoursSleptToday !== null && hoursSleptToday < 6 && (
+              <Badge variant="outline" className="text-[8px] bg-red-500/10 border-red-500/50 text-red-500 font-black uppercase px-2 py-0">Recuperação Necessária</Badge>
+            )}
+          </div>
+          
+          <div className="h-[120px] w-full mt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={sleepHistory}>
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#3f3f46', fontSize: 10, fontWeight: 900 }} 
+                />
+                <Tooltip 
+                  cursor={{ fill: '#18181b', radius: 8 }}
+                  contentStyle={{ backgroundColor: '#09090b', border: '1px solid #18181b', borderRadius: '12px', fontSize: '10px', fontWeight: 900 }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <ReferenceLine y={7} stroke="#3f3f46" strokeDasharray="3 3" />
+                <Bar dataKey="hours" radius={[4, 4, 0, 0]}>
+                  {sleepHistory.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.hours < 6 ? '#ef4444' : entry.hours < 7 ? '#f59e0b' : '#3b82f6'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        {hoursSleptToday !== null && hoursSleptToday < 6 && (
+          <Card className="p-6 bg-indigo-950/20 border-indigo-900/50 rounded-[2.5rem] border-l-4 border-l-indigo-500 flex flex-col justify-center gap-3">
+            <div className="flex items-center gap-2">
+              <Info size={16} className="text-indigo-400" />
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Sugestão de Recuperação</h4>
+            </div>
+            <p className="font-bold text-lg leading-tight text-white">
+              Foco em <span className="text-indigo-400 underline decoration-2 underline-offset-4">Manutenção e Descanso</span> hoje. 
+            </p>
+            <p className="text-xs text-zinc-500 font-medium">
+              Sono inferior a 6h detectado. Tarefas complexas foram mitigadas para preservar sua energia.
+            </p>
+          </Card>
+        )}
+      </div>
 
       {/* Task List grouped by Project */}
       <div className="space-y-10">
