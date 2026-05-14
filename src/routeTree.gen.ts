@@ -17,6 +17,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FinanceRouteImport } from './routes/finance'
+import { Route as FailureReportRouteImport } from './routes/failure-report'
 import { Route as AcademicRouteImport } from './routes/academic'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -60,6 +61,11 @@ const FinanceRoute = FinanceRouteImport.update({
   path: '/finance',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FailureReportRoute = FailureReportRouteImport.update({
+  id: '/failure-report',
+  path: '/failure-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AcademicRoute = AcademicRouteImport.update({
   id: '/academic',
   path: '/academic',
@@ -74,6 +80,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/academic': typeof AcademicRoute
+  '/failure-report': typeof FailureReportRoute
   '/finance': typeof FinanceRoute
   '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/academic': typeof AcademicRoute
+  '/failure-report': typeof FailureReportRoute
   '/finance': typeof FinanceRoute
   '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/academic': typeof AcademicRoute
+  '/failure-report': typeof FailureReportRoute
   '/finance': typeof FinanceRoute
   '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/academic'
+    | '/failure-report'
     | '/finance'
     | '/login'
     | '/menu'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/academic'
+    | '/failure-report'
     | '/finance'
     | '/login'
     | '/menu'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/academic'
+    | '/failure-report'
     | '/finance'
     | '/login'
     | '/menu'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcademicRoute: typeof AcademicRoute
+  FailureReportRoute: typeof FailureReportRoute
   FinanceRoute: typeof FinanceRoute
   LoginRoute: typeof LoginRoute
   MenuRoute: typeof MenuRoute
@@ -218,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FinanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/failure-report': {
+      id: '/failure-report'
+      path: '/failure-report'
+      fullPath: '/failure-report'
+      preLoaderRoute: typeof FailureReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/academic': {
       id: '/academic'
       path: '/academic'
@@ -238,6 +258,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcademicRoute: AcademicRoute,
+  FailureReportRoute: FailureReportRoute,
   FinanceRoute: FinanceRoute,
   LoginRoute: LoginRoute,
   MenuRoute: MenuRoute,
