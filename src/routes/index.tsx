@@ -507,7 +507,8 @@ function Dashboard() {
           </Dialog>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+    </header>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
         <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2.5rem] flex flex-col gap-4 overflow-hidden">
           <div className="flex justify-between items-center">
             <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5">
