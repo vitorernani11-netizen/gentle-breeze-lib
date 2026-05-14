@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate, useLocation } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -32,6 +32,7 @@ export const Route = createFileRoute('/tasks')({
 
 function TasksPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTasks, setActiveTasks] = useState<any[]>([]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
   const [showCompleted, setShowCompleted] = useState(false);
