@@ -129,7 +129,10 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
               </Button>
               <Button 
                 variant="ghost" 
-                className="h-9 px-3 text-[10px] font-black uppercase text-zinc-400 hover:text-white"
+                className={cn(
+                  "h-9 px-3 text-[10px] font-black uppercase transition-all",
+                  recurrence !== 'none' ? "text-[#00ff41]" : "text-zinc-400 hover:text-white"
+                )}
                 onClick={() => setView('repeat')}
               >
                 <Repeat size={14} className="mr-2" />

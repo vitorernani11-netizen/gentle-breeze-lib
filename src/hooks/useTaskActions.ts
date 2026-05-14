@@ -189,16 +189,31 @@ export const useTaskActions = (onSuccess?: () => void) => {
   };
 
   const addTask = (taskData: any) => {
+    // Sync Check: Validação de campos obrigatórios
+    if (!taskData.titulo || !taskData.data_execucao) {
+      toast.error('Erro de integridade: Dados obrigatórios ausentes.');
+      return null;
+    }
+
     try {
       const allTasks = loadFromLocal(TASKS_KEY) || [];
       const newTask = {
         id: crypto.randomUUID(),
         created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         status_concluido: false,
         triagem_stage: 1,
         user_id: 'local-user',
         tags: [],
-        ...taskData
+        titulo: taskData.titulo,
+        descricao: taskData.descricao || '',
+        prioridade: taskData.prioridade || 4,
+        data_execucao: taskData.data_execucao,
+        repeticao: taskData.repeticao || 'none',
+        lembrete: taskData.lembrete || null,
+        reminders: taskData.reminders || [],
+        hora_vencimento: taskData.hora_vencimento || null,
+        status: taskData.status || 'Entrada'
       };
       
       const updatedTasks = [newTask, ...allTasks];
