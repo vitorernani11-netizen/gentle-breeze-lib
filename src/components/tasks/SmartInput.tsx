@@ -84,56 +84,49 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
   };
 
   const DatePickerContent = () => (
-    <div className="p-4 bg-black border-4 border-white font-mono space-y-4">
-      <div className="grid grid-cols-1 gap-2">
+    <div className="p-3 bg-zinc-950 border border-zinc-800 font-sans space-y-3 rounded-xl shadow-2xl">
+      <div className="grid grid-cols-2 gap-2">
         <Button 
           variant="outline" 
-          className="justify-start rounded-none border-2 border-white hover:bg-white hover:text-black font-black uppercase"
+          className="justify-center rounded-lg border-zinc-800 hover:bg-zinc-900 hover:text-white font-bold uppercase text-[10px] h-9"
           onClick={() => setSelectedDate(startOfToday())}
+        >
+          Hoje
+        </Button>
+        <Button 
+          variant="outline" 
+          className="justify-center rounded-lg border-zinc-800 hover:bg-zinc-900 hover:text-white font-bold uppercase text-[10px] h-9"
+          onClick={() => setSelectedDate(addDays(startOfToday(), 1))}
         >
           Amanhã
         </Button>
-        <Button 
-          variant="outline" 
-          className="justify-start rounded-none border-2 border-white hover:bg-white hover:text-black font-black uppercase"
-          onClick={() => setSelectedDate(addWeeks(startOfWeek(new Date()), 1))}
-        >
-          Próxima Semana
-        </Button>
-        <Button 
-          variant="outline" 
-          className="justify-start rounded-none border-2 border-white hover:bg-white hover:text-black font-black uppercase"
-          onClick={() => setSelectedDate(undefined)}
-        >
-          Sem Vencimento
-        </Button>
       </div>
       
-      <div className="border-t-2 border-white pt-4">
+      <div className="border-t border-zinc-900 pt-3">
         <Calendar
           mode="single"
           selected={selectedDate}
           onSelect={setSelectedDate}
-          className="rounded-none border-2 border-white"
+          className="rounded-lg border-none"
           locale={ptBR}
         />
       </div>
 
-      <div className="border-t-2 border-white pt-4 space-y-2">
-        <span className="text-[10px] font-black uppercase text-zinc-500">Recorrência</span>
-        <div className="flex flex-wrap gap-2">
+      <div className="border-t border-zinc-900 pt-3 space-y-2">
+        <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-600">Recorrência</span>
+        <div className="flex flex-wrap gap-1.5">
           {(['none', 'daily', 'weekly', 'monthly'] as const).map((r) => (
             <Button
               key={r}
               variant="outline"
               size="sm"
               className={cn(
-                "rounded-none border-2 uppercase font-black text-[10px]",
-                recorrencia === r ? "bg-white text-black border-white" : "border-zinc-800 text-zinc-500 hover:border-white hover:text-white"
+                "rounded-md border-zinc-800 uppercase font-bold text-[9px] h-7 px-2",
+                recorrencia === r ? "bg-zinc-100 text-black border-white" : "text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
               )}
               onClick={() => setRecorrencia(r)}
             >
-              {r === 'none' ? 'Nenhuma' : r === 'daily' ? 'Diário' : r === 'weekly' ? 'Semanal' : 'Mensal'}
+              {r === 'none' ? 'Não' : r === 'daily' ? 'Dia' : r === 'weekly' ? 'Sem' : 'Mês'}
             </Button>
           ))}
         </div>
@@ -202,25 +195,25 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
                   <span className="hidden sm:inline text-[9px] font-bold uppercase tracking-wider">{reminder || 'Lembrete'}</span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-48 bg-black border-4 border-white p-2 font-mono">
-                <div className="flex flex-col gap-1">
+              <PopoverContent className="w-44 bg-zinc-950 border border-zinc-800 p-1.5 font-sans rounded-xl shadow-2xl">
+                <div className="flex flex-col gap-0.5">
                   <Button 
                     variant="ghost" 
-                    className="justify-start rounded-none hover:bg-white hover:text-black font-black uppercase text-[10px]"
+                    className="h-8 justify-start rounded-lg hover:bg-zinc-900 hover:text-white font-bold uppercase text-[9px]"
                     onClick={() => setReminder(format(addHours(new Date(), 2), 'HH:mm'))}
                   >
                     Em 2 horas
                   </Button>
                   <Button 
                     variant="ghost" 
-                    className="justify-start rounded-none hover:bg-white hover:text-black font-black uppercase text-[10px]"
+                    className="h-8 justify-start rounded-lg hover:bg-zinc-900 hover:text-white font-bold uppercase text-[9px]"
                     onClick={() => setReminder('09:00')}
                   >
-                    Amanhã de manhã
+                    Manhã (09:00)
                   </Button>
                   <Button 
                     variant="ghost" 
-                    className="justify-start rounded-none hover:bg-white hover:text-black font-black uppercase text-[10px]"
+                    className="h-8 justify-start rounded-lg hover:bg-zinc-900 text-red-500/70 font-bold uppercase text-[9px]"
                     onClick={() => setReminder(null)}
                   >
                     Limpar
@@ -241,17 +234,18 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
                   <span className="hidden sm:inline text-[9px] font-bold uppercase tracking-wider">P{priority}</span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-40 bg-black border-4 border-white p-2 font-mono">
-                <div className="flex flex-col gap-1">
+              <PopoverContent className="w-36 bg-zinc-950 border border-zinc-800 p-1.5 font-sans rounded-xl shadow-2xl">
+                <div className="flex flex-col gap-0.5">
                   {[1, 2, 3, 4].map((p) => (
                     <Button 
                       key={p}
                       variant="ghost" 
                       className={cn(
-                        "justify-start rounded-none hover:bg-white hover:text-black font-black uppercase text-[10px]",
-                        p === 1 && "text-[#ff0055]",
-                        p === 2 && "text-[#ffaa00]",
-                        p === 3 && "text-[#00ccff]"
+                        "h-8 justify-start rounded-lg hover:bg-zinc-900 font-bold uppercase text-[9px]",
+                        p === 1 && "text-red-500",
+                        p === 2 && "text-orange-500",
+                        p === 3 && "text-blue-500",
+                        p === 4 && "text-zinc-500"
                       )}
                       onClick={() => setPriority(p)}
                     >
