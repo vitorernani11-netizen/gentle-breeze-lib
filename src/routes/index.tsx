@@ -199,9 +199,29 @@ function Dashboard() {
         projeto_id: '',
         data_execucao: new Date().toISOString().split('T')[0],
         repeticao: 'none',
-        tags: ''
+        tags: '',
+        lembrete_ead_48h: false
       });
       toast.success('Tarefa enviada para Entrada');
+    }
+  };
+
+  const handleAddHydration = async () => {
+    if (!session) return;
+    const today = new Date().toISOString().split('T')[0];
+    const newAmount = hydration + 500;
+    
+    const { error } = await supabase
+      .from('hidratacao')
+      .upsert({
+        user_id: session.user.id,
+        data: today,
+        quantidade_ml: newAmount
+      }, { onConflict: 'user_id,data' });
+
+    if (!error) {
+      setHydration(newAmount);
+      toast.success('Hidratação registrada (+500ml)');
     }
   };
 
