@@ -25,7 +25,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { loadFromLocal } from '@/lib/storage';
+
+const PROJECTS_KEY = 'hardware_humano_projects';
 
 export function AppSidebar() {
   const [open, setOpen] = useState(false);
@@ -33,21 +35,15 @@ export function AppSidebar() {
   const location = useLocation();
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      
-      const { data } = await supabase
-        .from('projetos')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .limit(5);
-      
-      if (data) setProjects(data);
+    const fetchProjects = () => {
+      const data = loadFromLocal(PROJECTS_KEY) || [];
+      setProjects(data.slice(0, 5));
     };
 
     fetchProjects();
-  }, []);
+    // Refresh when sidebar opens
+    if (open) fetchProjects();
+  }, [open]);
 
   const mainItems = [
     { label: 'Hoje', icon: Calendar, href: '/', color: 'text-blue-400' },
