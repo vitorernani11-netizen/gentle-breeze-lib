@@ -40,9 +40,10 @@ function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [errorState, setErrorState] = useState<string | null>(null);
   const [selectedStage, setSelectedStage] = useState<number | null>(null);
+  const [detailTask, setDetailTask] = useState<any | null>(null);
   
 
-  const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask } = useTaskActions(() => {
+  const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask, updateTask } = useTaskActions(() => {
     fetchTasks();
     if (location.pathname === '/tasks' && window.location.hash === '#redirect-to-today') {
        navigate({ to: '/' });
