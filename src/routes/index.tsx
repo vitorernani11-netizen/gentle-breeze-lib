@@ -380,44 +380,6 @@ function Dashboard() {
       )}
 
       <section className="mb-8">
-        <div className="grid grid-cols-2 gap-3">
-          <Card className="p-4 bg-zinc-900/20 border-zinc-800/50 rounded-2xl border-t-2 border-t-emerald-500/50">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500/70 block mb-1">Impacto</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-white">{stats.positive}</span>
-              <span className="text-[8px] font-bold text-zinc-600 uppercase">PTS</span>
-            </div>
-          </Card>
-          
-          <Card className="p-4 bg-zinc-900/20 border-zinc-800/50 rounded-2xl border-t-2 border-t-red-500/50">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-red-500/70 block mb-1">Vazamentos</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-white">{stats.negative}</span>
-              <span className="text-[8px] font-bold text-zinc-600 uppercase">PTS</span>
-            </div>
-          </Card>
-        </div>
-      </section>
-
-      <section className="mb-8">
-        <Card className="p-5 bg-zinc-950 border-zinc-900 rounded-2xl overflow-hidden">
-          <div className="flex justify-between items-end mb-3">
-            <div>
-              <h2 className="text-[9px] font-bold uppercase tracking-wider text-zinc-600 mb-0.5">Progresso Carreira</h2>
-              <span className="text-sm font-bold tracking-tight text-zinc-300">Target R$ 7k</span>
-            </div>
-            <span className="text-lg font-black text-blue-500/80">{stats.careerSpeed.toFixed(1)}%</span>
-          </div>
-          <div className="h-1.5 w-full bg-zinc-900/50 rounded-full overflow-hidden border border-zinc-800/30">
-            <div 
-              className="h-full bg-blue-600/80 rounded-full transition-all duration-1000" 
-              style={{ width: `${stats.careerSpeed}%` }}
-            />
-          </div>
-        </Card>
-      </section>
-
-      <section className="mb-8">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-4 px-2">Hardware: Classificação (Eisenhower)</h3>
         <EisenhowerGrid tasks={tasks} onTaskClick={setDetailTask} />
         
