@@ -155,11 +155,18 @@ function Dashboard() {
         data: today,
         horas_sono: checkin.horas_sono ? parseFloat(checkin.horas_sono) : null,
         marmitas_prontas: checkin.marmitas_prontas,
+        treino_madrugada_realizado: checkin.treino_madrugada_realizado,
       }, { onConflict: 'user_id,data' });
 
     if (!error) {
       setShowCheckin(false);
       toast.success('Dia iniciado!');
+      if (!checkin.treino_madrugada_realizado) {
+        toast('Compensação Necessária', {
+          description: 'Sugestão: Realizar 15 min de alongamento hoje à noite.',
+          duration: 6000,
+        });
+      }
     }
   };
 
