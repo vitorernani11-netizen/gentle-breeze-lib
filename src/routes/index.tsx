@@ -155,11 +155,24 @@ function Dashboard() {
     setHydration(todayHydration ? todayHydration.quantidade_ml : 0);
 
     const checkinHistory = loadFromLocal(CHECKIN_KEY) || [];
-    const sortedCheckins = [...checkinHistory].sort((a: any, b: any) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 7);
-    const history = [...sortedCheckins].reverse().map((d: any) => ({
-      name: format(parseISO(d.data), 'dd/MM'),
-      hours: d.horas_sono || 0
-    }));
+    const sortedCheckins = [...checkinHistory]
+      .filter((d: any) => d && d.data && typeof d.data === 'string')
+      .sort((a: any, b: any) => new Date(b.data).getTime() - new Date(a.data).getTime())
+      .slice(0, 7);
+    const history = [...sortedCheckins].reverse().map((d: any) => {
+      let name = '??';
+      try {
+        if (d.data) {
+          name = format(parseISO(d.data), 'dd/MM');
+        }
+      } catch (e) {
+        console.error('Erro ao formatar data do checkin:', d.data);
+      }
+      return {
+        name,
+        hours: d.hours || d.horas_sono || 0
+      };
+    });
     setSleepHistory(history);
     
     const currentCheckin = checkinHistory.find((d: any) => d.data === today);
@@ -168,7 +181,11 @@ function Dashboard() {
       setIsRecoveryMode(currentCheckin.horas_sono !== null && currentCheckin.horas_sono < 6);
     }
 
-    const completedLast7 = allTasks.filter((t: any) => t.status_concluido && isAfter(parseISO(t.updated_at || t.created_at), sevenDaysAgo));
+    const completedLast7 = allTasks.filter((t: any) => 
+      t && t.status_concluido && 
+      (t.updated_at || t.created_at) && 
+      isAfter(parseISO(t.updated_at || t.created_at), sevenDaysAgo)
+    );
     const positiveTasks = completedLast7.filter((t: any) => {
       const proj = projectsData.find((p: any) => p.id === t.projeto_id);
       return proj?.nome === 'Nabih' || proj?.nome === 'Faculdade' || t.tags?.includes('Nabih') || t.tags?.includes('Faculdade');
@@ -178,11 +195,18 @@ function Dashboard() {
     const goodSleepCount = sortedCheckins.filter((s: any) => s.horas_sono && s.horas_sono >= 7).length;
     
     const financeRecords = loadFromLocal(FINANCE_KEY) || [];
-    const expenses7 = financeRecords.filter((f: any) => f.tipo === 'Saida' && isAfter(parseISO(f.data), sevenDaysAgo));
+    const expenses7 = financeRecords.filter((f: any) => 
+      f && f.tipo === 'Saida' && 
+      f.data && 
+      isAfter(parseISO(f.data), sevenDaysAgo)
+    );
     const expenseTotal = expenses7.reduce((acc: number, curr: any) => acc + Number(curr.valor), 0);
     
     const socialUsage = loadFromLocal(SOCIAL_KEY) || [];
-    const social7 = socialUsage.filter((s: any) => isAfter(parseISO(s.data), sevenDaysAgo));
+    const social7 = socialUsage.filter((s: any) => 
+      s && s.data && 
+      isAfter(parseISO(s.data), sevenDaysAgo)
+    );
     const socialHours = social7.reduce((acc: number, curr: any) => acc + curr.minutos, 0) / 60;
     
     setStats({
