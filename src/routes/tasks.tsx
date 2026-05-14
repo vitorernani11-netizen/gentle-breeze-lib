@@ -378,6 +378,13 @@ function TasksPage() {
           </div>
         )}
       </div>
+
+      <TaskDetailModal
+        task={detailTask}
+        open={!!detailTask}
+        onClose={() => setDetailTask(null)}
+        onUpdate={updateTask}
+      />
     </div>
   );
 }
