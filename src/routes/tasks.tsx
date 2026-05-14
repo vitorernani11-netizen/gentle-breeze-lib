@@ -224,7 +224,11 @@ function TasksPage() {
             .filter(task => !selectedStage || (task.triagem_stage || 1) === selectedStage)
             .map((task) => (
             <Card key={task.id} className="bg-zinc-950/30 border border-zinc-900/50 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between group hover:border-zinc-800 transition-all gap-4">
-              <div className="flex flex-col gap-2 flex-1 min-w-0">
+              <button
+                type="button"
+                onClick={() => setDetailTask(task)}
+                className="flex flex-col gap-2 flex-1 min-w-0 text-left cursor-pointer"
+              >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={cn("text-[8px] font-bold uppercase px-1.5 py-0.5 border rounded-md", 
                     task.prioridade === 1 ? "text-red-500 border-red-500/20 bg-red-500/5" :
