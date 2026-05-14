@@ -19,17 +19,32 @@ function TasksPage() {
   const [newTitle, setNewTitle] = useState('');
   const [loading, setLoading] = useState(true);
   const { moveTask } = useTaskActions(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) fetchTasks(session.user.id);
-    });
+    if (session?.user?.id) fetchTasks(session.user.id);
   });
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      fetchTasks(session?.user?.id || 'anonymous');
+    const initAuth = async () => {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      setSession(currentSession);
+      
+      if (currentSession?.user?.id) {
+        await fetchTasks(currentSession.user.id);
+      }
       setLoading(false);
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      if (newSession?.user?.id) {
+        fetchTasks(newSession.user.id);
+      } else {
+        setTasks([]);
+      }
     });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const fetchTasks = async (userId: string) => {
