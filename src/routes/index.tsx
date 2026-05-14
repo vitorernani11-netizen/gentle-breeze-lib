@@ -25,14 +25,11 @@ function Dashboard() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (!session) {
-        navigate({ to: '/login' });
-      } else {
-        fetchTodayCheckin(session.user.id);
-      }
+      // Login requirement removed as per request
+      fetchTodayCheckin(session?.user?.id || 'anonymous');
       setLoading(false);
     });
-  }, [navigate]);
+  }, []);
 
   const fetchTodayCheckin = async (userId: string) => {
     const today = new Date().toISOString().split('T')[0];
