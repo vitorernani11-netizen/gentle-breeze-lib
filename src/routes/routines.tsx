@@ -23,7 +23,7 @@ function Routines() {
 
   const fetchData = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || 'anonymous';
+    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
     const today = new Date().toISOString().split('T')[0];
 
     // Fetch routines
@@ -59,7 +59,7 @@ function Routines() {
       : [...currentCompleted, itemId];
 
     const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || 'anonymous';
+    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
     const today = new Date().toISOString().split('T')[0];
 
     const { error } = await supabase
@@ -81,7 +81,7 @@ function Routines() {
 
   const createDefaultRoutines = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || 'anonymous';
+    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
 
     const defaults = [
       {

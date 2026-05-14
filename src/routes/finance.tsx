@@ -17,7 +17,7 @@ function FinancePage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      fetchRecords(session?.user?.id || 'anonymous');
+      fetchRecords(session?.user?.id || '00000000-0000-0000-0000-000000000000');
     });
   }, []);
 
