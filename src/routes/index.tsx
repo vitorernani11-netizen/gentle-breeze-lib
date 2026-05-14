@@ -15,12 +15,15 @@ import {
   Clock, 
   ChevronRight,
   Filter,
-  ArrowRight
+  ArrowRight,
+  GraduationCap,
+  AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTaskActions } from '@/hooks/useTaskActions';
+import { differenceInDays, parseISO } from 'date-fns';
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
