@@ -50,7 +50,8 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       vencimento: format(vencimento, 'yyyy-MM-dd'),
       recorrencia: 'none',
       prioridade,
-      lembrete
+      lembrete,
+      descricao
     });
     setTitulo('');
     setDescricao('');
