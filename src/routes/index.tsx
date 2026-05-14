@@ -115,6 +115,8 @@ function Dashboard() {
       setAnxietyContent('');
       toast.success('Descarregado. Agora descanse.');
     }
+  };
+
   const fetchData = async (userId: string) => {
     const today = new Date().toISOString().split('T')[0];
     
