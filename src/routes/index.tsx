@@ -53,6 +53,9 @@ function Dashboard() {
   const [hydration, setHydration] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [anxietyContent, setAnxietyContent] = useState('');
+  const [sleepHistory, setSleepHistory] = useState<any[]>([]);
+  const [hoursSleptToday, setHoursSleptToday] = useState<number | null>(null);
+  const [isSilenced, setIsSilenced] = useState(false);
   
   const [checkin, setCheckin] = useState({
     horas_sono: '',
