@@ -311,9 +311,10 @@ function Dashboard() {
         tags: tagsArray,
         lembrete_ead_48h: newTask.lembrete_ead_48h,
         lembrete: null, // Initial support for manual tasks from main dashboard
-        hora_vencimento: null,
+        hora_vencimento: newTask.data_execucao && newTask.lembrete ? `${newTask.data_execucao}T${newTask.lembrete}:00.000Z` : null,
         status: 'Entrada',
         status_concluido: false,
+        prioridade: 4,
         created_at: new Date().toISOString()
       };
 
@@ -418,11 +419,6 @@ function Dashboard() {
         <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-4 px-2">Hardware: Classificação (Eisenhower)</h3>
         <EisenhowerGrid tasks={tasks} onTaskClick={setDetailTask} />
         
-        <div className="mt-8">
-          <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-4 px-2">Dashboard: Panorama</h3>
-          <EisenhowerMatrix tasks={tasks} onTaskClick={setDetailTask} />
-        </div>
-
         <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mt-8 mb-4 px-2">Hardware: Execução</h3>
         <div className="space-y-0 border-t border-white/10">
           {tasks.length > 0 ? (
