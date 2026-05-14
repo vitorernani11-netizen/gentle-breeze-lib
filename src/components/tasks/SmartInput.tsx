@@ -163,14 +163,14 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
           </Button>
         </div>
 
-        <div className="flex items-center justify-between border-t-2 border-zinc-900 pt-2 px-2">
-          <div className="flex items-center gap-1 sm:gap-4">
+        <div className="flex items-center justify-between border-t border-zinc-900/50 pt-1.5 px-1.5">
+          <div className="flex items-center gap-1 sm:gap-2">
             {isMobile ? (
               <Drawer>
                 <DrawerTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-zinc-500 hover:text-white hover:bg-zinc-900 rounded-none gap-2 px-2">
-                    <CalendarIcon size={16} />
-                    <span className="hidden sm:inline text-[10px] font-black uppercase">
+                  <Button variant="ghost" size="sm" className="h-8 text-zinc-600 hover:text-zinc-300 hover:bg-zinc-900/50 rounded-lg gap-1.5 px-2">
+                    <CalendarIcon size={14} />
+                    <span className="hidden sm:inline text-[9px] font-bold uppercase tracking-wider">
                       {selectedDate ? format(selectedDate, 'dd MMM', { locale: ptBR }) : 'Agendar'}
                     </span>
                   </Button>
@@ -182,9 +182,9 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
             ) : (
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-zinc-500 hover:text-white hover:bg-zinc-900 rounded-none gap-2 px-2">
-                    <CalendarIcon size={16} />
-                    <span className="hidden sm:inline text-[10px] font-black uppercase">
+                  <Button variant="ghost" size="sm" className="h-8 text-zinc-600 hover:text-zinc-300 hover:bg-zinc-900/50 rounded-lg gap-1.5 px-2">
+                    <CalendarIcon size={14} />
+                    <span className="hidden sm:inline text-[9px] font-bold uppercase tracking-wider">
                       {selectedDate ? format(selectedDate, 'dd MMM', { locale: ptBR }) : 'Agendar'}
                     </span>
                   </Button>
@@ -197,9 +197,9 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-zinc-500 hover:text-white hover:bg-zinc-900 rounded-none gap-2 px-2">
-                  <Bell size={16} />
-                  <span className="hidden sm:inline text-[10px] font-black uppercase">{reminder || 'Lembrete'}</span>
+                <Button variant="ghost" size="sm" className="h-8 text-zinc-600 hover:text-zinc-300 hover:bg-zinc-900/50 rounded-lg gap-1.5 px-2">
+                  <Bell size={14} />
+                  <span className="hidden sm:inline text-[9px] font-bold uppercase tracking-wider">{reminder || 'Lembrete'}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-48 bg-black border-4 border-white p-2 font-mono">
@@ -232,13 +232,13 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="sm" className={cn(
-                  "text-zinc-500 hover:text-white hover:bg-zinc-900 rounded-none gap-2 px-2",
-                  priority === 1 && "text-[#ff0055]",
-                  priority === 2 && "text-[#ffaa00]",
-                  priority === 3 && "text-[#00ccff]"
+                  "h-8 text-zinc-600 hover:text-zinc-300 hover:bg-zinc-900/50 rounded-lg gap-1.5 px-2",
+                  priority === 1 && "text-red-500",
+                  priority === 2 && "text-orange-500",
+                  priority === 3 && "text-blue-500"
                 )}>
-                  <Hash size={16} />
-                  <span className="hidden sm:inline text-[10px] font-black uppercase">P{priority}</span>
+                  <Hash size={14} />
+                  <span className="hidden sm:inline text-[9px] font-bold uppercase tracking-wider">P{priority}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-40 bg-black border-4 border-white p-2 font-mono">
@@ -264,8 +264,8 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
           </div>
 
           <div className="flex items-center gap-2">
-             <span className="text-[10px] font-black uppercase text-zinc-700 italic">Entrada / Triagem</span>
-             <ChevronDown size={14} className="text-zinc-800" />
+             <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-800 italic">Triagem</span>
+             <ChevronDown size={12} className="text-zinc-900" />
           </div>
         </div>
       </div>
