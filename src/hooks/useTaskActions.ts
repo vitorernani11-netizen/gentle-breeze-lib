@@ -16,6 +16,9 @@ export const useTaskActions = (onSuccess?: () => void) => {
         if (t.id === task.id) {
           if (task.repeticao && task.repeticao !== 'none') {
             try {
+              if (!t.data_execucao || typeof t.data_execucao !== 'string') {
+                throw new Error('Data de execução ausente ou inválida');
+              }
               const [year, month, day] = t.data_execucao.split('-').map(Number);
               const currentDate = new Date(year, month - 1, day);
               
