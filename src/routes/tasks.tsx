@@ -110,6 +110,7 @@ function TasksPage() {
     recorrencia: string;
     prioridade: number;
     lembrete: string | null;
+    reminders?: any[];
     descricao?: string;
     hora_vencimento?: string | null;
   }) => {
