@@ -86,6 +86,7 @@ export type Database = {
           created_at: string | null
           data_execucao: string | null
           id: string
+          status: Database["public"]["Enums"]["tarefa_status"] | null
           status_concluido: boolean | null
           titulo: string
           updated_at: string | null
@@ -96,6 +97,7 @@ export type Database = {
           created_at?: string | null
           data_execucao?: string | null
           id?: string
+          status?: Database["public"]["Enums"]["tarefa_status"] | null
           status_concluido?: boolean | null
           titulo: string
           updated_at?: string | null
@@ -106,6 +108,7 @@ export type Database = {
           created_at?: string | null
           data_execucao?: string | null
           id?: string
+          status?: Database["public"]["Enums"]["tarefa_status"] | null
           status_concluido?: boolean | null
           titulo?: string
           updated_at?: string | null
@@ -122,6 +125,7 @@ export type Database = {
     }
     Enums: {
       conta_tipo: "Pessoal" | "Nabih"
+      tarefa_status: "Entrada" | "Hoje" | "Amanha"
       transacao_tipo: "Entrada" | "Saida"
     }
     CompositeTypes: {
@@ -251,6 +255,7 @@ export const Constants = {
   public: {
     Enums: {
       conta_tipo: ["Pessoal", "Nabih"],
+      tarefa_status: ["Entrada", "Hoje", "Amanha"],
       transacao_tipo: ["Entrada", "Saida"],
     },
   },
