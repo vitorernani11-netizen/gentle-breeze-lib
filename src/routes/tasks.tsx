@@ -26,6 +26,7 @@ import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { cn } from '@/lib/utils';
 import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
 import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
+import { TaskCard } from '@/components/tasks/TaskCard';
 
 const TASKS_KEY = 'hardware_humano_data';
 
@@ -215,134 +216,20 @@ function TasksPage() {
         {activeTasks.length > 0 ? (
           activeTasks
             .filter(task => !selectedStage || (task.triagem_stage || 1) === selectedStage)
-            .map((task) => {
-              const taskDate = parseISO(task.data_execucao);
-              const isOverdue = !task.status_concluido && (
-                isBefore(taskDate, startOfToday()) || 
-                (task.hora_vencimento ? isBefore(parseISO(task.hora_vencimento), new Date()) : 
-                 (isToday(taskDate) && task.lembrete && (() => {
-                    const [hours, minutes] = task.lembrete.split(':').map(Number);
-                    const taskTime = new Date();
-                    taskTime.setHours(hours, minutes, 0, 0);
-                    return isBefore(taskTime, new Date());
-                  })())
-                )
-              );
-
-              return (
-                <Card key={task.id} className={cn(
-                  "bg-black border-0 border-b border-white/10 p-3 rounded-none flex flex-col group transition-all gap-3 relative",
-                  isOverdue ? "bg-red-500/5" : "hover:bg-zinc-900/30"
-                )}>
-                  <div className="absolute top-3 right-3 flex gap-2 z-10">
-                    <Button 
-                      aria-label="Concluir tarefa"
-                      size="sm"
-                      className="bg-white text-black hover:bg-zinc-200 font-black uppercase text-[10px] rounded-sm h-8 px-3 transition-all active:scale-95"
-                      onClick={() => completeTask(task)}
-                    >
-                      Concluir
-                    </Button>
-                    <Button 
-                      aria-label="Mover para Hoje"
-                      size="sm"
-                      className="bg-zinc-950 text-[#00ff41] hover:bg-[#00ff41] hover:text-black text-[10px] font-black uppercase rounded-sm border border-[#00ff41]/30 h-8 px-3 transition-all"
-                      onClick={() => {
-                        moveTask(task.id, 'Hoje');
-                        navigate({ to: '/' });
-                      }}
-                    >
-                      Hoje
-                    </Button>
-                    <Button 
-                      aria-label="Deletar registro"
-                      size="icon"
-                      variant="ghost"
-                      className="text-zinc-800 hover:text-red-500 hover:bg-red-500/10 h-8 w-8 border border-zinc-900 rounded-sm"
-                      onClick={() => deletePermanent(task.id)}
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-                  </div>
-
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setDetailTask(task)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') setDetailTask(task); }}
-                    className="flex flex-col gap-1.5 flex-1 min-w-0 text-left cursor-pointer pr-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className={cn("text-[8px] font-black uppercase px-1.5 py-0.5 border rounded-sm", 
-                        task.prioridade === 1 ? "text-red-500 border-red-500/20 bg-red-500/5" :
-                        task.prioridade === 2 ? "text-orange-500 border-orange-500/20 bg-orange-500/5" :
-                        task.prioridade === 3 ? "text-blue-500 border-blue-500/20 bg-blue-500/5" :
-                        "text-zinc-600 border-zinc-900"
-                      )}>
-                        P{task.prioridade || 4}
-                      </span>
-                      
-                      <div className="flex border border-zinc-900/50 bg-black/40 p-0.5 rounded-sm">
-                        {[1, 2, 3, 4].map((s) => (
-                          <button
-                            key={s}
-                            aria-label={`Mover para estágio ${s}`}
-                            onClick={(e) => { e.stopPropagation(); updateTriagemStage(task.id, s); }}
-                            className={cn(
-                              "w-4 h-4 text-[8px] font-black flex items-center justify-center rounded-sm transition-all",
-                              (task.triagem_stage || 1) === s 
-                                ? "bg-zinc-100 text-black" 
-                                : "text-zinc-700 hover:text-zinc-400"
-                            )}
-                          >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-
-                      {isOverdue && (
-                        <span className="text-[8px] font-black uppercase text-red-500 animate-pulse flex items-center gap-1 bg-red-500/10 px-1.5 py-0.5 border border-red-500/20">
-                          Atrasada
-                        </span>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-bold text-lg uppercase tracking-tight truncate leading-none mb-1">
-                        {task.titulo}
-                      </h3>
-                      
-                      {task.descricao && (
-                        <p className="text-zinc-600 text-[9px] font-medium uppercase leading-tight line-clamp-1 italic opacity-60">
-                          {task.descricao}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center justify-start gap-2 pt-1">
-                      <span className={cn(
-                        "text-[9px] font-black uppercase flex items-center gap-1.5 px-2 py-1 rounded-sm border",
-                        isOverdue ? "text-red-500 border-red-500/20 bg-red-500/5" : "text-zinc-300 border-zinc-800 bg-zinc-900/50"
-                      )}>
-                        <Calendar size={10} /> 
-                        {formatDate(taskDate, "d MMM", { locale: ptBR }).toUpperCase()}
-                        {task.lembrete && (
-                          <span className="ml-1.5 text-[#00ff41] font-black">
-                            {task.lembrete}
-                          </span>
-                        )}
-                      </span>
-
-                      {task.repeticao && task.repeticao !== 'none' && (
-                        <span className="text-[8px] font-black uppercase text-zinc-500 flex items-center gap-1 border border-zinc-900/50 px-1.5 py-1 rounded-sm">
-                          <Clock size={10} /> {task.repeticao === 'daily' ? 'DIÁRIO' : 'SEMANAL'}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              );
-            })
+            .map((task) => (
+              <TaskCard 
+                key={task.id}
+                task={task}
+                onComplete={completeTask}
+                onMoveToToday={(id) => {
+                  moveTask(id, 'Hoje');
+                  navigate({ to: '/' });
+                }}
+                onDelete={deletePermanent}
+                onClick={setDetailTask}
+                onUpdateStage={updateTriagemStage}
+              />
+            ))
         ) : (
           <div className="border-2 border-dashed border-zinc-800 p-20 text-center">
             <p className="text-zinc-700 font-black uppercase tracking-[0.5em] text-xs">Pipeline Vazio</p>
