@@ -91,7 +91,7 @@ function Purgatory() {
                         size="icon" 
                         variant="ghost" 
                         className="h-12 w-12 rounded-2xl bg-zinc-900 text-white border border-zinc-800 hover:bg-white hover:text-black transition-none shrink-0"
-                        onClick={() => completeTask(task.id)}
+                        onClick={() => completeTask(task)}
                       >
                         <Check size={20} />
                       </Button>
