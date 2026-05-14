@@ -229,12 +229,14 @@ function TasksPage() {
               const taskDate = parseISO(task.data_execucao);
               const isOverdue = !task.status_concluido && (
                 isBefore(taskDate, startOfToday()) || 
-                (isToday(taskDate) && task.lembrete && (() => {
-                  const [hours, minutes] = task.lembrete.split(':').map(Number);
-                  const taskTime = new Date();
-                  taskTime.setHours(hours, minutes, 0, 0);
-                  return isBefore(taskTime, new Date());
-                })())
+                (task.hora_vencimento ? isBefore(parseISO(task.hora_vencimento), new Date()) : 
+                 (isToday(taskDate) && task.lembrete && (() => {
+                    const [hours, minutes] = task.lembrete.split(':').map(Number);
+                    const taskTime = new Date();
+                    taskTime.setHours(hours, minutes, 0, 0);
+                    return isBefore(taskTime, new Date());
+                  })())
+                )
               );
 
               return (
