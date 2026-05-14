@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { Card } from '@/components/ui/card';
 import { 
   Plus, 
@@ -21,11 +21,8 @@ import {
 import { toast } from 'sonner';
 import { useTaskActions } from '@/hooks/useTaskActions';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { SmartInput } from '@/components/tasks/SmartInput';
 
 const TASKS_KEY = 'hardware_humano_data';
 
@@ -42,13 +39,6 @@ function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [errorState, setErrorState] = useState<string | null>(null);
   
-  const [newTask, setNewTask] = useState({
-    titulo: '',
-    descricao: '',
-    recorrencia: 'none',
-    vencimento: '',
-    prioridade: '4'
-  });
 
   const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask } = useTaskActions(() => {
     fetchTasks();
@@ -95,28 +85,28 @@ function TasksPage() {
     }
   };
 
-  const handleAddTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!newTask.titulo.trim()) {
-      toast.error('Título é obrigatório para captura.');
-      return;
-    }
-
+  const onSmartAddTask = (taskData: {
+    titulo: string;
+    vencimento: string;
+    recorrencia: string;
+    prioridade: number;
+    lembrete: string | null;
+  }) => {
     try {
       const task = {
         id: crypto.randomUUID(),
-        titulo: newTask.titulo.trim(),
-        descricao: newTask.descricao.trim(),
-        repeticao: newTask.recorrencia,
-        data_execucao: newTask.vencimento || new Date().toISOString().split('T')[0],
-        prioridade: parseInt(newTask.prioridade) || 4,
-        triagem_stage: 1, // Default stage
+        titulo: taskData.titulo,
+        descricao: '',
+        repeticao: taskData.recorrencia,
+        data_execucao: taskData.vencimento,
+        prioridade: taskData.prioridade,
+        triagem_stage: 1,
         user_id: 'local-user',
         status: 'Entrada',
         status_concluido: false,
         created_at: new Date().toISOString(),
-        tags: []
+        tags: [],
+        lembrete: taskData.lembrete
       };
 
       console.log('[Hardware:Entrada]', task);
@@ -125,14 +115,6 @@ function TasksPage() {
       saveToLocal(TASKS_KEY, [task, ...allTasks]);
       
       setActiveTasks(prev => [task, ...prev]);
-      setNewTask({
-        titulo: '',
-        descricao: '',
-        recorrencia: 'none',
-        vencimento: '',
-        prioridade: '4'
-      });
-      setShowAddModal(false);
       toast.success('Tarefa capturada', {
         className: 'bg-black border-2 border-[#00ff41] text-[#00ff41] font-mono'
       });
@@ -141,6 +123,7 @@ function TasksPage() {
       toast.error('O hardware rejeitou o novo registro.');
     }
   };
+
 
   if (loading) {
     return (
@@ -186,90 +169,10 @@ function TasksPage() {
           </Button>
           <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter italic">Entrada</h1>
         </div>
-        
-        <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-          <DialogTrigger asChild>
-            <Button 
-              aria-label="Capturar nova tarefa"
-              className="bg-white text-black hover:bg-[#00ff41] hover:text-black font-black uppercase rounded-none border-b-4 border-r-4 border-zinc-400 active:border-0 active:translate-y-1 active:translate-x-1 transition-none h-14 px-4 sm:px-6"
-            >
-              <Plus className="mr-2" /> <span className="hidden sm:inline">Capturar</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-[#0a0a0a] border-4 border-white rounded-none p-8 sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-black uppercase italic tracking-tighter mb-4">Novo Input de Hardware</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleAddTask} className="space-y-6">
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Título do Registro *</Label>
-                <Input 
-                  value={newTask.titulo}
-                  onChange={e => setNewTask({...newTask, titulo: e.target.value})}
-                  maxLength={100}
-                  required
-                  className="bg-zinc-900 border-2 border-white rounded-none h-12 font-bold focus-visible:ring-0 focus:border-[#00ff41]"
-                  placeholder="EX: FINALIZAR REFATORAÇÃO"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Recorrência</Label>
-                  <Select value={newTask.recorrencia} onValueChange={v => setNewTask({...newTask, recorrencia: v})}>
-                    <SelectTrigger className="bg-zinc-900 border-2 border-white rounded-none h-12 font-bold">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-2 border-white text-white rounded-none">
-                      <SelectItem value="none">Nenhuma</SelectItem>
-                      <SelectItem value="daily">Diário</SelectItem>
-                      <SelectItem value="weekly">Semanal</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Prioridade</Label>
-                  <Select value={newTask.prioridade} onValueChange={v => setNewTask({...newTask, prioridade: v})}>
-                    <SelectTrigger className={cn("bg-zinc-900 border-2 rounded-none h-12 font-bold", getPriorityColor(parseInt(newTask.prioridade)))}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-2 border-white text-white rounded-none">
-                      <SelectItem value="1" className="text-[#ff0055] font-black">P1 - CRÍTICO</SelectItem>
-                      <SelectItem value="2" className="text-[#ffaa00] font-black">P2 - ALTO</SelectItem>
-                      <SelectItem value="3" className="text-[#00ccff] font-black">P3 - MÉDIO</SelectItem>
-                      <SelectItem value="4" className="text-white font-black">P4 - BAIXO</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Vencimento / Lembrete</Label>
-                <Input 
-                  type="date"
-                  value={newTask.vencimento}
-                  onChange={e => setNewTask({...newTask, vencimento: e.target.value})}
-                  className="bg-zinc-900 border-2 border-white rounded-none h-12 font-bold"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Notas Adicionais</Label>
-                <Textarea 
-                  value={newTask.descricao}
-                  onChange={e => setNewTask({...newTask, descricao: e.target.value})}
-                  className="bg-zinc-900 border-2 border-white rounded-none min-h-[100px] font-bold focus:border-[#ff00ff]"
-                  placeholder="..."
-                />
-              </div>
-
-              <Button type="submit" className="w-full h-16 bg-[#00ff41] text-black font-black uppercase tracking-widest text-xl rounded-none border-b-8 border-r-8 border-green-900 active:border-0 transition-none">
-                Salvar no Pipeline
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
       </header>
+
+      <SmartInput onAddTask={onSmartAddTask} />
+
 
       {/* Triagem Section */}
       <section className="mb-12">

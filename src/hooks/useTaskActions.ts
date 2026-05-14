@@ -29,7 +29,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
               const nextDateStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
               
               toast.success(`Recorrência: ${nextDate.toLocaleDateString('pt-BR')}`);
-              return { ...t, data_execucao: nextDateStr, status: 'Hoje' };
+              return { ...t, data_execucao: nextDateStr, status: t.status };
             } catch (dateError) {
               console.error('Erro no cálculo de recorrência:', dateError);
               toast.error('Erro ao calcular próxima data. Resetando para hoje.');
