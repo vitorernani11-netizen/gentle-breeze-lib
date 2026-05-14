@@ -329,14 +329,15 @@ function Dashboard() {
   };
 
   const handleCreateTask = async () => {
-    if (!newTask.titulo || !session) return;
+    if (!newTask.titulo) return;
 
     const tagsArray = newTask.tags.split(',').map(t => t.trim()).filter(t => t !== '');
+    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
     
     const { data, error } = await supabase
       .from('tarefas')
       .insert([{
-        user_id: session.user.id,
+        user_id: userId,
         titulo: newTask.titulo,
         projeto_id: newTask.projeto_id || null,
         data_execucao: newTask.data_execucao,
