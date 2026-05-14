@@ -67,13 +67,9 @@ function MenuPage() {
 
   const fetchReceitas = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id;
+    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
 
     if (!userId) {
-      setReceitas(receitasIniciais.map((r, i) => ({ ...r, id: i.toString() })));
-      setLoading(false);
-      return;
-    }
 
     const { data } = await supabase
       .from('receitas')
