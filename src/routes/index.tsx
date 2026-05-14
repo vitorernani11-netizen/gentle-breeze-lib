@@ -105,7 +105,7 @@ function Dashboard() {
 
     const urgentAcademic = academicData?.filter(a => {
       const days = differenceInDays(parseISO(a.data_entrega), new Date());
-      return days <= 0; // "Faltar 1 dia" interpreted as today or already passed
+      return days <= 1; // "Faltar 1 dia" included
     }) || [];
 
     if (tasksData) setTasks(tasksData);
