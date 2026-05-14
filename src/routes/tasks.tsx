@@ -19,21 +19,41 @@ function TasksPage() {
   const [newTitle, setNewTitle] = useState('');
   const [loading, setLoading] = useState(true);
   const { moveTask } = useTaskActions(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) fetchTasks(session.user.id);
-    });
+    if (session?.user?.id) fetchTasks(session.user.id);
   });
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      fetchTasks(session?.user?.id || 'anonymous');
+    const initAuth = async () => {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      setSession(currentSession);
+      
+      if (currentSession?.user?.id) {
+        await fetchTasks(currentSession.user.id);
+      }
       setLoading(false);
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      if (newSession?.user?.id) {
+        fetchTasks(newSession.user.id);
+      } else {
+        setTasks([]);
+      }
     });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const fetchTasks = async (userId: string) => {
-    if (userId === 'anonymous') return;
+    if (!userId || userId === 'anonymous') {
+      console.log('Tentativa de busca ignorada: usuário anônimo ou nulo');
+      return;
+    }
+    
+    console.log('Buscando tarefas para usuário:', userId);
     const { data, error } = await supabase
       .from('tarefas')
       .select('*, projetos(nome, cor)')
@@ -43,10 +63,12 @@ function TasksPage() {
       .order('created_at', { ascending: false });
 
     if (error) {
+      console.error('Erro Supabase fetchTasks:', error);
       toast.error('Erro ao carregar tarefas');
       return;
     }
 
+    console.log('Tarefas carregadas:', data?.length);
     if (data) setTasks(data);
   };
 
