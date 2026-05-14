@@ -324,6 +324,23 @@ function Dashboard() {
                   />
                 </div>
 
+                <div className="flex items-center space-x-2 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
+                  <Checkbox 
+                    id="ead_reminder" 
+                    checked={newTask.lembrete_ead_48h}
+                    onCheckedChange={(checked) => setNewTask({ ...newTask, lembrete_ead_48h: !!checked })}
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <label
+                      htmlFor="ead_reminder"
+                      className="text-[10px] font-black uppercase tracking-widest text-zinc-400 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Bell size={10} className="text-yellow-500" />
+                      Lembrete Prazo EAD (48h antes)
+                    </label>
+                  </div>
+                </div>
+
                 <Button onClick={handleCreateTask} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none">
                   Agendar
                 </Button>
