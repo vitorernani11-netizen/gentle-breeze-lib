@@ -26,8 +26,9 @@ export const parseNLP = (input: string): NLPResult => {
     { regex: /todo domingo/gi, recurrence: 'weekly', label: 'todo domingo' },
     { regex: /amanhã/gi, dateOffset: 1, label: 'amanhã' },
     { regex: /hoje/gi, dateOffset: 0, label: 'hoje' },
-    { regex: /às (\d{1,2})h/gi, time: true, label: 'às' },
-    { regex: /às (\d{1,2}):(\d{2})/gi, time: true, label: 'às' },
+    { regex: /(?:à|a)s (\d{1,2})h/gi, time: true, label: 'às' },
+    { regex: /(?:à|a)s (\d{1,2}):(\d{2})/gi, time: true, label: 'às' },
+    { regex: /(\d{1,2})h/gi, time: true, label: '' },
   ];
 
   const now = new Date();
