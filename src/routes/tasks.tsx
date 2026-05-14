@@ -42,6 +42,9 @@ function TasksPage() {
 
   const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask } = useTaskActions(() => {
     fetchTasks();
+    if (location.pathname === '/tasks' && window.location.hash === '#redirect-to-today') {
+       navigate({ to: '/' });
+    }
   });
 
   useEffect(() => {
@@ -288,7 +291,10 @@ function TasksPage() {
                 <Button 
                   aria-label="Mover para Hoje"
                   className="bg-zinc-900 text-zinc-400 hover:text-zinc-100 text-[9px] font-bold uppercase rounded-xl border border-zinc-800 h-10 px-3 transition-all"
-                  onClick={() => moveTask(task.id, 'Hoje')}
+                  onClick={() => {
+                    moveTask(task.id, 'Hoje');
+                    navigate({ to: '/' });
+                  }}
                 >
                   Hoje
                 </Button>
