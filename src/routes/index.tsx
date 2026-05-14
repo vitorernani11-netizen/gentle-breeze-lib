@@ -248,6 +248,20 @@ function Dashboard() {
               <span className="text-[8px] font-black uppercase tracking-widest text-zinc-500 block">Itens Eliminados por Inércia</span>
               <span className="text-xl font-black text-red-500">{eliminatedCount}</span>
             </div>
+            
+            <div className="flex flex-col items-center gap-1 bg-zinc-900/50 p-2 rounded-xl border border-zinc-800/50">
+              <span className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Água</span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleAddHydration}
+                className="h-8 gap-2 px-2 hover:bg-blue-500/10 hover:text-blue-400 transition-none"
+              >
+                <Droplets size={14} className="text-blue-500" />
+                <span className="text-sm font-black">{(hydration / 1000).toFixed(1)}L</span>
+              </Button>
+            </div>
+
             <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
             <DialogTrigger asChild>
               <Button size="icon" className="h-14 w-14 rounded-2xl bg-white text-black hover:bg-zinc-200 transition-none shadow-2xl shadow-white/10">
