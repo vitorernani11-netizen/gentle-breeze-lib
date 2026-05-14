@@ -39,6 +39,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLin
 import { cn } from '@/lib/utils';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { EisenhowerMatrix } from '@/components/dashboard/EisenhowerMatrix';
+import { EisenhowerGrid } from '@/components/classification/EisenhowerGrid';
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
 import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
@@ -415,7 +416,12 @@ function Dashboard() {
 
       <section className="mb-8">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-4 px-2">Hardware: Classificação (Eisenhower)</h3>
-        <EisenhowerMatrix tasks={tasks} onTaskClick={setDetailTask} />
+        <EisenhowerGrid tasks={tasks} onTaskClick={setDetailTask} />
+        
+        <div className="mt-8">
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-4 px-2">Dashboard: Panorama</h3>
+          <EisenhowerMatrix tasks={tasks} onTaskClick={setDetailTask} />
+        </div>
 
         <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mt-8 mb-4 px-2">Hardware: Execução</h3>
         <div className="space-y-0 border-t border-white/10">
