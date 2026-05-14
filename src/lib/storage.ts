@@ -1,7 +1,41 @@
 // Unified storage manager for Hardware Humano
 import { toast } from 'sonner';
+import { isValid, parseISO } from 'date-fns';
 
 const STORAGE_KEY = 'hardware_humano_data';
+
+/**
+ * Valida se uma string é uma data ISO válida.
+ */
+export const isValidDate = (dateStr: any): boolean => {
+  if (!dateStr || typeof dateStr !== 'string') return false;
+  try {
+    const date = parseISO(dateStr);
+    return isValid(date);
+  } catch (e) {
+    return false;
+  }
+};
+
+/**
+ * Filtra registros com campos de data inválidos em uma coleção.
+ * @param collection Nome da coleção para logs
+ * @param items Array de objetos
+ * @param dateFields Lista de campos que devem ser datas válidas
+ */
+export const validateCollectionDates = (collection: string, items: any[], dateFields: string[]): any[] => {
+  if (!Array.isArray(items)) return [];
+  
+  return items.filter((item, index) => {
+    for (const field of dateFields) {
+      if (item[field] && !isValidDate(item[field])) {
+        console.warn(`[Hardware:Validacao] Registro #${index} na coleção '${collection}' ignorado por data inválida no campo '${field}':`, item[field]);
+        return false;
+      }
+    }
+    return true;
+  });
+};
 
 export const getStorageData = () => {
   if (typeof window === 'undefined') return {};

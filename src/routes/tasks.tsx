@@ -51,13 +51,22 @@ function TasksPage() {
   const fetchTasks = () => {
     try {
       setLoading(true);
-      const allTasks = loadFromLocal(TASKS_KEY);
+      let allTasks = loadFromLocal(TASKS_KEY);
       
       if (!Array.isArray(allTasks)) {
         throw new Error('Formato de dados inválido no hardware.');
       }
 
-      const active = allTasks.filter((t: any) => 
+      // Validação extra de datas
+      const validTasks = allTasks.filter((t: any) => {
+        const isDateValid = t.data_execucao ? /^\d{4}-\d{2}-\d{2}$/.test(t.data_execucao) || !isNaN(new Date(t.data_execucao).getTime()) : true;
+        if (!isDateValid) {
+          console.warn('[Hardware:Tasks] Tarefa ignorada por data inválida:', t);
+        }
+        return isDateValid;
+      });
+
+      const active = validTasks.filter((t: any) => 
         t && t.status === 'Entrada' && !t.status_concluido
       ).sort((a: any, b: any) => {
         const dateA = new Date(a.created_at || 0).getTime();
@@ -65,7 +74,7 @@ function TasksPage() {
         return dateB - dateA;
       });
 
-      const completed = allTasks.filter((t: any) => 
+      const completed = validTasks.filter((t: any) => 
         t && t.status === 'Entrada' && t.status_concluido
       ).sort((a: any, b: any) => {
         const dateA = new Date(a.created_at || 0).getTime();

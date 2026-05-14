@@ -132,7 +132,10 @@ function Dashboard() {
     const today = new Date().toISOString().split('T')[0];
     const sevenDaysAgo = subDays(new Date(), 7);
     
-    const allTasks = loadFromLocal(TASKS_KEY) || [];
+    // Helper para validação de data
+    const isValidDate = (d: any) => d && !isNaN(new Date(d).getTime());
+
+    const allTasks = (loadFromLocal(TASKS_KEY) || []).filter((t: any) => isValidDate(t.created_at || t.data_execucao));
     const todayTasks = allTasks.filter((t: any) => t.data_execucao === today && !t.status_concluido);
     setTasks(todayTasks);
 
@@ -142,19 +145,21 @@ function Dashboard() {
     const inertiaDeletions = allTasks.filter((t: any) => t.deletado_por_inercia).length;
     setEliminatedCount(inertiaDeletions);
 
-    const academicData = loadFromLocal(ACADEMIC_KEY) || [];
+    const academicData = (loadFromLocal(ACADEMIC_KEY) || []).filter((a: any) => isValidDate(a.data_entrega));
     const urgentAcademic = academicData.filter((a: any) => {
       if (a.concluido) return false;
-      const days = a.data_entrega ? differenceInDays(parseISO(a.data_entrega), new Date()) : 999;
-      return days <= 1;
+      try {
+        const days = differenceInDays(parseISO(a.data_entrega), new Date());
+        return days <= 1;
+      } catch (e) { return false; }
     });
     setAcademicUrgent(urgentAcademic);
 
-    const hydrationData = loadFromLocal(HYDRATION_KEY) || [];
+    const hydrationData = (loadFromLocal(HYDRATION_KEY) || []).filter((h: any) => isValidDate(h.data));
     const todayHydration = hydrationData.find((h: any) => h.data === today);
     setHydration(todayHydration ? todayHydration.quantidade_ml : 0);
 
-    const checkinHistory = loadFromLocal(CHECKIN_KEY) || [];
+    const checkinHistory = (loadFromLocal(CHECKIN_KEY) || []).filter((c: any) => isValidDate(c.data));
     const sortedCheckins = [...checkinHistory]
       .filter((d: any) => d && d.data && typeof d.data === 'string')
       .sort((a: any, b: any) => new Date(b.data).getTime() - new Date(a.data).getTime())
@@ -194,7 +199,7 @@ function Dashboard() {
     const trainingCount = sortedCheckins.filter((s: any) => s.treino_madrugada_realizado).length;
     const goodSleepCount = sortedCheckins.filter((s: any) => s.horas_sono && s.horas_sono >= 7).length;
     
-    const financeRecords = loadFromLocal(FINANCE_KEY) || [];
+    const financeRecords = (loadFromLocal(FINANCE_KEY) || []).filter((f: any) => isValidDate(f.data));
     const expenses7 = financeRecords.filter((f: any) => 
       f && f.tipo === 'Saida' && 
       f.data && 
@@ -202,7 +207,7 @@ function Dashboard() {
     );
     const expenseTotal = expenses7.reduce((acc: number, curr: any) => acc + Number(curr.valor), 0);
     
-    const socialUsage = loadFromLocal(SOCIAL_KEY) || [];
+    const socialUsage = (loadFromLocal(SOCIAL_KEY) || []).filter((s: any) => isValidDate(s.data));
     const social7 = socialUsage.filter((s: any) => 
       s && s.data && 
       isAfter(parseISO(s.data), sevenDaysAgo)
