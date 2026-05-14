@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { CheckSquare, DollarSign, Calendar, User } from "lucide-react";
+import { CheckSquare, DollarSign, Calendar, User, Utensils } from "lucide-react";
 
 export function BottomNav() {
   return (
