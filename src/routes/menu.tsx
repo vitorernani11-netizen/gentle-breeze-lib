@@ -1,12 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-// Removed BottomNav import
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ShoppingCart, Utensils } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { saveToLocal, loadFromLocal } from '@/lib/storage';
+
+const RECEITAS_KEY = 'hardware_humano_recipes';
 
 export const Route = createFileRoute('/menu')({
   component: MenuPage,
@@ -33,6 +34,7 @@ function MenuPage() {
 
   const receitasIniciais = [
     {
+      id: '1',
       nome: 'Frango com Arroz e Brócolis',
       descricao: 'Clássico para dieta limpa',
       ingredientes: [
@@ -42,6 +44,7 @@ function MenuPage() {
       ]
     },
     {
+      id: '2',
       nome: 'Patinho com Batata Doce',
       descricao: 'Energia constante e proteína magra',
       ingredientes: [
@@ -51,6 +54,7 @@ function MenuPage() {
       ]
     },
     {
+      id: '3',
       nome: 'Tilápia com Purê de Mandioquinha',
       descricao: 'Leve e de rápida absorção',
       ingredientes: [
@@ -65,35 +69,13 @@ function MenuPage() {
     fetchReceitas();
   }, []);
 
-  const fetchReceitas = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-
-    const { data } = await supabase
-      .from('receitas')
-      .select('*')
-      .eq('user_id', userId);
-
-    if (data && data.length > 0) {
-      const formatted = data.map(r => ({
-        id: r.id,
-        nome: r.nome,
-        descricao: r.descricao || '',
-        ingredientes: (r.ingredientes as any[]) || []
-      }));
-      setReceitas(formatted);
-    } else {
-      const toInsert = receitasIniciais.map(r => ({ ...r, user_id: userId }));
-      const { data: inserted } = await supabase.from('receitas').insert(toInsert).select();
-      if (inserted) {
-        setReceitas(inserted.map(r => ({
-          id: r.id,
-          nome: r.nome,
-          descricao: r.descricao || '',
-          ingredientes: (r.ingredientes as any[]) || []
-        })));
-      }
+  const fetchReceitas = () => {
+    let data = loadFromLocal(RECEITAS_KEY);
+    if (!data || data.length === 0) {
+      data = receitasIniciais;
+      saveToLocal(RECEITAS_KEY, data);
     }
+    setReceitas(data);
     setLoading(false);
   };
 

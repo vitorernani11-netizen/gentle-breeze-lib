@@ -1,12 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RotateCcw, CheckCircle2, ChevronRight, Plus, Trash2 } from 'lucide-react';
+import { RotateCcw, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { saveToLocal, loadFromLocal } from '@/lib/storage';
+
+const ROUTINES_KEY = 'hardware_humano_routines';
+const COMPLETIONS_KEY = 'hardware_humano_completions';
 
 export const Route = createFileRoute('/routines')({
   component: Routines,
@@ -21,28 +23,20 @@ function Routines() {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
+  const fetchData = () => {
     const today = new Date().toISOString().split('T')[0];
 
     // Fetch routines
-    const { data: routinesData } = await supabase
-      .from('rotinas')
-      .select('*')
-      .eq('user_id', userId);
+    const routinesData = loadFromLocal(ROUTINES_KEY) || [];
 
     // Fetch today's completions
-    const { data: completionsData } = await supabase
-      .from('rotina_conclusoes')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('data', today);
+    const completionsHistory = loadFromLocal(COMPLETIONS_KEY) || [];
+    const todayCompletions = completionsHistory.filter((c: any) => c.data === today);
 
-    if (routinesData) setRoutines(routinesData);
+    setRoutines(routinesData);
     
     const completionsMap: Record<string, string[]> = {};
-    completionsData?.forEach(c => {
+    todayCompletions.forEach((c: any) => {
       completionsMap[c.rotina_id] = c.itens_concluidos || [];
     });
     setCompletions(completionsMap);
@@ -50,7 +44,7 @@ function Routines() {
     setLoading(false);
   };
 
-  const toggleItem = async (routineId: string, itemId: string) => {
+  const toggleItem = (routineId: string, itemId: string) => {
     const currentCompleted = completions[routineId] || [];
     const isCompleted = currentCompleted.includes(itemId);
     
@@ -58,34 +52,31 @@ function Routines() {
       ? currentCompleted.filter(id => id !== itemId)
       : [...currentCompleted, itemId];
 
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
     const today = new Date().toISOString().split('T')[0];
+    const history = loadFromLocal(COMPLETIONS_KEY) || [];
+    const index = history.findIndex((c: any) => c.rotina_id === routineId && c.data === today);
 
-    const { error } = await supabase
-      .from('rotina_conclusoes')
-      .upsert({
-        rotina_id: routineId,
-        user_id: userId,
-        data: today,
-        itens_concluidos: newCompleted
-      }, { onConflict: 'rotina_id,user_id,data' });
+    const data = {
+      rotina_id: routineId,
+      data: today,
+      itens_concluidos: newCompleted
+    };
 
-    if (!error) {
-      setCompletions({ ...completions, [routineId]: newCompleted });
-      if (!isCompleted && newCompleted.length === routines.find(r => r.id === routineId)?.itens?.length) {
-        toast.success('Rotina concluída! 🚀');
-      }
+    if (index > -1) history[index] = data;
+    else history.push(data);
+
+    saveToLocal(COMPLETIONS_KEY, history);
+    setCompletions({ ...completions, [routineId]: newCompleted });
+
+    if (!isCompleted && newCompleted.length === routines.find(r => r.id === routineId)?.itens?.length) {
+      toast.success('Rotina concluída! 🚀');
     }
   };
 
-  const createDefaultRoutines = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-
+  const createDefaultRoutines = () => {
     const defaults = [
       {
-        user_id: userId,
+        id: '1',
         titulo: 'Rotina Matinal',
         itens: [
           { id: '1', label: 'Beber 500ml de água' },
@@ -95,7 +86,7 @@ function Routines() {
         ]
       },
       {
-        user_id: userId,
+        id: '2',
         titulo: 'Antes de Dormir',
         itens: [
           { id: '5', label: 'Planejar o dia seguinte' },
@@ -105,11 +96,9 @@ function Routines() {
       }
     ];
 
-    const { error } = await supabase.from('rotinas').insert(defaults);
-    if (!error) {
-      fetchData();
-      toast.success('Rotinas iniciais criadas!');
-    }
+    saveToLocal(ROUTINES_KEY, defaults);
+    setRoutines(defaults);
+    toast.success('Rotinas iniciais criadas!');
   };
 
   if (loading) return null;
