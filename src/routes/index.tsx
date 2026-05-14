@@ -406,6 +406,40 @@ function Dashboard() {
         </Card>
       </section>
 
+      <section className="mb-8">
+        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-4 px-2">Hardware: Execução</h3>
+        <div className="space-y-2">
+          {tasks.length > 0 ? (
+            tasks.map((task) => (
+              <Card key={task.id} className="p-4 bg-zinc-900/20 border-zinc-800/50 rounded-2xl flex items-center justify-between group">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-sm font-bold uppercase tracking-tight text-zinc-200">{task.titulo}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[8px] font-black text-zinc-600 uppercase">P{task.prioridade || 4}</span>
+                    {task.lembrete && (
+                      <span className="text-[8px] font-black text-blue-500 uppercase flex items-center gap-1">
+                        <Clock size={8} /> {task.lembrete}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <Button 
+                  size="icon" 
+                  className="h-8 w-8 rounded-full bg-zinc-100 text-black hover:bg-white transition-all active:scale-90"
+                  onClick={() => completeTask(task)}
+                >
+                  <Check size={14} />
+                </Button>
+              </Card>
+            ))
+          ) : (
+            <div className="py-8 text-center border-2 border-dashed border-zinc-900 rounded-2xl">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-800">Pipeline Vazio</p>
+            </div>
+          )}
+        </div>
+      </section>
+
       <section className="mt-8">
         <div className="flex justify-center">
            <Button onClick={() => setShowAddTask(true)} className="bg-zinc-100 text-black hover:bg-white rounded-full h-10 px-6 text-xs font-bold uppercase tracking-tight">
