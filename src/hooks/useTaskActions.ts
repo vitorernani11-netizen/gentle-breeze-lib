@@ -169,5 +169,21 @@ export const useTaskActions = (onSuccess?: () => void) => {
     }
   };
 
-  return { completeTask, rescheduleTask, moveTask, updateTriagemStage, restoreTask, deletePermanent };
+  const updateTask = (taskId: string, updates: Record<string, any>) => {
+    if (!taskId) return;
+    try {
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
+      const updatedTasks = allTasks.map((t: any) =>
+        t.id === taskId ? { ...t, ...updates, updated_at: new Date().toISOString() } : t
+      );
+      saveToLocal(TASKS_KEY, updatedTasks);
+      console.log('[Task:Update]', { taskId, updates });
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error('Erro ao atualizar tarefa:', error);
+      toast.error('Falha ao salvar alterações no hardware.');
+    }
+  };
+
+  return { completeTask, rescheduleTask, moveTask, updateTriagemStage, restoreTask, deletePermanent, updateTask };
 };
