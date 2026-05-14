@@ -128,13 +128,16 @@ function Dashboard() {
   const fetchData = async (userId: string) => {
     const today = new Date().toISOString().split('T')[0];
     
+    // Mover tarefas atrasadas para o Purgatório (status 'Amanha' ou 'Hoje' com data < hoje)
+    // Na verdade, no Purgatório elas já são filtradas por data < hoje e status_concluido = false.
+    // Mas para garantir que não apareçam no 'Hoje' se estiverem atrasadas:
+    
     // Fetch today's tasks
     const { data: tasksData } = await supabase
       .from('tarefas')
       .select('*, projetos(nome, cor)')
       .eq('user_id', userId)
-      .eq('data_execucao', today)
-      .eq('status', 'Hoje')
+      .eq('data_execucao', today) // Apenas tarefas com data EXATA de hoje
       .eq('status_concluido', false)
       .order('created_at', { ascending: false });
 
