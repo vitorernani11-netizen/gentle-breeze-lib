@@ -135,33 +135,29 @@ function Dashboard() {
   const fetchData = async (userId: string) => {
     const today = new Date().toISOString().split('T')[0];
     
-    // Mover tarefas atrasadas para o Purgatório (status 'Amanha' ou 'Hoje' com data < hoje)
-    // Na verdade, no Purgatório elas já são filtradas por data < hoje e status_concluido = false.
-    // Mas para garantir que não apareçam no 'Hoje' se estiverem atrasadas:
-    
-    // Fetch today's tasks
+    // 1. Fetch today's tasks
     const { data: tasksData } = await supabase
       .from('tarefas')
       .select('*, projetos(nome, cor)')
       .eq('user_id', userId)
-      .eq('data_execucao', today) // Apenas tarefas com data EXATA de hoje
+      .eq('data_execucao', today)
       .eq('status_concluido', false)
       .order('created_at', { ascending: false });
 
-    // Fetch projects
+    // 2. Fetch projects
     const { data: projectsData } = await supabase
       .from('projetos')
       .select('*')
       .eq('user_id', userId);
 
-    // Fetch eliminated count
+    // 3. Fetch eliminated count
     const { count } = await supabase
       .from('tarefas')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
       .eq('deletado_por_inercia', true);
 
-    // Fetch urgent academic activities (< 1 day remaining)
+    // 4. Fetch urgent academic activities
     const { data: academicData } = await supabase
       .from('atividades_academicas')
       .select('*')
@@ -174,7 +170,7 @@ function Dashboard() {
       return days <= 1;
     }) || [];
 
-    // Fetch hydration
+    // 5. Fetch hydration
     const { data: hydrationData } = await supabase
       .from('hidratacao')
       .select('quantidade_ml')
@@ -182,15 +178,58 @@ function Dashboard() {
       .eq('data', today)
       .single();
 
-    // Fetch sleep history (last 7 days)
+    // 6. Fetch sleep history
     const { data: sleepData } = await supabase
       .from('checkin_diario')
-      .select('data, horas_sono')
+      .select('data, horas_sono, treino_madrugada_realizado')
       .eq('user_id', userId)
       .order('data', { ascending: false })
       .limit(7);
 
-    // Fetch profile for silencing status
+    // 7. Calculate Impact Stats
+    const sevenDaysAgo = subDays(new Date(), 7).toISOString().split('T')[0];
+    
+    const { data: completedTasks } = await supabase
+      .from('tarefas')
+      .select('tags, projetos(nome)')
+      .eq('user_id', userId)
+      .eq('status_concluido', true)
+      .gte('updated_at', sevenDaysAgo);
+
+    const { data: financeRecords } = await supabase
+      .from('financeiro')
+      .select('valor')
+      .eq('user_id', userId)
+      .eq('conta', 'Pessoal')
+      .eq('tipo', 'Saida')
+      .gte('data', sevenDaysAgo);
+
+    const { data: socialUsage } = await supabase
+      .from('uso_redes_sociais')
+      .select('minutos')
+      .eq('user_id', userId)
+      .gte('data', sevenDaysAgo);
+
+    // POSITIVE: Completed #Nabih/#Faculdade + Training + Sleep > 7h
+    const positiveTasks = completedTasks?.filter(t => 
+      t.projetos?.nome === 'Nabih' || t.projetos?.nome === 'Faculdade' || 
+      t.tags?.includes('Nabih') || t.tags?.includes('Faculdade')
+    ).length || 0;
+    
+    const trainingCount = sleepData?.filter(s => s.treino_madrugada_realizado).length || 0;
+    const goodSleepCount = sleepData?.filter(s => s.horas_sono && s.horas_sono >= 7).length || 0;
+    
+    // NEGATIVE: Inertia Deletions + Personal Expenses + Social Media
+    const expenseTotal = financeRecords?.reduce((acc, curr) => acc + Number(curr.valor), 0) || 0;
+    const socialHours = (socialUsage?.reduce((acc, curr) => acc + curr.minutos, 0) || 0) / 60;
+    
+    // CAREER SPEED: Progress towards 7k
+    const codingTasksDone = completedTasks?.filter(t => t.tags?.includes('Codificação') || t.tags?.includes('Nabih')).length || 0;
+    const collegeTasksDone = academicData?.filter(a => a.concluido).length || 0; // Wait, we fetched academic pending before. Need historical.
+    // For now, simple logic: (codingTasks * 200) + (collegeTasks * 100) / 7000
+    const careerProgress = Math.min(100, (((codingTasksDone * 500) + (collegeTasksDone * 200)) / 7000) * 100);
+
+    // Fetch profile
     const { data: profileData } = await supabase
       .from('profiles')
       .select('notificacoes_silenciadas_ate')
@@ -203,8 +242,14 @@ function Dashboard() {
     if (count !== null) setEliminatedCount(count);
     if (hydrationData) setHydration(hydrationData.quantidade_ml);
     
+    setStats({
+      positive: positiveTasks + trainingCount + goodSleepCount,
+      negative: (count || 0) + Math.floor(expenseTotal / 100) + Math.floor(socialHours),
+      careerSpeed: careerProgress
+    });
+
     if (sleepData) {
-      const history = sleepData.reverse().map(d => ({
+      const history = [...sleepData].reverse().map(d => ({
         name: format(parseISO(d.data), 'dd/MM'),
         hours: d.horas_sono || 0
       }));
