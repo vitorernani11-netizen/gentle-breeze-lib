@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Calendar as CalendarIcon, 
   Bell, 
-  Bell, 
   ChevronDown, 
   Clock, 
   Hash,
