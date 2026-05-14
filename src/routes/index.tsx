@@ -94,7 +94,28 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, [showCheckin]);
 
-  const fetchData = async (userId: string) => {
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      const userId = session?.user?.id || 'anonymous';
+      checkTodayCheckin(userId);
+      fetchData(userId);
+      setLoading(false);
+    });
+  }, []);
+
+  const handleSaveAnxietyDump = async () => {
+    if (!anxietyContent.trim() || !session) return;
+    
+    const { error } = await supabase
+      .from('anxiety_dumps')
+      .insert([{ user_id: session.user.id, conteudo: anxietyContent }]);
+
+    if (!error) {
+      setAnxietyContent('');
+      toast.success('Descarregado. Agora descanse.');
+    }
+  };
     const today = new Date().toISOString().split('T')[0];
     
     // Fetch today's tasks
