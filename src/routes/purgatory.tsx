@@ -38,14 +38,14 @@ function Purgatory() {
       const allTasks = loadFromLocal(TASKS_KEY) || [];
       const allProjects = loadFromLocal(PROJECTS_KEY) || [];
 
-      const filtered = allTasks.filter((t: any) => 
-        !t.status_concluido && 
-        t.status !== 'Entrada' && 
-        t.data_execucao < today
-      ).map((t: any) => {
+      const filtered = allTasks.filter((t: any) => {
+        if (t.status_concluido || t.status === 'Entrada') return false;
+        const taskDate = String(t.data_execucao || '');
+        return taskDate < today;
+      }).map((t: any) => {
         const project = allProjects.find((p: any) => p.id === t.projeto_id);
         return { ...t, projetos: project ? { nome: project.nome, cor: project.cor } : null };
-      }).sort((a: any, b: any) => a.data_execucao.localeCompare(b.data_execucao));
+      }).sort((a: any, b: any) => String(a.data_execucao || '').localeCompare(String(b.data_execucao || '')));
 
       setTasks(filtered);
     } catch (error) {
@@ -91,7 +91,7 @@ function Purgatory() {
                         <span className="font-bold text-lg leading-tight truncate">{task.titulo}</span>
                         <div className="flex items-center gap-3">
                           <span className="text-[9px] text-red-500/70 font-black uppercase">
-                            Vencido em: {new Date(task.data_execucao).toLocaleDateString('pt-BR')}
+                            Vencido em: {task.data_execucao && String(task.data_execucao).includes('-') ? new Date(task.data_execucao).toLocaleDateString('pt-BR') : 'N/A'}
                           </span>
                           {task.contagem_adiamentos > 0 && (
                             <span className="text-[9px] text-zinc-600 font-black uppercase">
