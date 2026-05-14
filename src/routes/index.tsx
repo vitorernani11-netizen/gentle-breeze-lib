@@ -39,7 +39,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLin
 import { cn } from '@/lib/utils';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 
-const TASKS_KEY = 'hardware_humano_tasks';
+const TASKS_KEY = 'hardware_humano_data';
 const PROJECTS_KEY = 'hardware_humano_projects';
 const HYDRATION_KEY = 'hardware_humano_hydration';
 const CHECKIN_KEY = 'hardware_humano_checkin';
