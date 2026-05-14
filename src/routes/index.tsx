@@ -25,7 +25,8 @@ import {
   Zap,
   Moon,
   Bed,
-  Info
+  Info,
+  WifiOff
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +37,17 @@ import { useTaskActions } from '@/hooks/useTaskActions';
 import { differenceInDays, parseISO, format, isWithinInterval, setHours, setMinutes, addDays, isAfter, subDays } from 'date-fns';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine, Cell } from 'recharts';
 import { cn } from '@/lib/utils';
+import { saveToLocal, loadFromLocal } from '@/lib/storage';
+
+const TASKS_KEY = 'hardware_humano_tasks';
+const PROJECTS_KEY = 'hardware_humano_projects';
+const HYDRATION_KEY = 'hardware_humano_hydration';
+const CHECKIN_KEY = 'hardware_humano_checkin';
+const ANXIETY_KEY = 'hardware_humano_anxiety';
+const SLEEP_EVENTS_KEY = 'hardware_humano_sleep_events';
+const ACADEMIC_KEY = 'hardware_humano_academic';
+const FINANCE_KEY = 'hardware_humano_finance';
+const SOCIAL_KEY = 'hardware_humano_social';
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -81,14 +93,11 @@ function Dashboard() {
   });
 
   const { completeTask } = useTaskActions(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) fetchData(session.user.id);
-    });
+    fetchData();
   });
 
   useEffect(() => {
     const checkLockStatus = () => {
-      // Bloqueio temporariamente desativado para testes
       setIsLocked(false);
     };
 
@@ -98,25 +107,18 @@ function Dashboard() {
   }, [showCheckin]);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-      checkTodayCheckin(userId);
-      fetchData(userId);
-      setLoading(false);
-    });
+    checkTodayCheckin();
+    fetchData();
+    setLoading(false);
   }, []);
 
-  const handleSaveAnxietyDump = async () => {
+  const handleSaveAnxietyDump = () => {
     if (!anxietyContent.trim()) return;
     
     try {
-      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-      const { error } = await supabase
-        .from('anxiety_dumps')
-        .insert([{ user_id: userId, conteudo: anxietyContent }]);
-
-      if (error) throw error;
+      const dumps = loadFromLocal(ANXIETY_KEY) || [];
+      dumps.push({ id: crypto.randomUUID(), conteudo: anxietyContent, created_at: new Date().toISOString() });
+      saveToLocal(ANXIETY_KEY, dumps);
       
       setAnxietyContent('');
       toast.success('Descarregado. Agora descanse.');
@@ -126,168 +128,85 @@ function Dashboard() {
     }
   };
 
-  const fetchData = async (userId: string) => {
+  const fetchData = () => {
     const today = new Date().toISOString().split('T')[0];
+    const sevenDaysAgo = subDays(new Date(), 7);
     
-    // 1. Fetch today's tasks
-    const { data: tasksData } = await supabase
-      .from('tarefas')
-      .select('*, projetos(nome, cor)')
-      .eq('user_id', userId)
-      .eq('data_execucao', today)
-      .eq('status_concluido', false)
-      .order('created_at', { ascending: false });
+    const allTasks = loadFromLocal(TASKS_KEY) || [];
+    const todayTasks = allTasks.filter((t: any) => t.data_execucao === today && !t.status_concluido);
+    setTasks(todayTasks);
 
-    // 2. Fetch projects
-    const { data: projectsData } = await supabase
-      .from('projetos')
-      .select('*')
-      .eq('user_id', userId);
+    const projectsData = loadFromLocal(PROJECTS_KEY) || [];
+    setProjects(projectsData);
 
-    // 3. Fetch eliminated count
-    const { count } = await supabase
-      .from('tarefas')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('deletado_por_inercia', true);
+    const inertiaDeletions = allTasks.filter((t: any) => t.deletado_por_inercia).length;
+    setEliminatedCount(inertiaDeletions);
 
-    // 4. Fetch urgent academic activities
-    const { data: academicData } = await supabase
-      .from('atividades_academicas')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('concluido', false)
-      .order('data_entrega', { ascending: true });
-
-    const urgentAcademic = academicData?.filter(a => {
+    const academicData = loadFromLocal(ACADEMIC_KEY) || [];
+    const urgentAcademic = academicData.filter((a: any) => {
+      if (a.concluido) return false;
       const days = differenceInDays(parseISO(a.data_entrega), new Date());
       return days <= 1;
-    }) || [];
-
-    // 5. Fetch hydration
-    const { data: hydrationData } = await supabase
-      .from('hidratacao')
-      .select('quantidade_ml')
-      .eq('user_id', userId)
-      .eq('data', today)
-      .single();
-
-    // 6. Fetch sleep history
-    const { data: sleepData } = await supabase
-      .from('checkin_diario')
-      .select('data, horas_sono, treino_madrugada_realizado')
-      .eq('user_id', userId)
-      .order('data', { ascending: false })
-      .limit(7);
-
-    // 7. Calculate Impact Stats
-    const sevenDaysAgo = subDays(new Date(), 7).toISOString().split('T')[0];
-    
-    const { data: completedTasks } = await supabase
-      .from('tarefas')
-      .select('tags, projetos(nome)')
-      .eq('user_id', userId)
-      .eq('status_concluido', true)
-      .gte('updated_at', sevenDaysAgo);
-
-    const { data: financeRecords } = await supabase
-      .from('financeiro')
-      .select('valor')
-      .eq('user_id', userId)
-      .eq('conta', 'Pessoal')
-      .eq('tipo', 'Saida')
-      .gte('data', sevenDaysAgo);
-
-    const { data: socialUsage } = await supabase
-      .from('uso_redes_sociais')
-      .select('minutos')
-      .eq('user_id', userId)
-      .gte('data', sevenDaysAgo);
-
-    // POSITIVE: Completed #Nabih/#Faculdade + Training + Sleep > 7h
-    const positiveTasks = completedTasks?.filter(t => 
-      t.projetos?.nome === 'Nabih' || t.projetos?.nome === 'Faculdade' || 
-      t.tags?.includes('Nabih') || t.tags?.includes('Faculdade')
-    ).length || 0;
-    
-    const trainingCount = sleepData?.filter(s => s.treino_madrugada_realizado).length || 0;
-    const goodSleepCount = sleepData?.filter(s => s.horas_sono && s.horas_sono >= 7).length || 0;
-    
-    // NEGATIVE: Inertia Deletions + Personal Expenses + Social Media
-    const expenseTotal = financeRecords?.reduce((acc, curr) => acc + Number(curr.valor), 0) || 0;
-    const socialHours = (socialUsage?.reduce((acc, curr) => acc + curr.minutos, 0) || 0) / 60;
-    
-    // CAREER SPEED: Progress towards 7k
-    const codingTasksDone = completedTasks?.filter(t => t.tags?.includes('Codificação') || t.tags?.includes('Nabih')).length || 0;
-    const collegeTasksDone = academicData?.filter(a => a.concluido).length || 0; // Wait, we fetched academic pending before. Need historical.
-    // For now, simple logic: (codingTasks * 200) + (collegeTasks * 100) / 7000
-    const careerProgress = Math.min(100, (((codingTasksDone * 500) + (collegeTasksDone * 200)) / 7000) * 100);
-
-    // Fetch profile
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('notificacoes_silenciadas_ate')
-      .eq('id', userId)
-      .single();
-
-    if (tasksData) setTasks(tasksData);
-    if (projectsData) setProjects(projectsData);
+    });
     setAcademicUrgent(urgentAcademic);
-    if (count !== null) setEliminatedCount(count);
-    if (hydrationData) setHydration(hydrationData.quantidade_ml);
+
+    const hydrationData = loadFromLocal(HYDRATION_KEY) || [];
+    const todayHydration = hydrationData.find((h: any) => h.data === today);
+    setHydration(todayHydration ? todayHydration.quantidade_ml : 0);
+
+    const checkinHistory = loadFromLocal(CHECKIN_KEY) || [];
+    const sortedCheckins = [...checkinHistory].sort((a: any, b: any) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 7);
+    const history = [...sortedCheckins].reverse().map((d: any) => ({
+      name: format(parseISO(d.data), 'dd/MM'),
+      hours: d.horas_sono || 0
+    }));
+    setSleepHistory(history);
+    
+    const currentCheckin = checkinHistory.find((d: any) => d.data === today);
+    if (currentCheckin) {
+      setHoursSleptToday(currentCheckin.horas_sono);
+      setIsRecoveryMode(currentCheckin.horas_sono !== null && currentCheckin.horas_sono < 6);
+    }
+
+    const completedLast7 = allTasks.filter((t: any) => t.status_concluido && isAfter(parseISO(t.updated_at || t.created_at), sevenDaysAgo));
+    const positiveTasks = completedLast7.filter((t: any) => {
+      const proj = projectsData.find((p: any) => p.id === t.projeto_id);
+      return proj?.nome === 'Nabih' || proj?.nome === 'Faculdade' || t.tags?.includes('Nabih') || t.tags?.includes('Faculdade');
+    }).length;
+    
+    const trainingCount = sortedCheckins.filter((s: any) => s.treino_madrugada_realizado).length;
+    const goodSleepCount = sortedCheckins.filter((s: any) => s.horas_sono && s.horas_sono >= 7).length;
+    
+    const financeRecords = loadFromLocal(FINANCE_KEY) || [];
+    const expenses7 = financeRecords.filter((f: any) => f.tipo === 'Saida' && isAfter(parseISO(f.data), sevenDaysAgo));
+    const expenseTotal = expenses7.reduce((acc: number, curr: any) => acc + Number(curr.valor), 0);
+    
+    const socialUsage = loadFromLocal(SOCIAL_KEY) || [];
+    const social7 = socialUsage.filter((s: any) => isAfter(parseISO(s.data), sevenDaysAgo));
+    const socialHours = social7.reduce((acc: number, curr: any) => acc + curr.minutos, 0) / 60;
     
     setStats({
       positive: positiveTasks + trainingCount + goodSleepCount,
-      negative: (count || 0) + Math.floor(expenseTotal / 100) + Math.floor(socialHours),
-      careerSpeed: careerProgress
+      negative: inertiaDeletions + Math.floor(expenseTotal / 100) + Math.floor(socialHours),
+      careerSpeed: Math.min(100, (((positiveTasks * 500)) / 7000) * 100)
     });
 
-    if (sleepData) {
-      const history = [...sleepData].reverse().map(d => ({
-        name: format(parseISO(d.data), 'dd/MM'),
-        hours: d.horas_sono || 0
-      }));
-      setSleepHistory(history);
-      
-      const todaySleep = sleepData.find(d => d.data === today);
-      if (todaySleep) {
-        setHoursSleptToday(todaySleep.horas_sono);
-        setIsRecoveryMode(todaySleep.horas_sono !== null && todaySleep.horas_sono < 6);
-      }
-    }
-
-    if (profileData?.notificacoes_silenciadas_ate) {
-      const silentUntil = parseISO(profileData.notificacoes_silenciadas_ate);
-      setIsSilenced(isAfter(silentUntil, new Date()));
+    const silentUntil = loadFromLocal('hardware_humano_silence');
+    if (silentUntil) {
+      setIsSilenced(isAfter(parseISO(silentUntil), new Date()));
     }
   };
 
-  const handleSleepNow = async () => {
+  const handleSleepNow = () => {
     try {
-      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-      
-      // Set silenced until 05:00 tomorrow
       let targetDate = setHours(setMinutes(new Date(), 0), 5);
-      if (new Date().getHours() >= 5) {
-        targetDate = addDays(targetDate, 1);
-      }
+      if (new Date().getHours() >= 5) targetDate = addDays(targetDate, 1);
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: userId,
-          notificacoes_silenciadas_ate: targetDate.toISOString()
-        });
-
-      const { error: eventError } = await supabase
-        .from('sleep_events')
-        .insert([{
-          user_id: userId,
-          inicio_sono: new Date().toISOString()
-        }]);
-
-      if (profileError) throw profileError;
-      if (eventError) throw eventError;
+      saveToLocal('hardware_humano_silence', targetDate.toISOString());
+      
+      const events = loadFromLocal(SLEEP_EVENTS_KEY) || [];
+      events.push({ id: crypto.randomUUID(), inicio_sono: new Date().toISOString() });
+      saveToLocal(SLEEP_EVENTS_KEY, events);
 
       setIsSilenced(true);
       toast.success('Modo Sono Ativado', {
@@ -295,124 +214,96 @@ function Dashboard() {
         icon: <Moon className="h-4 w-4" />
       });
     } catch (error) {
-      console.error('Erro ao ativar modo sono:', error);
       toast.error('Erro ao salvar no hardware');
     }
   };
 
-  const checkTodayCheckin = async (userId: string) => {
+  const checkTodayCheckin = () => {
     const today = new Date().toISOString().split('T')[0];
-    const { data } = await supabase
-      .from('checkin_diario')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('data', today)
-      .single();
-
-    if (!data && userId !== 'anonymous') {
-      setShowCheckin(true);
-    }
+    const history = loadFromLocal(CHECKIN_KEY) || [];
+    const done = history.find((h: any) => h.data === today);
+    if (!done) setShowCheckin(true);
   };
 
-  const handleSaveCheckin = async () => {
+  const handleSaveCheckin = () => {
     try {
-      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
       const today = new Date().toISOString().split('T')[0];
+      const history = loadFromLocal(CHECKIN_KEY) || [];
+      const index = history.findIndex((h: any) => h.data === today);
       
-      const { error } = await supabase
-        .from('checkin_diario')
-        .upsert({
-          user_id: userId,
-          data: today,
-          horas_sono: checkin.horas_sono ? parseFloat(checkin.horas_sono) : null,
-          marmitas_prontas: checkin.marmitas_prontas,
-          treino_madrugada_realizado: checkin.treino_madrugada_realizado,
-        }, { onConflict: 'user_id,data' });
+      const data = {
+        data: today,
+        horas_sono: checkin.horas_sono ? parseFloat(checkin.horas_sono) : null,
+        marmitas_prontas: checkin.marmitas_prontas,
+        treino_madrugada_realizado: checkin.treino_madrugada_realizado,
+      };
 
-      if (error) throw error;
+      if (index > -1) history[index] = data;
+      else history.push(data);
 
+      saveToLocal(CHECKIN_KEY, history);
       setShowCheckin(false);
       toast.success('Dia iniciado!');
-      if (!checkin.treino_madrugada_realizado) {
-        toast('Compensação Necessária', {
-          description: 'Sugestão: Realizar 15 min de alongamento hoje à noite.',
-          duration: 6000,
-        });
-      }
+      fetchData();
     } catch (error) {
-      console.error('Erro ao salvar checkin:', error);
       toast.error('Erro ao salvar no hardware');
     }
   };
 
-  const handleCreateTask = async () => {
+  const handleCreateTask = () => {
     if (!newTask.titulo) return;
 
     try {
       const tagsArray = newTask.tags.split(',').map(t => t.trim()).filter(t => t !== '');
-      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-      
-      const { data, error } = await supabase
-        .from('tarefas')
-        .insert([{
-          user_id: userId,
-          titulo: newTask.titulo,
-          projeto_id: newTask.projeto_id || null,
-          data_execucao: newTask.data_execucao,
-          repeticao: newTask.repeticao,
-          tags: tagsArray,
-          lembrete_ead_48h: newTask.lembrete_ead_48h,
-          status: 'Entrada'
-        }])
-        .select('*, projetos(nome, cor)')
-        .single();
+      const task = {
+        id: crypto.randomUUID(),
+        titulo: newTask.titulo,
+        projeto_id: newTask.projeto_id !== 'none' ? newTask.projeto_id : null,
+        data_execucao: newTask.data_execucao,
+        repeticao: newTask.repeticao,
+        tags: tagsArray,
+        lembrete_ead_48h: newTask.lembrete_ead_48h,
+        status: 'Entrada',
+        status_concluido: false,
+        created_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
+      saveToLocal(TASKS_KEY, [task, ...allTasks]);
 
-      if (data) {
-        setShowAddTask(false);
-        setNewTask({
-          titulo: '',
-          projeto_id: 'none',
-          data_execucao: new Date().toISOString().split('T')[0],
-          repeticao: 'none',
-          tags: '',
-          lembrete_ead_48h: false
-        });
-        toast.success('Tarefa enviada para Entrada');
-        setTasks(prev => [data, ...prev]);
-      }
+      setShowAddTask(false);
+      setNewTask({
+        titulo: '',
+        projeto_id: 'none',
+        data_execucao: new Date().toISOString().split('T')[0],
+        repeticao: 'none',
+        tags: '',
+        lembrete_ead_48h: false
+      });
+      toast.success('Tarefa enviada para Entrada');
+      fetchData();
     } catch (error) {
-      console.error('Erro ao criar tarefa:', error);
       toast.error('Erro ao salvar no hardware');
     }
   };
 
-  const handleAddHydration = async () => {
+  const handleAddHydration = () => {
     try {
-      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
       const today = new Date().toISOString().split('T')[0];
-      const newAmount = hydration + 500;
+      const hydrationData = loadFromLocal(HYDRATION_KEY) || [];
+      const index = hydrationData.findIndex((h: any) => h.data === today);
       
-      const { error } = await supabase
-        .from('hidratacao')
-        .upsert({
-          user_id: userId,
-          data: today,
-          quantidade_ml: newAmount
-        }, { onConflict: 'user_id,data' });
+      const newTotal = hydration + 500;
+      if (index > -1) hydrationData[index].quantidade_ml = newTotal;
+      else hydrationData.push({ data: today, quantidade_ml: newTotal });
 
-      if (error) throw error;
-
-      setHydration(newAmount);
+      saveToLocal(HYDRATION_KEY, hydrationData);
+      setHydration(newTotal);
       toast.success('Hidratação registrada (+500ml)');
     } catch (error) {
-      console.error('Erro ao salvar hidratação:', error);
       toast.error('Erro ao salvar no hardware');
     }
   };
-
-  // Logic moved to useTaskActions hook
 
   if (loading) return null;
 
@@ -421,6 +312,11 @@ function Dashboard() {
       "min-h-screen p-6 pt-24 pb-20 max-w-2xl mx-auto transition-colors duration-1000",
       isRecoveryMode ? "bg-zinc-900 text-zinc-300 grayscale-[0.5]" : "bg-black text-white"
     )}>
+      <div className="fixed top-6 right-6 flex items-center gap-2 bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800 z-50">
+        <WifiOff size={14} className="text-zinc-500" />
+        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Modo Offline: Local</span>
+      </div>
+
       {isLocked && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
           <PowerOff size={80} className="text-zinc-800 mb-8 animate-pulse" />
@@ -434,7 +330,6 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Dashboard de Impacto */}
       <section className="mb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card className="p-6 bg-emerald-950/20 border-emerald-900/50 rounded-[2rem] border-t-4 border-t-emerald-500">
@@ -457,7 +352,6 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* Velocidade de Carreira */}
       <section className="mb-12">
         <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] overflow-hidden">
           <div className="flex justify-between items-end mb-4">
@@ -480,287 +374,13 @@ function Dashboard() {
         </Card>
       </section>
 
-      {/* Hardware Humano Widget */}
-      <section className="mb-12">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="h-1 w-4 rounded-full bg-blue-500" />
-          <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Hardware Humano</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Card className={cn(
-            "p-4 border-zinc-800/50 flex items-center gap-4 transition-all",
-            isRecoveryMode ? "bg-zinc-800/50" : "bg-zinc-900/20"
-          )}>
-            <div className="h-10 w-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
-              <Droplets size={20} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-0.5">Hidratação</p>
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-black truncate">{(hydration / 1000).toFixed(1)}L</span>
-                <Button size="icon" variant="ghost" className="h-6 w-6 text-zinc-500 hover:text-white" onClick={handleAddHydration}>
-                  <Plus size={14} />
-                </Button>
-              </div>
-            </div>
-          </Card>
-
-          <Card className={cn(
-            "p-4 border-zinc-800/50 flex items-center gap-4 transition-all",
-            isRecoveryMode ? "bg-zinc-800/50" : "bg-zinc-900/20"
-          )}>
-            <div className="h-10 w-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 shrink-0">
-              <Moon size={20} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-0.5">Status do Sono</p>
-              <span className="text-lg font-black truncate">{hoursSleptToday ?? '--'}h</span>
-            </div>
-          </Card>
-
-          <Card className={cn(
-            "p-4 border-red-900/30 flex items-center gap-4 transition-all",
-            isRecoveryMode ? "bg-red-950/10" : "bg-red-950/20"
-          )}>
-            <div className="h-10 w-10 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
-              <Clock size={20} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[8px] font-black uppercase tracking-widest text-red-500/60 mb-0.5">Prazo EAD</p>
-              <span className="text-sm font-black text-red-500 whitespace-nowrap">
-                {differenceInDays(new Date('2026-05-25'), new Date())} dias restantes
-              </span>
-            </div>
-          </Card>
+      <section className="mt-12">
+        <div className="flex justify-center">
+           <Button onClick={() => setShowAddTask(true)} className="bg-white text-black hover:bg-zinc-200 rounded-full h-12 px-8 font-black uppercase tracking-tighter">
+             <Plus className="mr-2" /> Adicionar Captura
+           </Button>
         </div>
       </section>
-
-      <header className="mb-12">
-        <div className="flex justify-between items-start mb-8">
-          <div>
-            <h1 className="text-5xl font-black tracking-tighter uppercase leading-none mb-2">Hoje</h1>
-            <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">
-              {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button 
-              size="icon" 
-              onClick={handleSleepNow}
-              className={`h-12 w-12 rounded-full border transition-none ${isSilenced ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:text-white'}`}
-            >
-              <Moon size={20} fill={isSilenced ? "currentColor" : "none"} />
-            </Button>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="icon" className="h-12 w-12 rounded-full bg-zinc-900/50 border border-zinc-800 text-zinc-500 hover:text-white transition-none">
-                  <Zap size={20} />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-zinc-950 border-zinc-900 rounded-[2.5rem] p-8 sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-center">Anxiety Dump</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-6 py-6">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Descarregue seus pensamentos</Label>
-                    <Textarea 
-                      placeholder="O que está te preocupando? Solte tudo aqui..." 
-                      value={anxietyContent}
-                      onChange={(e) => setAnxietyContent(e.target.value)}
-                      className="bg-zinc-900 border-none min-h-[150px] rounded-2xl px-6 py-4 font-bold focus-visible:ring-1 ring-zinc-700 resize-none"
-                    />
-                  </div>
-                  <Button onClick={handleSaveAnxietyDump} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none">
-                    Descarregar e Relaxar
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="p-5 bg-zinc-900/20 border-zinc-900/50 rounded-3xl flex flex-col gap-1">
-            <span className="text-[8px] font-black uppercase tracking-widest text-zinc-600">Hidratação</span>
-            <div className="flex items-center justify-between">
-              <span className="text-xl font-black">{(hydration / 1000).toFixed(1)}L</span>
-              <Button size="icon" variant="ghost" className="h-8 w-8 text-blue-500 hover:bg-blue-500/10" onClick={handleAddHydration}>
-                <Plus size={16} />
-              </Button>
-            </div>
-          </Card>
-          <Card className="p-5 bg-zinc-900/20 border-zinc-900/50 rounded-3xl flex flex-col gap-1">
-            <span className="text-[8px] font-black uppercase tracking-widest text-zinc-600">Eliminados</span>
-            <div className="flex items-center justify-between">
-              <span className="text-xl font-black text-red-500">{eliminatedCount}</span>
-              <AlertCircle size={16} className="text-zinc-800" />
-            </div>
-          </Card>
-        </div>
-      </header>
-
-      {hoursSleptToday !== null && hoursSleptToday < 6 && (
-        <Card className="p-5 bg-indigo-950/20 border-indigo-900/50 rounded-3xl mb-10 border-l-4 border-l-indigo-500">
-          <div className="flex items-center gap-2 mb-1">
-            <Info size={14} className="text-indigo-400" />
-            <h4 className="text-[9px] font-black uppercase tracking-widest text-indigo-400">Hardware em Débito</h4>
-          </div>
-          <p className="text-sm font-bold text-white leading-tight">
-            Prioridade hoje: <span className="text-indigo-400">Manutenção e Descanso</span>.
-          </p>
-        </Card>
-      )}
-
-      <div className="space-y-12">
-        {academicUrgent.length > 0 && (
-          <section className="space-y-4">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 px-1">Urgência Acadêmica</h2>
-            <div className="space-y-1">
-              {academicUrgent.map((activity) => (
-                <div key={activity.id} className="flex items-center gap-4 p-4 hover:bg-zinc-900/30 rounded-2xl group transition-all">
-                  <div 
-                    className="h-6 w-6 rounded-lg border-2 border-red-900/50 bg-red-950/20 flex items-center justify-center cursor-pointer group-hover:border-red-500"
-                    onClick={async () => {
-                      const { error } = await supabase.from('atividades_academicas').update({ concluido: true }).eq('id', activity.id);
-                      if (!error) {
-                        setAcademicUrgent(academicUrgent.filter(a => a.id !== activity.id));
-                        toast.success('Atividade concluída!');
-                      }
-                    }}
-                  >
-                    <Check size={14} className="text-red-500 opacity-0 group-hover:opacity-100" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm text-zinc-200 truncate">{activity.nome}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[8px] font-black text-red-500 uppercase tracking-tighter">
-                        {differenceInDays(parseISO(activity.data_entrega), new Date()) <= 0 ? 'Entrega Hoje' : 'Entrega Amanhã'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <section className="space-y-6">
-          <div className="flex justify-between items-center px-1">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">Tarefas</h2>
-            <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 gap-2 text-[9px] font-black uppercase text-zinc-500 hover:text-white">
-                  <Plus size={12} /> Adicionar
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-zinc-950 border-zinc-900 rounded-3xl p-8 sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-black uppercase tracking-tighter">Nova Missão</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-6 py-6">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">O que fazer?</Label>
-                    <Input 
-                      placeholder="Título da tarefa" 
-                      value={newTask.titulo}
-                      onChange={(e) => setNewTask({ ...newTask, titulo: e.target.value })}
-                      className="bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Projeto</Label>
-                      <Select value={newTask.projeto_id} onValueChange={(v) => setNewTask({ ...newTask, projeto_id: v })}>
-                        <SelectTrigger className="bg-zinc-900 border-none h-12 rounded-xl">
-                          <SelectValue placeholder="Geral" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-zinc-800">
-                          <SelectItem value="none">Geral</SelectItem>
-                          {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Data</Label>
-                      <Input 
-                        type="date"
-                        value={newTask.data_execucao}
-                        onChange={(e) => setNewTask({ ...newTask, data_execucao: e.target.value })}
-                        className="bg-zinc-900 border-none h-12 rounded-xl"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Tags</Label>
-                    <Input 
-                      placeholder="tag1, tag2" 
-                      value={newTask.tags}
-                      onChange={(e) => setNewTask({ ...newTask, tags: e.target.value })}
-                      className="bg-zinc-900 border-none h-12 rounded-xl"
-                    />
-                  </div>
-                  <Button onClick={handleCreateTask} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest">
-                    Agendar
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          <div className="space-y-1">
-            {tasks.length > 0 ? (
-              tasks.map((task) => {
-                const isComplex = task.tags?.includes('Estudo Complexo');
-                const isMitigated = hoursSleptToday !== null && hoursSleptToday < 6 && isComplex;
-
-                return (
-                  <div 
-                    key={task.id} 
-                    className={cn(
-                      "flex items-center gap-4 p-4 hover:bg-zinc-900/30 rounded-2xl group transition-all",
-                      isMitigated && "opacity-30 grayscale pointer-events-none"
-                    )}
-                  >
-                    <div 
-                      className="h-6 w-6 rounded-lg border-2 border-zinc-800 bg-zinc-950 flex items-center justify-center cursor-pointer group-hover:border-blue-500"
-                      onClick={() => completeTask(task)}
-                    >
-                      <Check size={14} className="text-blue-500 opacity-0 group-hover:opacity-100" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm text-zinc-200 truncate">{task.titulo}</p>
-                      <div className="flex items-center gap-3 mt-1">
-                        {task.projetos && (
-                          <div className="flex items-center gap-1.5">
-                            <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: task.projetos.cor }} />
-                            <span className="text-[8px] font-black text-zinc-600 uppercase tracking-tighter">{task.projetos.nome}</span>
-                          </div>
-                        )}
-                        {task.tags?.map((tag: string) => (
-                          <span key={tag} className={cn(
-                            "text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded",
-                            tag === 'Estudo Complexo' ? "bg-indigo-950/30 text-indigo-400" : "bg-zinc-900 text-zinc-600"
-                          )}>
-                            {tag}
-                          </span>
-                        ))}
-                        {isMitigated && (
-                          <span className="text-[8px] font-black text-red-500 uppercase tracking-tighter">Bloqueado</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="py-12 text-center">
-                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-800">Tudo limpo por aqui</p>
-              </div>
-            )}
-          </div>
-        </section>
-      </div>
 
       <Dialog open={showCheckin} onOpenChange={setShowCheckin}>
         <DialogContent className="w-[90%] rounded-[2.5rem] bg-zinc-950 border-zinc-900 p-8 sm:max-w-md">
@@ -778,7 +398,6 @@ function Dashboard() {
                 className="bg-zinc-900 border-none h-20 text-4xl font-black rounded-3xl text-center focus-visible:ring-0"
               />
             </div>
-
             <div className="flex flex-col gap-4">
               <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 text-center">O treino das 05h foi realizado?</Label>
               <div className="flex gap-4">
@@ -798,75 +417,34 @@ function Dashboard() {
                 </Button>
               </div>
             </div>
-
             <Button onClick={handleSaveCheckin} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none">
               Iniciar o Jogo
             </Button>
           </div>
         </DialogContent>
       </Dialog>
-      
-      {/* Quick Action Button Fixed */}
-      <div className="fixed bottom-10 right-10">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button size="icon" className="h-16 w-16 rounded-full bg-white text-black shadow-[0_0_50px_rgba(255,255,255,0.15)] hover:scale-105 active:scale-95 transition-all">
-              <Plus size={32} strokeWidth={3} />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-zinc-950 border-zinc-900 rounded-3xl p-8 sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-black uppercase tracking-tighter">Ação Rápida</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-6 py-6">
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">O que fazer?</Label>
-                <Input 
-                  placeholder="Título da tarefa" 
-                  value={newTask.titulo}
-                  onChange={(e) => setNewTask({ ...newTask, titulo: e.target.value })}
-                  className="bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Projeto</Label>
-                  <Select value={newTask.projeto_id} onValueChange={(v) => setNewTask({ ...newTask, projeto_id: v })}>
-                    <SelectTrigger className="bg-zinc-900 border-none h-12 rounded-xl">
-                      <SelectValue placeholder="Geral" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-800">
-                      <SelectItem value="none">Geral</SelectItem>
-                      {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Data</Label>
-                  <Input 
-                    type="date"
-                    value={newTask.data_execucao}
-                    onChange={(e) => setNewTask({ ...newTask, data_execucao: e.target.value })}
-                    className="bg-zinc-900 border-none h-12 rounded-xl"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Tags</Label>
-                <Input 
-                  placeholder="tag1, tag2" 
-                  value={newTask.tags}
-                  onChange={(e) => setNewTask({ ...newTask, tags: e.target.value })}
-                  className="bg-zinc-900 border-none h-12 rounded-xl"
-                />
-              </div>
-              <Button onClick={handleCreateTask} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest">
-                Agendar
-              </Button>
+
+      <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
+        <DialogContent className="bg-zinc-950 border-zinc-900 rounded-3xl p-8 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black uppercase tracking-tighter">Nova Missão</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-6">
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">O que fazer?</Label>
+              <Input 
+                placeholder="Título da tarefa" 
+                value={newTask.titulo}
+                onChange={(e) => setNewTask({ ...newTask, titulo: e.target.value })}
+                className="bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold"
+              />
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+            <Button onClick={handleCreateTask} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest">
+              Agendar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
