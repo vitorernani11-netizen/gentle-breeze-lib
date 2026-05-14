@@ -106,7 +106,8 @@ function Dashboard() {
     data_execucao: new Date().toISOString().split('T')[0],
     repeticao: 'none',
     tags: '',
-    lembrete_ead_48h: false
+    lembrete_ead_48h: false,
+    lembrete: ''
   });
 
   const { completeTask, deletePermanent, moveTask, updateTriagemStage, updateTask, addTask } = useTaskActions(() => {
@@ -328,7 +329,8 @@ function Dashboard() {
         data_execucao: new Date().toISOString().split('T')[0],
         repeticao: 'none',
         tags: '',
-        lembrete_ead_48h: false
+        lembrete_ead_48h: false,
+        lembrete: ''
       });
       toast.success('Tarefa enviada para Entrada');
       fetchData();
