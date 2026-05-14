@@ -150,9 +150,9 @@ function AcademicPage() {
               <div className="flex flex-col gap-1 pr-4">
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                    differenceInDays(parseISO(activity.data_entrega), new Date()) < 1 
+                    differenceInDays(parseISO(activity.data_entrega), new Date()) <= 1 
                       ? 'bg-red-600 text-white' 
-                      : differenceInDays(parseISO(activity.data_entrega), new Date()) < 3 
+                      : differenceInDays(parseISO(activity.data_entrega), new Date()) <= 3 
                         ? 'bg-yellow-500 text-black' 
                         : 'bg-zinc-900 text-zinc-500'
                   }`}>
