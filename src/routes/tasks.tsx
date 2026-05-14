@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate, useLocation } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -32,6 +32,7 @@ export const Route = createFileRoute('/tasks')({
 
 function TasksPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTasks, setActiveTasks] = useState<any[]>([]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
   const [showCompleted, setShowCompleted] = useState(false);
@@ -42,6 +43,9 @@ function TasksPage() {
 
   const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask } = useTaskActions(() => {
     fetchTasks();
+    if (location.pathname === '/tasks' && window.location.hash === '#redirect-to-today') {
+       navigate({ to: '/' });
+    }
   });
 
   useEffect(() => {
@@ -288,7 +292,10 @@ function TasksPage() {
                 <Button 
                   aria-label="Mover para Hoje"
                   className="bg-zinc-900 text-zinc-400 hover:text-zinc-100 text-[9px] font-bold uppercase rounded-xl border border-zinc-800 h-10 px-3 transition-all"
-                  onClick={() => moveTask(task.id, 'Hoje')}
+                  onClick={() => {
+                    moveTask(task.id, 'Hoje');
+                    navigate({ to: '/' });
+                  }}
                 >
                   Hoje
                 </Button>
