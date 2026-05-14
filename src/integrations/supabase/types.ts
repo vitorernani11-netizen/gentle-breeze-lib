@@ -14,7 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      checkin_diario: {
+        Row: {
+          created_at: string | null
+          data: string
+          horas_sono: number | null
+          id: string
+          marmitas_prontas: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          data?: string
+          horas_sono?: number | null
+          id?: string
+          marmitas_prontas?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          data?: string
+          horas_sono?: number | null
+          id?: string
+          marmitas_prontas?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      financeiro: {
+        Row: {
+          conta: Database["public"]["Enums"]["conta_tipo"]
+          created_at: string | null
+          data: string | null
+          descricao: string | null
+          id: string
+          tipo: Database["public"]["Enums"]["transacao_tipo"]
+          updated_at: string | null
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          conta: Database["public"]["Enums"]["conta_tipo"]
+          created_at?: string | null
+          data?: string | null
+          descricao?: string | null
+          id?: string
+          tipo: Database["public"]["Enums"]["transacao_tipo"]
+          updated_at?: string | null
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          conta?: Database["public"]["Enums"]["conta_tipo"]
+          created_at?: string | null
+          data?: string | null
+          descricao?: string | null
+          id?: string
+          tipo?: Database["public"]["Enums"]["transacao_tipo"]
+          updated_at?: string | null
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      tarefas: {
+        Row: {
+          categoria: string | null
+          created_at: string | null
+          data_execucao: string | null
+          id: string
+          status_concluido: boolean | null
+          titulo: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string | null
+          data_execucao?: string | null
+          id?: string
+          status_concluido?: boolean | null
+          titulo: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string | null
+          data_execucao?: string | null
+          id?: string
+          status_concluido?: boolean | null
+          titulo?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +121,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      conta_tipo: "Pessoal" | "Nabih"
+      transacao_tipo: "Entrada" | "Saida"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +249,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      conta_tipo: ["Pessoal", "Nabih"],
+      transacao_tipo: ["Entrada", "Saida"],
+    },
   },
 } as const
