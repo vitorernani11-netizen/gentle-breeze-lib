@@ -57,6 +57,7 @@ function Dashboard() {
   const [sleepHistory, setSleepHistory] = useState<any[]>([]);
   const [hoursSleptToday, setHoursSleptToday] = useState<number | null>(null);
   const [isSilenced, setIsSilenced] = useState(false);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   
   const [checkin, setCheckin] = useState({
     horas_sono: '',
