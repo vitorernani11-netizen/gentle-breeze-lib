@@ -217,7 +217,7 @@ function TasksPage() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-0 border-t border-white/10">
         {activeTasks.length > 0 ? (
           activeTasks
             .filter(task => !selectedStage || (task.triagem_stage || 1) === selectedStage)
@@ -237,8 +237,8 @@ function TasksPage() {
 
               return (
                 <Card key={task.id} className={cn(
-                  "bg-zinc-950/30 border p-3 rounded-xl flex flex-col justify-between group transition-all gap-2",
-                  isOverdue ? "border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.05)]" : "border-zinc-900/50 hover:border-zinc-800"
+                  "bg-black border-0 border-b border-white/10 p-3 rounded-none flex flex-col justify-between group transition-all gap-3",
+                  isOverdue ? "bg-red-500/5" : "hover:bg-zinc-900/30"
                 )}>
                   <div
                     role="button"
@@ -248,8 +248,8 @@ function TasksPage() {
                     className="flex flex-col gap-1.5 flex-1 min-w-0 text-left cursor-pointer"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <span className={cn("text-[7px] font-black uppercase px-1 py-0.5 border rounded-sm", 
+                      <div className="flex items-center gap-2">
+                        <span className={cn("text-[8px] font-black uppercase px-1.5 py-0.5 border rounded-sm", 
                           task.prioridade === 1 ? "text-red-500 border-red-500/20 bg-red-500/5" :
                           task.prioridade === 2 ? "text-orange-500 border-orange-500/20 bg-orange-500/5" :
                           task.prioridade === 3 ? "text-blue-500 border-blue-500/20 bg-blue-500/5" :
@@ -258,14 +258,14 @@ function TasksPage() {
                           P{task.prioridade || 4}
                         </span>
                         
-                        <div className="flex border border-zinc-900/30 bg-black/40 p-0.5 rounded-md">
+                        <div className="flex border border-zinc-900/50 bg-black/40 p-0.5 rounded-sm">
                           {[1, 2, 3, 4].map((s) => (
                             <button
                               key={s}
                               aria-label={`Mover para estágio ${s}`}
                               onClick={(e) => { e.stopPropagation(); updateTriagemStage(task.id, s); }}
                               className={cn(
-                                "w-4 h-4 text-[7px] font-black flex items-center justify-center rounded-sm transition-all",
+                                "w-4 h-4 text-[8px] font-black flex items-center justify-center rounded-sm transition-all",
                                 (task.triagem_stage || 1) === s 
                                   ? "bg-zinc-100 text-black" 
                                   : "text-zinc-700 hover:text-zinc-400"
@@ -278,72 +278,55 @@ function TasksPage() {
                       </div>
 
                       {isOverdue && (
-                        <span className="text-[7px] font-black uppercase text-red-500 animate-pulse flex items-center gap-1 bg-red-500/10 px-1 py-0.5 rounded border border-red-500/20">
+                        <span className="text-[8px] font-black uppercase text-red-500 animate-pulse flex items-center gap-1 bg-red-500/10 px-1.5 py-0.5 border border-red-500/20">
                           Atrasada
                         </span>
                       )}
                     </div>
                     
                     <div>
-                      <h3 className="font-bold text-base uppercase tracking-tight truncate leading-none mb-1">
+                      <h3 className="font-bold text-lg uppercase tracking-tight truncate leading-none mb-1">
                         {task.titulo}
                       </h3>
                       
                       {task.descricao && (
-                        <p className="text-zinc-600 text-[8px] font-medium uppercase leading-tight line-clamp-1 italic opacity-70">
+                        <p className="text-zinc-600 text-[9px] font-medium uppercase leading-tight line-clamp-1 italic opacity-60">
                           {task.descricao}
                         </p>
                       )}
                     </div>
                     
-                    <div className="flex items-center justify-between mt-auto pt-1">
-                      <div className="flex items-center gap-2">
-                        <span className={cn(
-                          "text-[8px] font-black uppercase flex items-center gap-1 px-1.5 py-0.5 rounded-sm border",
-                          isOverdue ? "text-red-500 border-red-500/20 bg-red-500/5" : "text-zinc-400 border-zinc-900 bg-zinc-900/30"
-                        )}>
-                          <Calendar size={8} /> 
-                          {formatDate(taskDate, "d MMM", { locale: ptBR }).toUpperCase()}
-                          {task.lembrete && ` • ${task.lembrete}`}
-                        </span>
+                    <div className="flex items-center justify-start gap-2 pt-1">
+                      <span className={cn(
+                        "text-[9px] font-black uppercase flex items-center gap-1.5 px-2 py-1 rounded-sm border",
+                        isOverdue ? "text-red-500 border-red-500/20 bg-red-500/5" : "text-zinc-300 border-zinc-800 bg-zinc-900/50"
+                      )}>
+                        <Calendar size={10} /> 
+                        {formatDate(taskDate, "d MMM", { locale: ptBR }).toUpperCase()}
+                        {task.lembrete && ` • ${task.lembrete}`}
+                      </span>
 
-                        {task.repeticao && task.repeticao !== 'none' && (
-                          <span className="text-[7px] font-black uppercase text-zinc-600 flex items-center gap-1 border border-zinc-900/50 px-1 py-0.5 rounded-sm">
-                            <Clock size={8} /> {task.repeticao === 'daily' ? 'DIÁRIO' : 'SEMANAL'}
-                          </span>
-                        )}
-                      </div>
-                      
-                      {isOverdue && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-5 px-1.5 text-[7px] font-black uppercase text-[#00ff41] hover:bg-[#00ff41]/10 border border-[#00ff41]/20 rounded-sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            rescheduleTask(task, new Date().toISOString().split('T')[0]);
-                          }}
-                        >
-                          Reagendar
-                        </Button>
+                      {task.repeticao && task.repeticao !== 'none' && (
+                        <span className="text-[8px] font-black uppercase text-zinc-500 flex items-center gap-1 border border-zinc-900/50 px-1.5 py-1 rounded-sm">
+                          <Clock size={10} /> {task.repeticao === 'daily' ? 'DIÁRIO' : 'SEMANAL'}
+                        </span>
                       )}
                     </div>
                   </div>
                   
-                  <div className="flex gap-1.5 pt-2 border-t border-zinc-900/50">
+                  <div className="flex gap-2">
                     <Button 
                       aria-label="Concluir tarefa"
                       size="sm"
-                      className="bg-zinc-100 text-black hover:bg-white font-bold rounded-lg flex-1 h-8 transition-all active:scale-95"
+                      className="bg-white text-black hover:bg-zinc-200 font-black uppercase text-[10px] rounded-sm flex-1 h-10 transition-all active:scale-95"
                       onClick={() => completeTask(task)}
                     >
-                      <Check size={14} className="mr-1" />
-                      <span className="text-[8px] font-black uppercase">Concluir</span>
+                      Concluir
                     </Button>
                     <Button 
                       aria-label="Mover para Hoje"
                       size="sm"
-                      className="bg-zinc-900 text-zinc-400 hover:text-zinc-100 text-[8px] font-bold uppercase rounded-lg border border-zinc-800 h-8 px-2 transition-all"
+                      className="bg-zinc-950 text-[#00ff41] hover:bg-[#00ff41] hover:text-black text-[10px] font-black uppercase rounded-sm border border-[#00ff41]/30 h-10 px-4 transition-all"
                       onClick={() => {
                         moveTask(task.id, 'Hoje');
                         navigate({ to: '/' });
@@ -355,10 +338,10 @@ function TasksPage() {
                       aria-label="Deletar registro"
                       size="icon"
                       variant="ghost"
-                      className="text-zinc-800 hover:text-red-500 h-8 w-8"
+                      className="text-zinc-800 hover:text-red-500 hover:bg-red-500/10 h-10 w-10 border border-zinc-900 rounded-sm"
                       onClick={() => deletePermanent(task.id)}
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={16} />
                     </Button>
                   </div>
                 </Card>

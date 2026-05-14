@@ -153,7 +153,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
                   </span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-zinc-950 border-zinc-900">
+              <PopoverContent className="w-auto p-0 bg-zinc-950 border-zinc-900 z-[110]">
                 <Calendar
                   mode="single"
                   selected={vencimento}
@@ -170,7 +170,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
                   {lembrete && <span className="ml-2 text-[10px] font-bold uppercase">{lembrete}</span>}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-48 bg-zinc-950 border-zinc-900 p-2">
+              <PopoverContent className="w-48 bg-zinc-950 border-zinc-900 p-2 z-[110]">
                  <div className="grid grid-cols-1 gap-1">
                     {['09:00', '12:00', '15:00', '18:00', '21:00'].map(t => (
                       <Button key={t} variant="ghost" className="justify-start font-bold" onClick={() => setLembrete(t)}>{t}</Button>
@@ -191,7 +191,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
                   <Flag size={18} />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-40 bg-zinc-950 border-zinc-900 p-2">
+              <PopoverContent className="w-40 bg-zinc-950 border-zinc-900 p-2 z-[110]">
                 {[1, 2, 3, 4].map(p => (
                   <Button 
                     key={p} 
