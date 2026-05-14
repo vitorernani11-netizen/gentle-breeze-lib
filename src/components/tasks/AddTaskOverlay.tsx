@@ -27,6 +27,7 @@ interface AddTaskOverlayProps {
     prioridade: number;
     lembrete: string | null;
     descricao?: string;
+    hora_vencimento?: string | null;
   }) => void;
 }
 
@@ -46,13 +47,23 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
 
   const handleSubmit = () => {
     if (!titulo.trim()) return;
+
+    let horaVencISO = null;
+    if (lembrete) {
+      const [h, m] = lembrete.split(':').map(Number);
+      const d = new Date(vencimento);
+      d.setHours(h, m, 0, 0);
+      horaVencISO = d.toISOString();
+    }
+
     onAddTask({
       titulo,
       vencimento: format(vencimento, 'yyyy-MM-dd'),
       recorrencia: 'none',
       prioridade,
       lembrete,
-      descricao
+      descricao,
+      hora_vencimento: horaVencISO
     });
     setTitulo('');
     setDescricao('');
