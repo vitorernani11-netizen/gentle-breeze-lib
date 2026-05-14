@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BottomNav } from '@/components/BottomNav';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ShoppingCart, Utensils, Info } from 'lucide-react';
+import { ShoppingCart, Utensils } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -31,7 +31,7 @@ function MenuPage() {
   const [currentList, setCurrentList] = useState<Ingrediente[]>([]);
   const [currentRecipeName, setCurrentRecipeName] = useState('');
 
-  const receitasIniciais: Omit<Receita, 'id'>[] = [
+  const receitasIniciais = [
     {
       nome: 'Frango com Arroz e Brócolis',
       descricao: 'Clássico para dieta limpa',
@@ -70,7 +70,6 @@ function MenuPage() {
     const userId = session?.user?.id;
 
     if (!userId) {
-      // @ts-ignore - Mock data for anonymous
       setReceitas(receitasIniciais.map((r, i) => ({ ...r, id: i.toString() })));
       setLoading(false);
       return;
@@ -82,12 +81,24 @@ function MenuPage() {
       .eq('user_id', userId);
 
     if (data && data.length > 0) {
-      setReceitas(data);
+      const formatted = data.map(r => ({
+        id: r.id,
+        nome: r.nome,
+        descricao: r.descricao || '',
+        ingredientes: (r.ingredientes as any[]) || []
+      }));
+      setReceitas(formatted);
     } else {
-      // If user has no recipes, seed with initial ones
       const toInsert = receitasIniciais.map(r => ({ ...r, user_id: userId }));
       const { data: inserted } = await supabase.from('receitas').insert(toInsert).select();
-      if (inserted) setReceitas(inserted);
+      if (inserted) {
+        setReceitas(inserted.map(r => ({
+          id: r.id,
+          nome: r.nome,
+          descricao: r.descricao || '',
+          ingredientes: (r.ingredientes as any[]) || []
+        })));
+      }
     }
     setLoading(false);
   };
@@ -180,10 +191,6 @@ function MenuPage() {
             >
               Concluído
             </Button>
-            
-            <p className="text-center text-zinc-600 text-[9px] font-bold uppercase tracking-tighter">
-              Cantidades calculadas para produção de 7 marmitas individuais.
-            </p>
           </div>
         </DialogContent>
       </Dialog>
