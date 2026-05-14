@@ -196,6 +196,7 @@ export type Database = {
       tarefas: {
         Row: {
           categoria: string | null
+          contagem_adiamentos: number | null
           created_at: string | null
           data_base: string | null
           data_execucao: string | null
@@ -211,6 +212,7 @@ export type Database = {
         }
         Insert: {
           categoria?: string | null
+          contagem_adiamentos?: number | null
           created_at?: string | null
           data_base?: string | null
           data_execucao?: string | null
@@ -226,6 +228,7 @@ export type Database = {
         }
         Update: {
           categoria?: string | null
+          contagem_adiamentos?: number | null
           created_at?: string | null
           data_base?: string | null
           data_execucao?: string | null
