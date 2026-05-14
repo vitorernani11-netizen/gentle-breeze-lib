@@ -26,6 +26,7 @@ interface AddTaskOverlayProps {
     recorrencia: string;
     prioridade: number;
     lembrete: string | null;
+    descricao?: string;
   }) => void;
 }
 
