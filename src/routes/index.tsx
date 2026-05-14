@@ -147,7 +147,7 @@ function Dashboard() {
     const isValidDate = (d: any) => Boolean(safeParseDate(d));
 
     const allTasks = (loadFromLocal(TASKS_KEY) || []).filter((t: any) => isValidDate(t.created_at || t.data_execucao));
-    const todayTasks = allTasks.filter((t: any) => t.data_execucao === today && !t.status_concluido);
+    const todayTasks = allTasks.filter((t: any) => (t.data_execucao === today || t.status === 'Hoje') && !t.status_concluido);
     setTasks(todayTasks);
 
     const projectsData = loadFromLocal(PROJECTS_KEY) || [];
