@@ -88,20 +88,8 @@ function Dashboard() {
 
   useEffect(() => {
     const checkLockStatus = () => {
-      const now = new Date();
-      const lockStart = setMinutes(setHours(now, 21), 30);
-      const lockEnd = setHours(now, 6);
-      
-      // If we are between 21:30 and 23:59
-      if (now >= lockStart) {
-        setIsLocked(!showCheckin);
-      } 
-      // If we are between 00:00 and 06:00
-      else if (now < lockEnd) {
-        setIsLocked(!showCheckin);
-      } else {
-        setIsLocked(false);
-      }
+      // Bloqueio temporariamente desativado para testes
+      setIsLocked(false);
     };
 
     checkLockStatus();
