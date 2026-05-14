@@ -439,7 +439,7 @@ function TasksPage() {
 
       <Button
         onClick={() => setIsAddingTask(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-black border-2 border-[#ff00ff] text-[#ff00ff] shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-110 hover:bg-[#ff00ff] hover:text-black transition-all z-50 flex items-center justify-center p-0"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-black border-2 shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-110 hover:bg-[#ff00ff] transition-all z-50 flex items-center justify-center p-0 text-gray-50 border-slate-700"
         aria-label="Adicionar nova tarefa"
       >
         <Plus size={32} strokeWidth={3} />
