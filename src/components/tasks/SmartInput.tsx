@@ -142,24 +142,24 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
   );
 
   return (
-    <div className="relative group w-full max-w-2xl mx-auto mb-12">
+    <div className="relative group w-full max-w-xl mx-auto mb-6">
       {renderHighlights()}
       
-      <div className="bg-zinc-950 border-4 border-white p-2 flex flex-col gap-2 relative z-10">
-        <div className="flex items-center gap-2">
+      <div className="bg-zinc-950 border border-zinc-800 p-1.5 flex flex-col gap-1.5 relative z-10 rounded-xl">
+        <div className="flex items-center gap-1.5">
           <Input
             ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-            placeholder="O QUE PRECISA SER FEITO?"
-            className="bg-transparent border-none text-xl sm:text-2xl font-black uppercase italic tracking-tighter focus-visible:ring-0 placeholder:text-zinc-800 h-14"
+            placeholder="O que precisa ser feito?"
+            className="bg-transparent border-none text-base font-medium tracking-tight focus-visible:ring-0 placeholder:text-zinc-800 h-10"
           />
           <Button 
             onClick={handleAdd}
-            className="bg-[#00ff41] text-black hover:bg-green-400 rounded-none border-b-4 border-r-4 border-green-900 w-14 h-14 shrink-0 transition-none active:translate-y-1 active:translate-x-1 active:border-0"
+            className="bg-zinc-100 text-black hover:bg-white rounded-lg w-10 h-10 shrink-0 transition-all active:scale-95"
           >
-            <Send size={24} />
+            <Send size={18} />
           </Button>
         </div>
 
