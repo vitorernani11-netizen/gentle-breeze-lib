@@ -24,17 +24,23 @@ function Projects() {
   }, []);
 
   const fetchProjects = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || 'anonymous';
-    
-    const { data } = await supabase
-      .from('projetos')
-      .select('*, tarefas(count)')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      
+      const { data, error } = await supabase
+        .from('projetos')
+        .select('*, tarefas(count)')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
 
-    if (data) setProjects(data);
-    setLoading(false);
+      if (error) throw error;
+      if (data) setProjects(data);
+    } catch (error) {
+      console.error('Erro ao buscar projetos:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const addProject = async () => {
