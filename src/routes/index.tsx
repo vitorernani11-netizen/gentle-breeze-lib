@@ -17,13 +17,17 @@ import {
   Filter,
   ArrowRight,
   GraduationCap,
-  AlertCircle
+  AlertCircle,
+  Droplets,
+  Dumbbell,
+  Bell
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useTaskActions } from '@/hooks/useTaskActions';
-import { differenceInDays, parseISO } from 'date-fns';
+import { differenceInDays, parseISO, format } from 'date-fns';
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -39,10 +43,12 @@ function Dashboard() {
   const [projects, setProjects] = useState<any[]>([]);
   const [academicUrgent, setAcademicUrgent] = useState<any[]>([]);
   const [eliminatedCount, setEliminatedCount] = useState(0);
+  const [hydration, setHydration] = useState(0);
   
   const [checkin, setCheckin] = useState({
     horas_sono: '',
     marmitas_prontas: false,
+    treino_madrugada_realizado: false,
   });
 
   const [newTask, setNewTask] = useState({
@@ -50,7 +56,8 @@ function Dashboard() {
     projeto_id: '',
     data_execucao: new Date().toISOString().split('T')[0],
     repeticao: 'none',
-    tags: ''
+    tags: '',
+    lembrete_ead_48h: false
   });
 
   const { completeTask } = useTaskActions(() => {
@@ -108,10 +115,19 @@ function Dashboard() {
       return days <= 1; // "Faltar 1 dia" included
     }) || [];
 
+    // Fetch hydration
+    const { data: hydrationData } = await supabase
+      .from('hidratacao')
+      .select('quantidade_ml')
+      .eq('user_id', userId)
+      .eq('data', today)
+      .single();
+
     if (tasksData) setTasks(tasksData);
     if (projectsData) setProjects(projectsData);
     setAcademicUrgent(urgentAcademic);
     if (count !== null) setEliminatedCount(count);
+    if (hydrationData) setHydration(hydrationData.quantidade_ml);
   };
 
   const checkTodayCheckin = async (userId: string) => {
@@ -139,11 +155,18 @@ function Dashboard() {
         data: today,
         horas_sono: checkin.horas_sono ? parseFloat(checkin.horas_sono) : null,
         marmitas_prontas: checkin.marmitas_prontas,
+        treino_madrugada_realizado: checkin.treino_madrugada_realizado,
       }, { onConflict: 'user_id,data' });
 
     if (!error) {
       setShowCheckin(false);
       toast.success('Dia iniciado!');
+      if (!checkin.treino_madrugada_realizado) {
+        toast('Compensação Necessária', {
+          description: 'Sugestão: Realizar 15 min de alongamento hoje à noite.',
+          duration: 6000,
+        });
+      }
     }
   };
 
@@ -161,6 +184,7 @@ function Dashboard() {
         data_execucao: newTask.data_execucao,
         repeticao: newTask.repeticao,
         tags: tagsArray,
+        lembrete_ead_48h: newTask.lembrete_ead_48h,
         status: 'Entrada' // Todas as novas tarefas caem na Entrada por padrão
       }])
       .select('*, projetos(nome, cor)')
@@ -175,9 +199,29 @@ function Dashboard() {
         projeto_id: '',
         data_execucao: new Date().toISOString().split('T')[0],
         repeticao: 'none',
-        tags: ''
+        tags: '',
+        lembrete_ead_48h: false
       });
       toast.success('Tarefa enviada para Entrada');
+    }
+  };
+
+  const handleAddHydration = async () => {
+    if (!session) return;
+    const today = new Date().toISOString().split('T')[0];
+    const newAmount = hydration + 500;
+    
+    const { error } = await supabase
+      .from('hidratacao')
+      .upsert({
+        user_id: session.user.id,
+        data: today,
+        quantidade_ml: newAmount
+      }, { onConflict: 'user_id,data' });
+
+    if (!error) {
+      setHydration(newAmount);
+      toast.success('Hidratação registrada (+500ml)');
     }
   };
 
@@ -204,6 +248,20 @@ function Dashboard() {
               <span className="text-[8px] font-black uppercase tracking-widest text-zinc-500 block">Itens Eliminados por Inércia</span>
               <span className="text-xl font-black text-red-500">{eliminatedCount}</span>
             </div>
+            
+            <div className="flex flex-col items-center gap-1 bg-zinc-900/50 p-2 rounded-xl border border-zinc-800/50">
+              <span className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Água</span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleAddHydration}
+                className="h-8 gap-2 px-2 hover:bg-blue-500/10 hover:text-blue-400 transition-none"
+              >
+                <Droplets size={14} className="text-blue-500" />
+                <span className="text-sm font-black">{(hydration / 1000).toFixed(1)}L</span>
+              </Button>
+            </div>
+
             <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
             <DialogTrigger asChild>
               <Button size="icon" className="h-14 w-14 rounded-2xl bg-white text-black hover:bg-zinc-200 transition-none shadow-2xl shadow-white/10">
@@ -264,6 +322,23 @@ function Dashboard() {
                     onChange={(e) => setNewTask({ ...newTask, tags: e.target.value })}
                     className="bg-zinc-900 border-none h-12 rounded-xl px-4 font-bold"
                   />
+                </div>
+
+                <div className="flex items-center space-x-2 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
+                  <Checkbox 
+                    id="ead_reminder" 
+                    checked={newTask.lembrete_ead_48h}
+                    onCheckedChange={(checked) => setNewTask({ ...newTask, lembrete_ead_48h: !!checked })}
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <label
+                      htmlFor="ead_reminder"
+                      className="text-[10px] font-black uppercase tracking-widest text-zinc-400 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Bell size={10} className="text-yellow-500" />
+                      Lembrete Prazo EAD (48h antes)
+                    </label>
+                  </div>
                 </div>
 
                 <Button onClick={handleCreateTask} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none">
@@ -399,6 +474,26 @@ function Dashboard() {
                 onChange={(e) => setCheckin({ ...checkin, horas_sono: e.target.value })}
                 className="bg-zinc-900 border-none h-20 text-4xl font-black rounded-3xl text-center focus-visible:ring-0"
               />
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 text-center">O treino das 05h foi realizado?</Label>
+              <div className="flex gap-4">
+                <Button 
+                  variant={checkin.treino_madrugada_realizado ? 'default' : 'secondary'}
+                  className={`flex-1 h-16 rounded-2xl font-black uppercase transition-none ${checkin.treino_madrugada_realizado ? 'bg-blue-600 text-white' : 'bg-zinc-900 text-zinc-500'}`}
+                  onClick={() => setCheckin({ ...checkin, treino_madrugada_realizado: true })}
+                >
+                  <Dumbbell size={20} className="mr-2" /> Sim
+                </Button>
+                <Button 
+                  variant={!checkin.treino_madrugada_realizado ? 'default' : 'secondary'}
+                  className={`flex-1 h-16 rounded-2xl font-black uppercase transition-none ${!checkin.treino_madrugada_realizado ? 'bg-zinc-800 text-zinc-300' : 'bg-zinc-900 text-zinc-500'}`}
+                  onClick={() => setCheckin({ ...checkin, treino_madrugada_realizado: false })}
+                >
+                  Não
+                </Button>
+              </div>
             </div>
 
             <div className="flex flex-col gap-4">
