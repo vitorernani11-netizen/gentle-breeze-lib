@@ -121,6 +121,17 @@ function Purgatory() {
                             <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-center">Nova Data de Execução</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-6 py-6">
+                            <div className="space-y-2 text-center">
+                              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Adiamentos Restantes</Label>
+                              <div className="flex justify-center gap-2 mt-2">
+                                {[1, 2, 3].map((step) => (
+                                  <div 
+                                    key={step} 
+                                    className={`h-2 w-12 rounded-full ${step <= (task.contagem_adiamentos || 0) ? 'bg-red-600' : 'bg-zinc-800'}`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
                             <div className="space-y-2">
                               <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Escolha o dia</Label>
                               <Input 
