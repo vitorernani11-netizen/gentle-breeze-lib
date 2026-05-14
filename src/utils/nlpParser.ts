@@ -47,7 +47,8 @@ export const parseNLP = (input: string): NLPResult => {
       }
       if (p.time) {
         const hour = parseInt(match[1]);
-        reminderTime = `${String(hour).padStart(2, '0')}:00`;
+        const minutes = match[2] || '00';
+        reminderTime = `${String(hour).padStart(2, '0')}:${minutes}`;
       }
     }
   });
