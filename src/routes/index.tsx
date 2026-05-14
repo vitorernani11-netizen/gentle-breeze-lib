@@ -17,13 +17,17 @@ import {
   Filter,
   ArrowRight,
   GraduationCap,
-  AlertCircle
+  AlertCircle,
+  Droplets,
+  Dumbbell,
+  Bell
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useTaskActions } from '@/hooks/useTaskActions';
-import { differenceInDays, parseISO } from 'date-fns';
+import { differenceInDays, parseISO, format } from 'date-fns';
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
