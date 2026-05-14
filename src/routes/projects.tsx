@@ -13,6 +13,7 @@ export const Route = createFileRoute('/projects')({
 });
 
 function Projects() {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newProjectName, setNewProjectName] = useState('');
