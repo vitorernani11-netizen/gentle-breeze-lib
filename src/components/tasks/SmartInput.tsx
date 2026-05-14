@@ -3,12 +3,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Calendar as CalendarIcon, 
   Bell, 
-  Plus, 
+  Bell, 
   ChevronDown, 
   Clock, 
   Hash,
-  Send,
-  X
+  Send
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
