@@ -33,7 +33,12 @@ function TasksPage() {
   }, []);
 
   const fetchTasks = async (userId: string) => {
-    if (userId === 'anonymous') return;
+    if (!userId || userId === 'anonymous') {
+      console.log('Tentativa de busca ignorada: usuário anônimo ou nulo');
+      return;
+    }
+    
+    console.log('Buscando tarefas para usuário:', userId);
     const { data, error } = await supabase
       .from('tarefas')
       .select('*, projetos(nome, cor)')
@@ -43,10 +48,12 @@ function TasksPage() {
       .order('created_at', { ascending: false });
 
     if (error) {
+      console.error('Erro Supabase fetchTasks:', error);
       toast.error('Erro ao carregar tarefas');
       return;
     }
 
+    console.log('Tarefas carregadas:', data?.length);
     if (data) setTasks(data);
   };
 
