@@ -108,15 +108,21 @@ function Dashboard() {
   }, []);
 
   const handleSaveAnxietyDump = async () => {
-    if (!anxietyContent.trim() || !session) return;
+    if (!anxietyContent.trim()) return;
     
-    const { error } = await supabase
-      .from('anxiety_dumps')
-      .insert([{ user_id: session.user.id, conteudo: anxietyContent }]);
+    try {
+      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
+      const { error } = await supabase
+        .from('anxiety_dumps')
+        .insert([{ user_id: userId, conteudo: anxietyContent }]);
 
-    if (!error) {
+      if (error) throw error;
+      
       setAnxietyContent('');
       toast.success('Descarregado. Agora descanse.');
+    } catch (error) {
+      console.error('Erro ao salvar anxiety dump:', error);
+      toast.error('Erro ao salvar no hardware');
     }
   };
 
@@ -257,34 +263,40 @@ function Dashboard() {
   };
 
   const handleSleepNow = async () => {
-    if (!session) return;
-    
-    // Set silenced until 05:00 tomorrow
-    let targetDate = setHours(setMinutes(new Date(), 0), 5);
-    if (new Date().getHours() >= 5) {
-      targetDate = addDays(targetDate, 1);
-    }
+    try {
+      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
+      
+      // Set silenced until 05:00 tomorrow
+      let targetDate = setHours(setMinutes(new Date(), 0), 5);
+      if (new Date().getHours() >= 5) {
+        targetDate = addDays(targetDate, 1);
+      }
 
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert({
-        id: session.user.id,
-        notificacoes_silenciadas_ate: targetDate.toISOString()
-      });
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: userId,
+          notificacoes_silenciadas_ate: targetDate.toISOString()
+        });
 
-    const { error: eventError } = await supabase
-      .from('sleep_events')
-      .insert([{
-        user_id: session.user.id,
-        inicio_sono: new Date().toISOString()
-      }]);
+      const { error: eventError } = await supabase
+        .from('sleep_events')
+        .insert([{
+          user_id: userId,
+          inicio_sono: new Date().toISOString()
+        }]);
 
-    if (!profileError && !eventError) {
+      if (profileError) throw profileError;
+      if (eventError) throw eventError;
+
       setIsSilenced(true);
       toast.success('Modo Sono Ativado', {
         description: 'Notificações silenciadas até as 05:00.',
         icon: <Moon className="h-4 w-4" />
       });
+    } catch (error) {
+      console.error('Erro ao ativar modo sono:', error);
+      toast.error('Erro ao salvar no hardware');
     }
   };
 
@@ -303,20 +315,22 @@ function Dashboard() {
   };
 
   const handleSaveCheckin = async () => {
-    if (!session) return setShowCheckin(false);
-    const today = new Date().toISOString().split('T')[0];
-    
-    const { error } = await supabase
-      .from('checkin_diario')
-      .upsert({
-        user_id: session.user.id,
-        data: today,
-        horas_sono: checkin.horas_sono ? parseFloat(checkin.horas_sono) : null,
-        marmitas_prontas: checkin.marmitas_prontas,
-        treino_madrugada_realizado: checkin.treino_madrugada_realizado,
-      }, { onConflict: 'user_id,data' });
+    try {
+      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { error } = await supabase
+        .from('checkin_diario')
+        .upsert({
+          user_id: userId,
+          data: today,
+          horas_sono: checkin.horas_sono ? parseFloat(checkin.horas_sono) : null,
+          marmitas_prontas: checkin.marmitas_prontas,
+          treino_madrugada_realizado: checkin.treino_madrugada_realizado,
+        }, { onConflict: 'user_id,data' });
 
-    if (!error) {
+      if (error) throw error;
+
       setShowCheckin(false);
       toast.success('Dia iniciado!');
       if (!checkin.treino_madrugada_realizado) {
@@ -325,62 +339,76 @@ function Dashboard() {
           duration: 6000,
         });
       }
+    } catch (error) {
+      console.error('Erro ao salvar checkin:', error);
+      toast.error('Erro ao salvar no hardware');
     }
   };
 
   const handleCreateTask = async () => {
     if (!newTask.titulo) return;
 
-    const tagsArray = newTask.tags.split(',').map(t => t.trim()).filter(t => t !== '');
-    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-    
-    const { data, error } = await supabase
-      .from('tarefas')
-      .insert([{
-        user_id: userId,
-        titulo: newTask.titulo,
-        projeto_id: newTask.projeto_id || null,
-        data_execucao: newTask.data_execucao,
-        repeticao: newTask.repeticao,
-        tags: tagsArray,
-        lembrete_ead_48h: newTask.lembrete_ead_48h,
-        status: 'Entrada' // Todas as novas tarefas caem na Entrada por padrão
-      }])
-      .select('*, projetos(nome, cor)')
-      .single();
+    try {
+      const tagsArray = newTask.tags.split(',').map(t => t.trim()).filter(t => t !== '');
+      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
+      
+      const { data, error } = await supabase
+        .from('tarefas')
+        .insert([{
+          user_id: userId,
+          titulo: newTask.titulo,
+          projeto_id: newTask.projeto_id || null,
+          data_execucao: newTask.data_execucao,
+          repeticao: newTask.repeticao,
+          tags: tagsArray,
+          lembrete_ead_48h: newTask.lembrete_ead_48h,
+          status: 'Entrada'
+        }])
+        .select('*, projetos(nome, cor)')
+        .single();
 
-    if (data) {
-      setShowAddTask(false);
-      setNewTask({
-        titulo: '',
-        projeto_id: 'none',
-        data_execucao: new Date().toISOString().split('T')[0],
-        repeticao: 'none',
-        tags: '',
-        lembrete_ead_48h: false
-      });
-      toast.success('Tarefa enviada para Entrada');
-      const userId = session?.user?.id;
-      if (userId) fetchData(userId);
+      if (error) throw error;
+
+      if (data) {
+        setShowAddTask(false);
+        setNewTask({
+          titulo: '',
+          projeto_id: 'none',
+          data_execucao: new Date().toISOString().split('T')[0],
+          repeticao: 'none',
+          tags: '',
+          lembrete_ead_48h: false
+        });
+        toast.success('Tarefa enviada para Entrada');
+        setTasks(prev => [data, ...prev]);
+      }
+    } catch (error) {
+      console.error('Erro ao criar tarefa:', error);
+      toast.error('Erro ao salvar no hardware');
     }
   };
 
   const handleAddHydration = async () => {
-    if (!session) return;
-    const today = new Date().toISOString().split('T')[0];
-    const newAmount = hydration + 500;
-    
-    const { error } = await supabase
-      .from('hidratacao')
-      .upsert({
-        user_id: session.user.id,
-        data: today,
-        quantidade_ml: newAmount
-      }, { onConflict: 'user_id,data' });
+    try {
+      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
+      const today = new Date().toISOString().split('T')[0];
+      const newAmount = hydration + 500;
+      
+      const { error } = await supabase
+        .from('hidratacao')
+        .upsert({
+          user_id: userId,
+          data: today,
+          quantidade_ml: newAmount
+        }, { onConflict: 'user_id,data' });
 
-    if (!error) {
+      if (error) throw error;
+
       setHydration(newAmount);
       toast.success('Hidratação registrada (+500ml)');
+    } catch (error) {
+      console.error('Erro ao salvar hidratação:', error);
+      toast.error('Erro ao salvar no hardware');
     }
   };
 

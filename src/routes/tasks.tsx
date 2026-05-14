@@ -19,7 +19,8 @@ function TasksPage() {
   const [newTitle, setNewTitle] = useState('');
   const [loading, setLoading] = useState(true);
   const { moveTask } = useTaskActions(() => {
-    if (session?.user?.id) fetchTasks(session.user.id);
+    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
+    fetchTasks(userId);
   });
 
   useEffect(() => {
@@ -36,23 +37,16 @@ function TasksPage() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
-      if (newSession?.user?.id) {
-        fetchTasks(newSession.user.id);
-      } else {
-        setTasks([]);
-      }
+      const userId = newSession?.user?.id || '00000000-0000-0000-0000-000000000000';
+      fetchTasks(userId);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const fetchTasks = async (userId: string) => {
-    if (!userId) {
-      console.log('Tentativa de busca ignorada: usuário nulo');
-      return;
-    }
+    if (!userId) return;
     
-    console.log('Buscando tarefas para usuário:', userId);
     const { data, error } = await supabase
       .from('tarefas')
       .select('*, projetos(nome, cor)')
@@ -67,7 +61,6 @@ function TasksPage() {
       return;
     }
 
-    console.log('Tarefas carregadas:', data?.length);
     if (data) setTasks(data);
   };
 
@@ -102,8 +95,6 @@ function TasksPage() {
     }
   };
 
-  // Logic moved to useTaskActions hook
-
   const deleteTask = async (id: string) => {
     const { error } = await supabase.from('tarefas').delete().eq('id', id);
     if (!error) {
@@ -114,7 +105,6 @@ function TasksPage() {
 
   if (loading) return null;
 
-  // Grouping tasks by primary tag (first tag) or project
   const groupedTasks = tasks.reduce((acc: any, task) => {
     const key = task.projetos?.nome || 'Sem Projeto';
     if (!acc[key]) acc[key] = [];
