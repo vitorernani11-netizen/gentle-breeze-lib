@@ -35,6 +35,7 @@ function TasksPage() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [errorState, setErrorState] = useState<string | null>(null);
   
   const [newTask, setNewTask] = useState({
     titulo: '',
@@ -50,31 +51,58 @@ function TasksPage() {
 
   useEffect(() => {
     fetchTasks();
-    setLoading(false);
   }, []);
 
   const fetchTasks = () => {
-    const allTasks = loadFromLocal(TASKS_KEY) || [];
-    const filteredTasks = allTasks.filter((t: any) => 
-      t.status === 'Entrada' && !t.status_concluido
-    ).sort((a: any, b: any) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-    setTasks(filteredTasks);
+    try {
+      setLoading(true);
+      const allTasks = loadFromLocal(TASKS_KEY);
+      
+      if (!Array.isArray(allTasks)) {
+        throw new Error('Formato de dados inválido no hardware.');
+      }
+
+      const filteredTasks = allTasks.filter((t: any) => 
+        t && t.status === 'Entrada' && !t.status_concluido
+      ).sort((a: any, b: any) => {
+        const dateA = new Date(a.created_at || 0).getTime();
+        const dateB = new Date(b.created_at || 0).getTime();
+        return dateB - dateA;
+      });
+      
+      setTasks(filteredTasks);
+      setErrorState(null);
+    } catch (error: any) {
+      console.error('Erro ao carregar tarefas:', error);
+      setErrorState('Falha ao acessar banco de dados local.');
+      toast.error('O hardware falhou ao carregar a Entrada.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTask.titulo.trim()) return;
+    
+    // Validação Básica
+    if (!newTask.titulo.trim()) {
+      toast.error('Título é obrigatório para captura.');
+      return;
+    }
+
+    if (newTask.titulo.length > 100) {
+      toast.error('Título muito longo (máx 100 caracteres).');
+      return;
+    }
 
     try {
       const task = {
         id: crypto.randomUUID(),
-        titulo: newTask.titulo,
-        descricao: newTask.descricao,
+        titulo: newTask.titulo.trim(),
+        descricao: newTask.descricao.trim(),
         repeticao: newTask.recorrencia,
         data_execucao: newTask.vencimento || new Date().toISOString().split('T')[0],
-        prioridade: parseInt(newTask.prioridade),
+        prioridade: parseInt(newTask.prioridade) || 4,
         user_id: 'local-user',
         status: 'Entrada',
         status_concluido: false,
@@ -97,19 +125,43 @@ function TasksPage() {
       toast.success('Tarefa capturada com sucesso');
     } catch (error: any) {
       console.error('Erro ao adicionar tarefa:', error);
-      toast.error('Falha ao salvar no hardware');
+      toast.error('O hardware rejeitou o novo registro.');
     }
   };
 
   const deleteTask = (id: string) => {
-    const allTasks = loadFromLocal(TASKS_KEY) || [];
-    const updatedTasks = allTasks.filter((t: any) => t.id !== id);
-    saveToLocal(TASKS_KEY, updatedTasks);
-    setTasks(tasks.filter(t => t.id !== id));
-    toast.success('Tarefa removida');
+    if (!id) return;
+    
+    try {
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
+      const updatedTasks = allTasks.filter((t: any) => t.id !== id);
+      saveToLocal(TASKS_KEY, updatedTasks);
+      setTasks(tasks.filter(t => t.id !== id));
+      toast.success('Registro deletado');
+    } catch (error) {
+      console.error('Erro ao deletar tarefa:', error);
+      toast.error('Falha ao remover do hardware.');
+    }
   };
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center font-mono">
+        <span className="text-zinc-500 animate-pulse font-black uppercase tracking-[0.3em]">Carregando Pipeline...</span>
+      </div>
+    );
+  }
+
+  if (errorState) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center font-mono p-6 text-center">
+        <AlertCircle size={48} className="text-red-500 mb-4" />
+        <h2 className="text-xl font-black uppercase mb-2">Erro de Hardware</h2>
+        <p className="text-zinc-500 text-xs mb-8 uppercase tracking-widest">{errorState}</p>
+        <Button onClick={() => window.location.reload()} className="bg-white text-black rounded-none h-12 px-8 font-black uppercase">Reiniciar Sistema</Button>
+      </div>
+    );
+  }
 
   const triagemItems = [
     { num: '1', label: 'Classificação', desc: 'Onde/Quando/Entrega', color: 'border-white' },
@@ -154,10 +206,12 @@ function TasksPage() {
             </DialogHeader>
             <form onSubmit={handleAddTask} className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Título do Registro</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Título do Registro *</Label>
                 <Input 
                   value={newTask.titulo}
                   onChange={e => setNewTask({...newTask, titulo: e.target.value})}
+                  maxLength={100}
+                  required
                   className="bg-zinc-900 border-2 border-white rounded-none h-12 font-bold focus-visible:ring-0 focus:border-[#00ff41]"
                   placeholder="EX: FINALIZAR REFATORAÇÃO"
                 />
