@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 
-import appCss from "../styles.css?url";
+import "../styles.css";
 
 function NotFoundComponent() {
   return (
