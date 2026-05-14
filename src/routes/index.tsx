@@ -72,14 +72,27 @@ function Dashboard() {
   });
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      const userId = session?.user?.id || 'anonymous';
-      checkTodayCheckin(userId);
-      fetchData(userId);
-      setLoading(false);
-    });
-  }, []);
+    const checkLockStatus = () => {
+      const now = new Date();
+      const lockStart = setMinutes(setHours(now, 21), 30);
+      const lockEnd = setHours(now, 6);
+      
+      // If we are between 21:30 and 23:59
+      if (now >= lockStart) {
+        setIsLocked(!showCheckin);
+      } 
+      // If we are between 00:00 and 06:00
+      else if (now < lockEnd) {
+        setIsLocked(!showCheckin);
+      } else {
+        setIsLocked(false);
+      }
+    };
+
+    checkLockStatus();
+    const interval = setInterval(checkLockStatus, 60000);
+    return () => clearInterval(interval);
+  }, [showCheckin]);
 
   const fetchData = async (userId: string) => {
     const today = new Date().toISOString().split('T')[0];
