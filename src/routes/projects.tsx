@@ -84,9 +84,14 @@ function Projects() {
     <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20">
       <header className="mb-10 flex justify-between items-end">
         <div>
-          <div className="flex items-center gap-2 text-purple-500 mb-2">
-            <Layers size={20} />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Estrutura</span>
+          <div className="flex items-center gap-4 mb-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/' })} className="transition-none -ml-3 text-zinc-500 hover:text-white">
+              <ArrowLeft size={24} />
+            </Button>
+            <div className="flex items-center gap-2 text-purple-500">
+              <Layers size={20} />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Estrutura</span>
+            </div>
           </div>
           <h1 className="text-4xl font-black tracking-tighter uppercase leading-none">Projetos</h1>
         </div>
