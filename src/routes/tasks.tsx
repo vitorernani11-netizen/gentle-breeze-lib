@@ -46,7 +46,7 @@ function TasksPage() {
   const [isAddingTask, setIsAddingTask] = useState(false);
   
 
-  const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask, updateTask, rescheduleTask } = useTaskActions(() => {
+  const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask, updateTask, rescheduleTask, addTask } = useTaskActions(() => {
     fetchTasks();
     if (location.pathname === '/tasks' && window.location.hash === '#redirect-to-today') {
        navigate({ to: '/' });
@@ -55,6 +55,13 @@ function TasksPage() {
 
   useEffect(() => {
     fetchTasks();
+    // Add event listener for local storage changes from other components/pages
+    const handleStorageChange = () => {
+      console.log('[Hardware:Sync] Storage change detected');
+      fetchTasks();
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const fetchTasks = () => {
@@ -110,39 +117,26 @@ function TasksPage() {
     recorrencia: string;
     prioridade: number;
     lembrete: string | null;
+    reminders?: any[];
     descricao?: string;
     hora_vencimento?: string | null;
   }) => {
-    try {
-      const task = {
-        id: crypto.randomUUID(),
-        titulo: taskData.titulo,
-        descricao: taskData.descricao || '',
-        repeticao: taskData.recorrencia || 'none',
-        data_execucao: taskData.vencimento,
-        prioridade: taskData.prioridade || 4,
-        triagem_stage: 1,
-        user_id: 'local-user',
-        status: 'Entrada',
-        status_concluido: false,
-        created_at: new Date().toISOString(),
-        tags: [],
-        lembrete: taskData.lembrete,
-        hora_vencimento: taskData.hora_vencimento
-      };
+    const task = addTask({
+      titulo: taskData.titulo,
+      descricao: taskData.descricao || '',
+      repeticao: taskData.recorrencia || 'none',
+      data_execucao: taskData.vencimento,
+      prioridade: taskData.prioridade || 4,
+      status: 'Entrada',
+      lembrete: taskData.lembrete,
+      reminders: taskData.reminders || [],
+      hora_vencimento: taskData.hora_vencimento
+    });
 
-      console.log('[Hardware:Entrada]', task);
-
-      const allTasks = loadFromLocal(TASKS_KEY) || [];
-      saveToLocal(TASKS_KEY, [task, ...allTasks]);
-      
-      setActiveTasks(prev => [task, ...prev]);
+    if (task) {
       toast.success('Tarefa capturada', {
         className: 'bg-black border-2 border-[#00ff41] text-[#00ff41] font-mono'
       });
-    } catch (error: any) {
-      console.error('Erro ao adicionar tarefa:', error);
-      toast.error('O hardware rejeitou o novo registro.');
     }
   };
 

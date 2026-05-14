@@ -48,6 +48,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
       });
 
       saveToLocal(TASKS_KEY, updatedTasks);
+      window.dispatchEvent(new Event('storage'));
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Erro ao completar tarefa:', error);
@@ -121,6 +122,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
       });
 
       saveToLocal(TASKS_KEY, updatedTasks);
+      window.dispatchEvent(new Event('storage'));
       toast.success(status === 'Hoje' ? 'Mover: Hoje' : 'Mover: Amanhã');
       if (onSuccess) onSuccess();
     } catch (error) {
@@ -177,6 +179,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
         t.id === taskId ? { ...t, ...updates, updated_at: new Date().toISOString() } : t
       );
       saveToLocal(TASKS_KEY, updatedTasks);
+      window.dispatchEvent(new Event('storage'));
       console.log('[Task:Update]', { taskId, updates });
       if (onSuccess) onSuccess();
     } catch (error) {
@@ -185,5 +188,31 @@ export const useTaskActions = (onSuccess?: () => void) => {
     }
   };
 
-  return { completeTask, rescheduleTask, moveTask, updateTriagemStage, restoreTask, deletePermanent, updateTask };
+  const addTask = (taskData: any) => {
+    try {
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
+      const newTask = {
+        id: crypto.randomUUID(),
+        created_at: new Date().toISOString(),
+        status_concluido: false,
+        triagem_stage: 1,
+        user_id: 'local-user',
+        tags: [],
+        ...taskData
+      };
+      
+      const updatedTasks = [newTask, ...allTasks];
+      saveToLocal(TASKS_KEY, updatedTasks);
+      window.dispatchEvent(new Event('storage'));
+      console.log('[Hardware:Sync]', updatedTasks.length);
+      if (onSuccess) onSuccess();
+      return newTask;
+    } catch (error) {
+      console.error('Erro ao adicionar tarefa:', error);
+      toast.error('Erro ao salvar nova tarefa.');
+      return null;
+    }
+  };
+
+  return { completeTask, rescheduleTask, moveTask, updateTriagemStage, restoreTask, deletePermanent, updateTask, addTask };
 };
