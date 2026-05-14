@@ -246,7 +246,7 @@ function TasksPage() {
                       <button
                         key={s}
                         aria-label={`Mover para estágio ${s}`}
-                        onClick={() => updateTriagemStage(task.id, s)}
+                        onClick={(e) => { e.stopPropagation(); updateTriagemStage(task.id, s); }}
                         className={cn(
                           "w-5 h-5 text-[8px] font-bold flex items-center justify-center rounded-md transition-all",
                           (task.triagem_stage || 1) === s 
