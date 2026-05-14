@@ -1,12 +1,14 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Plus, Layers, Folder, MoreVertical, Hash, ArrowLeft } from 'lucide-react';
+import { Plus, Layers, Folder, MoreVertical, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { saveToLocal, loadFromLocal } from '@/lib/storage';
+
+const PROJECTS_KEY = 'hardware_humano_projects';
+const TASKS_KEY = 'hardware_humano_tasks';
 
 export const Route = createFileRoute('/projects')({
   component: Projects,
@@ -23,58 +25,50 @@ function Projects() {
     fetchProjects();
   }, []);
 
-  const fetchProjects = async () => {
+  const fetchProjects = () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-      
-      const { data, error } = await supabase
-        .from('projetos')
-        .select('*, tarefas(count)')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+      const allProjects = loadFromLocal(PROJECTS_KEY) || [];
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
 
-      if (error) throw error;
-      if (data) setProjects(data);
+      // Add task count to projects
+      const projectsWithCount = allProjects.map((p: any) => {
+        const count = allTasks.filter((t: any) => t.projeto_id === p.id && !t.status_concluido).length;
+        return { ...p, tarefas: [{ count }] };
+      });
+
+      setProjects(projectsWithCount);
     } catch (error) {
-      console.error('Erro ao buscar projetos:', error);
+      console.error('Erro ao buscar projetos localmente:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const addProject = async () => {
+  const addProject = () => {
     if (!newProjectName.trim()) return;
     setLoading(true);
     
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-      
-      const { data, error } = await supabase
-        .from('projetos')
-        .insert([{ 
-          nome: newProjectName, 
-          user_id: userId,
-          cor: '#' + Math.floor(Math.random()*16777215).toString(16)
-        }])
-        .select()
-        .single();
+      const newProject = { 
+        id: crypto.randomUUID(),
+        nome: newProjectName, 
+        user_id: 'local-user',
+        cor: '#' + Math.floor(Math.random()*16777215).toString(16),
+        created_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
+      const all = loadFromLocal(PROJECTS_KEY) || [];
+      const updated = [newProject, ...all];
+      saveToLocal(PROJECTS_KEY, updated);
 
-      if (data) {
-        setProjects([data, ...projects]);
-        setNewProjectName('');
-        setShowAdd(false);
-        toast.success('Projeto criado com sucesso');
-        fetchProjects(); 
-      }
+      setProjects([newProject, ...projects]);
+      setNewProjectName('');
+      setShowAdd(false);
+      toast.success('Projeto criado com sucesso');
+      fetchProjects(); 
     } catch (error: any) {
-      console.error('Erro ao criar projeto:', error);
-      toast.error('Erro ao criar projeto: ' + (error.message || 'Falha na conexão'), {
-        style: { background: '#7f1d1d', color: '#fff', border: 'none' }
-      });
+      console.error('Erro ao criar projeto localmente:', error);
+      toast.error('Erro ao criar projeto');
     } finally {
       setLoading(false);
     }
@@ -103,16 +97,16 @@ function Projects() {
               <Plus size={24} />
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-zinc-950 border-zinc-900 rounded-3xl p-8">
+          <DialogContent className="bg-zinc-950 border-zinc-900 rounded-3xl p-8 sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-center">Novo Projeto</DialogTitle>
             </DialogHeader>
             <div className="space-y-6 py-6">
-              <Input 
+              <input 
                 placeholder="Nome do projeto" 
                 value={newProjectName}
                 onChange={(e) => setNewProjectName(e.target.value)}
-                className="bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold text-lg focus-visible:ring-1 ring-zinc-700"
+                className="w-full bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold text-lg focus:outline-none focus:ring-1 ring-zinc-700 text-white"
               />
               <Button onClick={addProject} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none">
                 Criar Projeto
@@ -137,10 +131,6 @@ function Projects() {
                 variant="ghost" 
                 size="icon" 
                 className="h-10 w-10 text-zinc-700 hover:text-white hover:bg-zinc-800 transition-all"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Ação de mais opções
-                }}
               >
                 <MoreVertical size={20} />
               </Button>
