@@ -74,11 +74,6 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
   const renderHighlights = () => {
     if (!nlpData || nlpData.detectedPatterns.length === 0) return null;
 
-    let parts: JSX.Element[] = [];
-    let currentText = inputValue;
-
-    // This is a simplified highlighter. In a real scenario, we'd need something more robust.
-    // For now, we'll just show the detected tags below the input or as a visual indicator.
     return (
       <div className="absolute left-3 top-[-24px] flex gap-2 animate-in fade-in slide-in-from-bottom-2">
         {nlpData.detectedPatterns.map((pattern, idx) => (
@@ -149,7 +144,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
   );
 
   return (
-    <div className="relative group w-full max-w-2xl mx-auto">
+    <div className="relative group w-full max-w-2xl mx-auto mb-12">
       {renderHighlights()}
       
       <div className="bg-zinc-950 border-4 border-white p-2 flex flex-col gap-2 relative z-10">
@@ -159,7 +154,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-            placeholder="O QUE PRECISA SER FEITO? (ex: treinar amanhã às 18h)"
+            placeholder="O QUE PRECISA SER FEITO?"
             className="bg-transparent border-none text-xl sm:text-2xl font-black uppercase italic tracking-tighter focus-visible:ring-0 placeholder:text-zinc-800 h-14"
           />
           <Button 
@@ -172,7 +167,6 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
 
         <div className="flex items-center justify-between border-t-2 border-zinc-900 pt-2 px-2">
           <div className="flex items-center gap-1 sm:gap-4">
-            {/* Date Picker */}
             {isMobile ? (
               <Drawer>
                 <DrawerTrigger asChild>
@@ -203,7 +197,6 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
               </Popover>
             )}
 
-            {/* Reminders */}
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-zinc-500 hover:text-white hover:bg-zinc-900 rounded-none gap-2 px-2">
@@ -238,7 +231,6 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
               </PopoverContent>
             </Popover>
 
-            {/* Priority */}
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="sm" className={cn(
