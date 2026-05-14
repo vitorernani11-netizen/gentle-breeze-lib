@@ -19,7 +19,8 @@ export const useTaskActions = (onSuccess?: () => void) => {
               if (!t.data_execucao || typeof t.data_execucao !== 'string') {
                 throw new Error('Data de execução ausente ou inválida');
               }
-              const [year, month, day] = t.data_execucao.split('-').map(Number);
+              const dateString = String(t.data_execucao);
+              const [year, month, day] = dateString.split('-').map(Number);
               const currentDate = new Date(year, month - 1, day);
               
               if (isNaN(currentDate.getTime())) throw new Error('Data inválida');
