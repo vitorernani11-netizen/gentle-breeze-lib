@@ -27,6 +27,13 @@ export function BottomNav() {
           <span className="text-[10px] font-medium">Financeiro</span>
         </Link>
         <Link 
+          to="/menu" 
+          className="flex flex-col items-center justify-center space-y-1 text-muted-foreground [&.active]:text-foreground transition-none"
+        >
+          <Utensils size={20} />
+          <span className="text-[10px] font-medium">Cardápio</span>
+        </Link>
+        <Link 
           to="/profile" 
           className="flex flex-col items-center justify-center space-y-1 text-muted-foreground [&.active]:text-foreground transition-none"
         >
