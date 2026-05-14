@@ -33,13 +33,19 @@ function TasksPage() {
   }, []);
 
   const fetchTasks = async (userId: string) => {
-    const { data } = await supabase
+    if (userId === 'anonymous') return;
+    const { data, error } = await supabase
       .from('tarefas')
       .select('*, projetos(nome, cor)')
       .eq('user_id', userId)
       .eq('status', 'Entrada')
       .eq('status_concluido', false)
       .order('created_at', { ascending: false });
+
+    if (error) {
+      toast.error('Erro ao carregar tarefas');
+      return;
+    }
 
     if (data) setTasks(data);
   };
@@ -103,14 +109,24 @@ function TasksPage() {
         <h1 className="text-3xl font-black uppercase tracking-tighter">Entrada</h1>
       </header>
 
-      <form onSubmit={addTask} className="flex gap-2 mb-10">
+      <form 
+        onSubmit={(e) => {
+          e.preventDefault();
+          addTask(e);
+        }} 
+        className="flex gap-2 mb-10"
+      >
         <Input
           placeholder="O que está na mente?"
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
           className="bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold text-lg focus-visible:ring-1 ring-zinc-700"
         />
-        <Button type="submit" size="icon" className="h-14 w-14 rounded-2xl bg-white text-black hover:bg-zinc-200 transition-none shrink-0">
+        <Button 
+          type="submit" 
+          size="icon" 
+          className="h-14 w-14 rounded-2xl bg-white text-black hover:bg-zinc-200 transition-all shrink-0 active:scale-95"
+        >
           <Plus size={24} />
         </Button>
       </form>
