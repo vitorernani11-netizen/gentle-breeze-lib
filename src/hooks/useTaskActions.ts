@@ -5,14 +5,16 @@ export const useTaskActions = (onSuccess?: () => void) => {
   const completeTask = async (task: any) => {
     // If it's recurring, we don't just "complete" it, we move it to the next date
     if (task.repeticao && task.repeticao !== 'none') {
-      const currentDate = new Date(task.data_execucao);
+      // Usar data local para evitar problemas de fuso horário na conversão para ISO
+      const [year, month, day] = task.data_execucao.split('-').map(Number);
+      const currentDate = new Date(year, month - 1, day);
       let nextDate = new Date(currentDate);
 
       if (task.repeticao === 'daily') nextDate.setDate(currentDate.getDate() + 1);
       if (task.repeticao === 'weekly') nextDate.setDate(currentDate.getDate() + 7);
       if (task.repeticao === 'monthly') nextDate.setMonth(currentDate.getMonth() + 1);
 
-      const nextDateStr = nextDate.toISOString().split('T')[0];
+      const nextDateStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
 
       const { error } = await supabase
         .from('tarefas')

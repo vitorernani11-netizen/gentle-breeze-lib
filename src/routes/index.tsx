@@ -310,18 +310,18 @@ function Dashboard() {
       .single();
 
     if (data) {
-      // Tarefas agora vão para Entrada, não aparecem imediatamente no Hoje
-      // a menos que o usuário as mova deliberadamente
       setShowAddTask(false);
       setNewTask({
         titulo: '',
-        projeto_id: '',
+        projeto_id: 'none',
         data_execucao: new Date().toISOString().split('T')[0],
         repeticao: 'none',
         tags: '',
         lembrete_ead_48h: false
       });
       toast.success('Tarefa enviada para Entrada');
+      const userId = session?.user?.id;
+      if (userId) fetchData(userId);
     }
   };
 
