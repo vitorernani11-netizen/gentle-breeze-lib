@@ -115,10 +115,19 @@ function Dashboard() {
       return days <= 1; // "Faltar 1 dia" included
     }) || [];
 
+    // Fetch hydration
+    const { data: hydrationData } = await supabase
+      .from('hidratacao')
+      .select('quantidade_ml')
+      .eq('user_id', userId)
+      .eq('data', today)
+      .single();
+
     if (tasksData) setTasks(tasksData);
     if (projectsData) setProjects(projectsData);
     setAcademicUrgent(urgentAcademic);
     if (count !== null) setEliminatedCount(count);
+    if (hydrationData) setHydration(hydrationData.quantidade_ml);
   };
 
   const checkTodayCheckin = async (userId: string) => {
