@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      anxiety_dumps: {
+        Row: {
+          conteudo: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          conteudo: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          conteudo?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       atividades_academicas: {
         Row: {
           concluido: boolean
