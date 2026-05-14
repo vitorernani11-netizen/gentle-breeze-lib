@@ -33,13 +33,19 @@ function TasksPage() {
   }, []);
 
   const fetchTasks = async (userId: string) => {
-    const { data } = await supabase
+    if (userId === 'anonymous') return;
+    const { data, error } = await supabase
       .from('tarefas')
       .select('*, projetos(nome, cor)')
       .eq('user_id', userId)
       .eq('status', 'Entrada')
       .eq('status_concluido', false)
       .order('created_at', { ascending: false });
+
+    if (error) {
+      toast.error('Erro ao carregar tarefas');
+      return;
+    }
 
     if (data) setTasks(data);
   };
