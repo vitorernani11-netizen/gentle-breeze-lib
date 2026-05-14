@@ -43,10 +43,12 @@ function Dashboard() {
   const [projects, setProjects] = useState<any[]>([]);
   const [academicUrgent, setAcademicUrgent] = useState<any[]>([]);
   const [eliminatedCount, setEliminatedCount] = useState(0);
+  const [hydration, setHydration] = useState(0);
   
   const [checkin, setCheckin] = useState({
     horas_sono: '',
     marmitas_prontas: false,
+    treino_madrugada_realizado: false,
   });
 
   const [newTask, setNewTask] = useState({
@@ -54,7 +56,8 @@ function Dashboard() {
     projeto_id: '',
     data_execucao: new Date().toISOString().split('T')[0],
     repeticao: 'none',
-    tags: ''
+    tags: '',
+    lembrete_ead_48h: false
   });
 
   const { completeTask } = useTaskActions(() => {
