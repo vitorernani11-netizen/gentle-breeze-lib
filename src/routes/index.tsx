@@ -15,12 +15,15 @@ import {
   Clock, 
   ChevronRight,
   Filter,
-  ArrowRight
+  ArrowRight,
+  GraduationCap,
+  AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useTaskActions } from '@/hooks/useTaskActions';
+import { differenceInDays, parseISO } from 'date-fns';
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -34,6 +37,7 @@ function Dashboard() {
   const [showAddTask, setShowAddTask] = useState(false);
   const [tasks, setTasks] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
+  const [academicUrgent, setAcademicUrgent] = useState<any[]>([]);
   const [eliminatedCount, setEliminatedCount] = useState(0);
   
   const [checkin, setCheckin] = useState({
@@ -91,8 +95,22 @@ function Dashboard() {
       .eq('user_id', userId)
       .eq('deletado_por_inercia', true);
 
+    // Fetch urgent academic activities (< 1 day remaining)
+    const { data: academicData } = await supabase
+      .from('atividades_academicas')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('concluido', false)
+      .order('data_entrega', { ascending: true });
+
+    const urgentAcademic = academicData?.filter(a => {
+      const days = differenceInDays(parseISO(a.data_entrega), new Date());
+      return days <= 1; // "Faltar 1 dia" included
+    }) || [];
+
     if (tasksData) setTasks(tasksData);
     if (projectsData) setProjects(projectsData);
+    setAcademicUrgent(urgentAcademic);
     if (count !== null) setEliminatedCount(count);
   };
 
@@ -260,6 +278,51 @@ function Dashboard() {
 
       {/* Task List grouped by Project */}
       <div className="space-y-10">
+        {/* Urgent Academic Activities */}
+        {academicUrgent.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 px-1">
+              <div className="h-1 w-4 rounded-full bg-red-600" />
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-red-500 flex items-center gap-1">
+                <AlertCircle size={10} /> Emergência Acadêmica
+              </h2>
+            </div>
+            <div className="space-y-4">
+              {academicUrgent.map((activity) => (
+                <Card key={activity.id} className="p-6 bg-red-950/20 border-red-900/50 rounded-[2rem] border-l-4 border-l-red-600 flex flex-col gap-3 transition-none">
+                  <div className="flex justify-between items-start">
+                    <div className="flex flex-col gap-1.5 flex-1 pr-4">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-[8px] h-4 bg-red-600 border-none text-white font-black uppercase py-0 px-1.5">
+                          {differenceInDays(parseISO(activity.data_entrega), new Date()) <= 0 ? 'ENTREGA HOJE' : 'ENTREGA AMANHÃ'}
+                        </Badge>
+                        <span className="text-[9px] font-black text-red-400 uppercase flex items-center">
+                          <GraduationCap size={10} className="mr-1" /> Acadêmico
+                        </span>
+                      </div>
+                      <span className="font-bold text-xl leading-tight text-white">{activity.nome}</span>
+                    </div>
+                    
+                    <Button 
+                      size="icon" 
+                      className="h-14 w-14 rounded-2xl bg-red-600 text-white hover:bg-red-700 transition-none shrink-0 border-none"
+                      onClick={async () => {
+                        const { error } = await supabase.from('atividades_academicas').update({ concluido: true }).eq('id', activity.id);
+                        if (!error) {
+                          setAcademicUrgent(academicUrgent.filter(a => a.id !== activity.id));
+                          toast.success('Atividade concluída!');
+                        }
+                      }}
+                    >
+                      <Check size={24} />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
         {tasks.length > 0 ? (
           Object.entries(
             tasks.reduce((acc: any, task) => {

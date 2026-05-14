@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      atividades_academicas: {
+        Row: {
+          concluido: boolean
+          created_at: string
+          data_entrega: string
+          id: string
+          nome: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          concluido?: boolean
+          created_at?: string
+          data_entrega: string
+          id?: string
+          nome: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          concluido?: boolean
+          created_at?: string
+          data_entrega?: string
+          id?: string
+          nome?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       checkin_diario: {
         Row: {
           created_at: string | null
