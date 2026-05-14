@@ -120,12 +120,20 @@ function Projects() {
             <Card key={project.id} className="p-6 bg-zinc-950 border-zinc-900 rounded-3xl flex items-center justify-between transition-none relative overflow-hidden group">
               <div className="absolute top-0 left-0 w-1.5 h-full" style={{ backgroundColor: project.cor }} />
               <div className="flex flex-col gap-1 pl-2">
-                <span className="text-xl font-black tracking-tight">{project.nome}</span>
+                <span className="text-xl font-black tracking-tight group-hover:text-white transition-colors">{project.nome}</span>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
                   {project.tarefas?.[0]?.count || 0} Tarefas Ativas
                 </span>
               </div>
-              <Button variant="ghost" size="icon" className="h-10 w-10 text-zinc-700 hover:text-white transition-none">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-10 w-10 text-zinc-700 hover:text-white hover:bg-zinc-800 transition-all"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Ação de mais opções
+                }}
+              >
                 <MoreVertical size={20} />
               </Button>
             </Card>
