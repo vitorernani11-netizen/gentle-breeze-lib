@@ -195,7 +195,7 @@ function MenuPage() {
         </DialogContent>
       </Dialog>
 
-      <BottomNav />
+      {/* BottomNav removed */}
     </div>
   );
 }
