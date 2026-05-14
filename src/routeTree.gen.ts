@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as MenuRouteImport } from './routes/menu'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FinanceRouteImport } from './routes/finance'
 import { Route as IndexRouteImport } from './routes/index'
@@ -23,6 +24,11 @@ const TasksRoute = TasksRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MenuRoute = MenuRouteImport.update({
+  id: '/menu',
+  path: '/menu',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/finance': typeof FinanceRoute
   '/login': typeof LoginRoute
+  '/menu': typeof MenuRoute
   '/profile': typeof ProfileRoute
   '/tasks': typeof TasksRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/finance': typeof FinanceRoute
   '/login': typeof LoginRoute
+  '/menu': typeof MenuRoute
   '/profile': typeof ProfileRoute
   '/tasks': typeof TasksRoute
 }
@@ -60,21 +68,23 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/finance': typeof FinanceRoute
   '/login': typeof LoginRoute
+  '/menu': typeof MenuRoute
   '/profile': typeof ProfileRoute
   '/tasks': typeof TasksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/finance' | '/login' | '/profile' | '/tasks'
+  fullPaths: '/' | '/finance' | '/login' | '/menu' | '/profile' | '/tasks'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/finance' | '/login' | '/profile' | '/tasks'
-  id: '__root__' | '/' | '/finance' | '/login' | '/profile' | '/tasks'
+  to: '/' | '/finance' | '/login' | '/menu' | '/profile' | '/tasks'
+  id: '__root__' | '/' | '/finance' | '/login' | '/menu' | '/profile' | '/tasks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   FinanceRoute: typeof FinanceRoute
   LoginRoute: typeof LoginRoute
+  MenuRoute: typeof MenuRoute
   ProfileRoute: typeof ProfileRoute
   TasksRoute: typeof TasksRoute
 }
@@ -93,6 +103,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/menu': {
+      id: '/menu'
+      path: '/menu'
+      fullPath: '/menu'
+      preLoaderRoute: typeof MenuRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -123,9 +140,20 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   FinanceRoute: FinanceRoute,
   LoginRoute: LoginRoute,
+  MenuRoute: MenuRoute,
   ProfileRoute: ProfileRoute,
   TasksRoute: TasksRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
