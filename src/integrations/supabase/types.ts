@@ -51,6 +51,7 @@ export type Database = {
           horas_sono: number | null
           id: string
           marmitas_prontas: boolean | null
+          treino_madrugada_realizado: boolean | null
           updated_at: string | null
           user_id: string
         }
@@ -60,6 +61,7 @@ export type Database = {
           horas_sono?: number | null
           id?: string
           marmitas_prontas?: boolean | null
+          treino_madrugada_realizado?: boolean | null
           updated_at?: string | null
           user_id: string
         }
@@ -69,6 +71,7 @@ export type Database = {
           horas_sono?: number | null
           id?: string
           marmitas_prontas?: boolean | null
+          treino_madrugada_realizado?: boolean | null
           updated_at?: string | null
           user_id?: string
         }
@@ -107,6 +110,33 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           valor?: number
+        }
+        Relationships: []
+      }
+      hidratacao: {
+        Row: {
+          created_at: string
+          data: string
+          id: string
+          quantidade_ml: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: string
+          id?: string
+          quantidade_ml?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          id?: string
+          quantidade_ml?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -233,6 +263,7 @@ export type Database = {
           data_execucao: string | null
           deletado_por_inercia: boolean | null
           id: string
+          lembrete_ead_48h: boolean | null
           projeto_id: string | null
           repeticao: string | null
           status: Database["public"]["Enums"]["tarefa_status"] | null
@@ -251,6 +282,7 @@ export type Database = {
           data_execucao?: string | null
           deletado_por_inercia?: boolean | null
           id?: string
+          lembrete_ead_48h?: boolean | null
           projeto_id?: string | null
           repeticao?: string | null
           status?: Database["public"]["Enums"]["tarefa_status"] | null
@@ -269,6 +301,7 @@ export type Database = {
           data_execucao?: string | null
           deletado_por_inercia?: boolean | null
           id?: string
+          lembrete_ead_48h?: boolean | null
           projeto_id?: string | null
           repeticao?: string | null
           status?: Database["public"]["Enums"]["tarefa_status"] | null
