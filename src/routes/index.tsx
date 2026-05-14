@@ -47,6 +47,8 @@ function Dashboard() {
   const [academicUrgent, setAcademicUrgent] = useState<any[]>([]);
   const [eliminatedCount, setEliminatedCount] = useState(0);
   const [hydration, setHydration] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [anxietyContent, setAnxietyContent] = useState('');
   
   const [checkin, setCheckin] = useState({
     horas_sono: '',
