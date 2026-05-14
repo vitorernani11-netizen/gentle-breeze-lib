@@ -4,9 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { BottomNav } from '@/components/BottomNav';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowUpCircle, ArrowDownCircle, TrendingUp, TrendingDown, Plus, ChevronRight } from 'lucide-react';
-import { toast } from 'sonner';
-import { BarChart, Bar, CartesianGrid, Tooltip, ResponsiveContainer, Cell, XAxis, YAxis } from 'recharts';
+import { TrendingUp, TrendingDown, Plus, Wallet, Building2 } from 'lucide-react';
+import { BarChart, Bar, Tooltip, ResponsiveContainer, Cell, XAxis, YAxis } from 'recharts';
 
 export const Route = createFileRoute('/finance')({
   component: FinancePage,
@@ -16,11 +15,9 @@ function FinancePage() {
   const navigate = useNavigate();
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
       fetchRecords(session?.user?.id || 'anonymous');
     });
   }, []);
@@ -48,7 +45,6 @@ function FinancePage() {
   const personalBalance = calculateBalance('Pessoal');
   const nabihBalance = calculateBalance('Nabih');
 
-  // Prepare data for the net profit chart (last 7 days)
   const getChartData = () => {
     const data = [];
     const today = new Date();
@@ -70,7 +66,6 @@ function FinancePage() {
       data.push({
         name: d.toLocaleDateString('pt-BR', { weekday: 'short' }),
         lucro: profit,
-        date: dateStr
       });
     }
     return data;
@@ -86,12 +81,11 @@ function FinancePage() {
         <h1 className="text-3xl font-black uppercase tracking-tighter">Financeiro</h1>
       </header>
 
-      {/* Balance Cards */}
       <div className="grid grid-cols-1 gap-4 mb-8">
         <Card className="p-6 bg-zinc-900 border-zinc-800 rounded-3xl">
           <div className="flex justify-between items-start mb-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Conta Pessoal</span>
-            <WalletIcon className="text-zinc-500" size={16} />
+            <Wallet className="text-zinc-500" size={16} />
           </div>
           <p className={`text-3xl font-black tracking-tighter ${personalBalance >= 0 ? 'text-white' : 'text-red-500'}`}>
             R$ {personalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -101,7 +95,7 @@ function FinancePage() {
         <Card className="p-6 bg-white border-none rounded-3xl">
           <div className="flex justify-between items-start mb-2">
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Caixa Nabih</span>
-            <BuildingIcon className="text-zinc-400" size={16} />
+            <Building2 className="text-zinc-400" size={16} />
           </div>
           <p className={`text-3xl font-black tracking-tighter ${nabihBalance >= 0 ? 'text-black' : 'text-red-600'}`}>
             R$ {nabihBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -109,7 +103,6 @@ function FinancePage() {
         </Card>
       </div>
 
-      {/* Chart Section */}
       <section className="mb-10">
         <div className="flex justify-between items-end mb-4 px-1">
           <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-500">Meta Semanal (Nabih)</h2>
@@ -135,7 +128,6 @@ function FinancePage() {
         </Card>
       </section>
 
-      {/* History */}
       <section>
         <div className="flex justify-between items-center mb-4 px-1">
           <h2 className="text-sm font-bold uppercase tracking-widest text-zinc-500">Histórico</h2>
@@ -168,12 +160,4 @@ function FinancePage() {
       <BottomNav />
     </div>
   );
-}
-
-function WalletIcon({ className, size }: { className?: string; size?: number }) {
-  return <Plus className={className} size={size} />;
-}
-
-function BuildingIcon({ className, size }: { className?: string; size?: number }) {
-  return <Plus className={className} size={size} />;
 }
