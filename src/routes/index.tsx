@@ -20,14 +20,17 @@ import {
   AlertCircle,
   Droplets,
   Dumbbell,
-  Bell
+  Bell,
+  PowerOff,
+  Zap
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { useTaskActions } from '@/hooks/useTaskActions';
-import { differenceInDays, parseISO, format } from 'date-fns';
+import { differenceInDays, parseISO, format, isWithinInterval, setHours, setMinutes } from 'date-fns';
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -44,6 +47,8 @@ function Dashboard() {
   const [academicUrgent, setAcademicUrgent] = useState<any[]>([]);
   const [eliminatedCount, setEliminatedCount] = useState(0);
   const [hydration, setHydration] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [anxietyContent, setAnxietyContent] = useState('');
   
   const [checkin, setCheckin] = useState({
     horas_sono: '',
@@ -67,6 +72,29 @@ function Dashboard() {
   });
 
   useEffect(() => {
+    const checkLockStatus = () => {
+      const now = new Date();
+      const lockStart = setMinutes(setHours(now, 21), 30);
+      const lockEnd = setHours(now, 6);
+      
+      // If we are between 21:30 and 23:59
+      if (now >= lockStart) {
+        setIsLocked(!showCheckin);
+      } 
+      // If we are between 00:00 and 06:00
+      else if (now < lockEnd) {
+        setIsLocked(!showCheckin);
+      } else {
+        setIsLocked(false);
+      }
+    };
+
+    checkLockStatus();
+    const interval = setInterval(checkLockStatus, 60000);
+    return () => clearInterval(interval);
+  }, [showCheckin]);
+
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       const userId = session?.user?.id || 'anonymous';
@@ -75,6 +103,19 @@ function Dashboard() {
       setLoading(false);
     });
   }, []);
+
+  const handleSaveAnxietyDump = async () => {
+    if (!anxietyContent.trim() || !session) return;
+    
+    const { error } = await supabase
+      .from('anxiety_dumps')
+      .insert([{ user_id: session.user.id, conteudo: anxietyContent }]);
+
+    if (!error) {
+      setAnxietyContent('');
+      toast.success('Descarregado. Agora descanse.');
+    }
+  };
 
   const fetchData = async (userId: string) => {
     const today = new Date().toISOString().split('T')[0];
@@ -231,6 +272,18 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20">
+      {isLocked && (
+        <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
+          <PowerOff size={80} className="text-zinc-800 mb-8 animate-pulse" />
+          <h2 className="text-3xl font-black tracking-tighter uppercase mb-4">Hardware exausto</h2>
+          <p className="text-zinc-500 font-bold uppercase tracking-widest text-sm max-w-xs">
+            PROJETO X: DESLIGAMENTO OBRIGATÓRIO.
+          </p>
+          <p className="text-zinc-700 text-[10px] font-black uppercase tracking-[0.3em] mt-12">
+            Acesso liberado às 06:00 após Check-in
+          </p>
+        </div>
+      )}
       <header className="mb-10">
         <div className="flex items-center gap-2 text-blue-500 mb-2">
           <Calendar size={20} />
@@ -261,6 +314,33 @@ function Dashboard() {
                 <span className="text-sm font-black">{(hydration / 1000).toFixed(1)}L</span>
               </Button>
             </div>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="icon" className="h-14 w-14 rounded-2xl bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800 transition-none">
+                  <Zap size={24} />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-zinc-950 border-zinc-900 rounded-[2.5rem] p-8 sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-center">Anxiety Dump</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6 py-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Descarregue seus pensamentos</Label>
+                    <Textarea 
+                      placeholder="O que está te preocupando? Solte tudo aqui..." 
+                      value={anxietyContent}
+                      onChange={(e) => setAnxietyContent(e.target.value)}
+                      className="bg-zinc-900 border-none min-h-[150px] rounded-2xl px-6 py-4 font-bold focus-visible:ring-1 ring-zinc-700 resize-none"
+                    />
+                  </div>
+                  <Button onClick={handleSaveAnxietyDump} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none">
+                    Descarregar e Relaxar
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
             <DialogTrigger asChild>
