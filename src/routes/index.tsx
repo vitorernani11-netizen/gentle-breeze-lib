@@ -20,6 +20,7 @@ import {
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTaskActions } from '@/hooks/useTaskActions';
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -47,6 +48,12 @@ function Dashboard() {
     tags: ''
   });
 
+  const { completeTask } = useTaskActions(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) fetchData(session.user.id);
+    });
+  });
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -66,6 +73,7 @@ function Dashboard() {
       .select('*, projetos(nome, cor)')
       .eq('user_id', userId)
       .eq('data_execucao', today)
+      .eq('status', 'Hoje')
       .eq('status_concluido', false)
       .order('created_at', { ascending: false });
 
@@ -126,16 +134,14 @@ function Dashboard() {
         data_execucao: newTask.data_execucao,
         repeticao: newTask.repeticao,
         tags: tagsArray,
-        status: 'Hoje'
+        status: 'Entrada' // Todas as novas tarefas caem na Entrada por padrão
       }])
       .select('*, projetos(nome, cor)')
       .single();
 
     if (data) {
-      const today = new Date().toISOString().split('T')[0];
-      if (data.data_execucao === today) {
-        setTasks([data, ...tasks]);
-      }
+      // Tarefas agora vão para Entrada, não aparecem imediatamente no Hoje
+      // a menos que o usuário as mova deliberadamente
       setShowAddTask(false);
       setNewTask({
         titulo: '',
@@ -144,43 +150,11 @@ function Dashboard() {
         repeticao: 'none',
         tags: ''
       });
-      toast.success('Tarefa agendada');
+      toast.success('Tarefa enviada para Entrada');
     }
   };
 
-  const completeTask = async (task: any) => {
-    // If it's recurring, we don't just "complete" it, we move it to the next date
-    if (task.repeticao !== 'none') {
-      const currentDate = new Date(task.data_execucao);
-      let nextDate = new Date(currentDate);
-
-      if (task.repeticao === 'daily') nextDate.setDate(currentDate.getDate() + 1);
-      if (task.repeticao === 'weekly') nextDate.setDate(currentDate.getDate() + 7);
-      if (task.repeticao === 'monthly') nextDate.setMonth(currentDate.getMonth() + 1);
-
-      const nextDateStr = nextDate.toISOString().split('T')[0];
-
-      const { error } = await supabase
-        .from('tarefas')
-        .update({ data_execucao: nextDateStr })
-        .eq('id', task.id);
-
-      if (!error) {
-        setTasks(tasks.filter(t => t.id !== task.id));
-        toast.success(`Recorrência agendada para ${nextDate.toLocaleDateString()}`);
-      }
-    } else {
-      const { error } = await supabase
-        .from('tarefas')
-        .update({ status_concluido: true })
-        .eq('id', task.id);
-
-      if (!error) {
-        setTasks(tasks.filter(t => t.id !== task.id));
-        toast.success('Tarefa concluída!');
-      }
-    }
-  };
+  // Logic moved to useTaskActions hook
 
   if (loading) return null;
 
