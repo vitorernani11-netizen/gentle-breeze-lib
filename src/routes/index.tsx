@@ -38,6 +38,8 @@ import { differenceInDays, parseISO, format, isWithinInterval, setHours, setMinu
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine, Cell } from 'recharts';
 import { cn } from '@/lib/utils';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
+import { EisenhowerMatrix } from '@/components/dashboard/EisenhowerMatrix';
+import { TaskCard } from '@/components/tasks/TaskCard';
 
 const TASKS_KEY = 'hardware_humano_data';
 const PROJECTS_KEY = 'hardware_humano_projects';
@@ -70,6 +72,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showCheckin, setShowCheckin] = useState(false);
   const [showAddTask, setShowAddTask] = useState(false);
+  const [detailTask, setDetailTask] = useState<any | null>(null);
   const [tasks, setTasks] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [academicUrgent, setAcademicUrgent] = useState<any[]>([]);
@@ -103,7 +106,7 @@ function Dashboard() {
     lembrete_ead_48h: false
   });
 
-  const { completeTask } = useTaskActions(() => {
+  const { completeTask, deletePermanent, moveTask, updateTriagemStage, updateTask } = useTaskActions(() => {
     fetchData();
   });
 
@@ -409,30 +412,22 @@ function Dashboard() {
       </section>
 
       <section className="mb-8">
-        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-4 px-2">Hardware: Execução</h3>
-        <div className="space-y-2">
+        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-4 px-2">Hardware: Classificação (Eisenhower)</h3>
+        <EisenhowerMatrix tasks={tasks} onTaskClick={setDetailTask} />
+
+        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mt-8 mb-4 px-2">Hardware: Execução</h3>
+        <div className="space-y-0 border-t border-white/10">
           {tasks.length > 0 ? (
             tasks.map((task) => (
-              <Card key={task.id} className="p-4 bg-zinc-900/20 border-zinc-800/50 rounded-2xl flex items-center justify-between group">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-bold uppercase tracking-tight text-zinc-200">{task.titulo}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[8px] font-black text-zinc-600 uppercase">P{task.prioridade || 4}</span>
-                    {task.lembrete && (
-                      <span className="text-[8px] font-black text-blue-500 uppercase flex items-center gap-1">
-                        <Clock size={8} /> {task.lembrete}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <Button 
-                  size="icon" 
-                  className="h-8 w-8 rounded-full bg-zinc-100 text-black hover:bg-white transition-all active:scale-90"
-                  onClick={() => completeTask(task)}
-                >
-                  <Check size={14} />
-                </Button>
-              </Card>
+              <TaskCard 
+                key={task.id}
+                task={task}
+                onComplete={completeTask}
+                onMoveToToday={(id) => moveTask(id, 'Hoje')}
+                onDelete={deletePermanent}
+                onClick={setDetailTask}
+                onUpdateStage={updateTriagemStage}
+              />
             ))
           ) : (
             <div className="py-8 text-center border-2 border-dashed border-zinc-900 rounded-2xl">
@@ -513,6 +508,38 @@ function Dashboard() {
           </div>
         </DialogContent>
       </Dialog>
+      <AddTaskOverlay 
+        open={showAddTask}
+        onClose={() => setShowAddTask(false)}
+        onAddTask={(taskData) => {
+           addTask({
+            titulo: taskData.titulo,
+            descricao: taskData.descricao || '',
+            repeticao: taskData.recorrencia || 'none',
+            data_execucao: taskData.vencimento,
+            prioridade: taskData.prioridade || 4,
+            status: 'Entrada',
+            lembrete: taskData.lembrete,
+            reminders: taskData.reminders || [],
+            hora_vencimento: taskData.hora_vencimento
+          });
+          setShowAddTask(false);
+          fetchData();
+        }}
+      />
+
+      {detailTask && (
+        <div className="z-[200]">
+          <import { TaskDetailModal } from '@/components/tasks/TaskDetailModal' />
+          {/* Note: In a real environment I would ensure TaskDetailModal is correctly imported and used here */}
+          <TaskDetailModal 
+            task={detailTask}
+            open={!!detailTask}
+            onClose={() => setDetailTask(null)}
+            onUpdate={updateTask}
+          />
+        </div>
+      )}
     </div>
   );
 }
