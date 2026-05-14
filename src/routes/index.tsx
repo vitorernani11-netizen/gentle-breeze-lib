@@ -205,7 +205,10 @@ function Dashboard() {
       setSleepHistory(history);
       
       const todaySleep = sleepData.find(d => d.data === today);
-      if (todaySleep) setHoursSleptToday(todaySleep.horas_sono);
+      if (todaySleep) {
+        setHoursSleptToday(todaySleep.horas_sono);
+        setIsRecoveryMode(todaySleep.horas_sono !== null && todaySleep.horas_sono < 6);
+      }
     }
 
     if (profileData?.notificacoes_silenciadas_ate) {
