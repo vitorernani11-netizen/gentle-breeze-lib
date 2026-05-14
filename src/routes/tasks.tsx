@@ -13,7 +13,10 @@ import {
   Calendar, 
   AlertCircle,
   ChevronDown,
-  Info
+  ChevronUp,
+  RefreshCw,
+  Flame,
+  Check
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskActions } from '@/hooks/useTaskActions';
@@ -32,8 +35,10 @@ export const Route = createFileRoute('/tasks')({
 
 function TasksPage() {
   const navigate = useNavigate();
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [activeTasks, setActiveTasks] = useState<any[]>([]);
+  const [completedTasks, setCompletedTasks] = useState<any[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [errorState, setErrorState] = useState<string | null>(null);
   
@@ -45,7 +50,7 @@ function TasksPage() {
     prioridade: '4'
   });
 
-  const { moveTask } = useTaskActions(() => {
+  const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask } = useTaskActions(() => {
     fetchTasks();
   });
 
@@ -62,15 +67,24 @@ function TasksPage() {
         throw new Error('Formato de dados inválido no hardware.');
       }
 
-      const filteredTasks = allTasks.filter((t: any) => 
+      const active = allTasks.filter((t: any) => 
         t && t.status === 'Entrada' && !t.status_concluido
       ).sort((a: any, b: any) => {
         const dateA = new Date(a.created_at || 0).getTime();
         const dateB = new Date(b.created_at || 0).getTime();
         return dateB - dateA;
       });
+
+      const completed = allTasks.filter((t: any) => 
+        t && t.status === 'Entrada' && t.status_concluido
+      ).sort((a: any, b: any) => {
+        const dateA = new Date(a.created_at || 0).getTime();
+        const dateB = new Date(b.created_at || 0).getTime();
+        return dateB - dateA;
+      });
       
-      setTasks(filteredTasks);
+      setActiveTasks(active);
+      setCompletedTasks(completed);
       setErrorState(null);
     } catch (error: any) {
       console.error('Erro ao carregar tarefas:', error);
@@ -84,14 +98,8 @@ function TasksPage() {
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validação Básica
     if (!newTask.titulo.trim()) {
       toast.error('Título é obrigatório para captura.');
-      return;
-    }
-
-    if (newTask.titulo.length > 100) {
-      toast.error('Título muito longo (máx 100 caracteres).');
       return;
     }
 
@@ -103,6 +111,7 @@ function TasksPage() {
         repeticao: newTask.recorrencia,
         data_execucao: newTask.vencimento || new Date().toISOString().split('T')[0],
         prioridade: parseInt(newTask.prioridade) || 4,
+        triagem_stage: 1, // Default stage
         user_id: 'local-user',
         status: 'Entrada',
         status_concluido: false,
@@ -110,10 +119,12 @@ function TasksPage() {
         tags: []
       };
 
+      console.log('[Hardware:Entrada]', task);
+
       const allTasks = loadFromLocal(TASKS_KEY) || [];
       saveToLocal(TASKS_KEY, [task, ...allTasks]);
       
-      setTasks(prev => [task, ...prev]);
+      setActiveTasks(prev => [task, ...prev]);
       setNewTask({
         titulo: '',
         descricao: '',
@@ -122,52 +133,28 @@ function TasksPage() {
         prioridade: '4'
       });
       setShowAddModal(false);
-      toast.success('Tarefa capturada com sucesso');
+      toast.success('Tarefa capturada', {
+        className: 'bg-black border-2 border-[#00ff41] text-[#00ff41] font-mono'
+      });
     } catch (error: any) {
       console.error('Erro ao adicionar tarefa:', error);
       toast.error('O hardware rejeitou o novo registro.');
     }
   };
 
-  const deleteTask = (id: string) => {
-    if (!id) return;
-    
-    try {
-      const allTasks = loadFromLocal(TASKS_KEY) || [];
-      const updatedTasks = allTasks.filter((t: any) => t.id !== id);
-      saveToLocal(TASKS_KEY, updatedTasks);
-      setTasks(tasks.filter(t => t.id !== id));
-      toast.success('Registro deletado');
-    } catch (error) {
-      console.error('Erro ao deletar tarefa:', error);
-      toast.error('Falha ao remover do hardware.');
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center font-mono">
-        <span className="text-zinc-500 animate-pulse font-black uppercase tracking-[0.3em]">Carregando Pipeline...</span>
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center font-mono text-[#00ff41]">
+        <span className="animate-pulse font-black uppercase tracking-[0.3em]">Carregando Pipeline...</span>
       </div>
     );
   }
 
-  if (errorState) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center font-mono p-6 text-center">
-        <AlertCircle size={48} className="text-red-500 mb-4" />
-        <h2 className="text-xl font-black uppercase mb-2">Erro de Hardware</h2>
-        <p className="text-zinc-500 text-xs mb-8 uppercase tracking-widest">{errorState}</p>
-        <Button onClick={() => window.location.reload()} className="bg-white text-black rounded-none h-12 px-8 font-black uppercase">Reiniciar Sistema</Button>
-      </div>
-    );
-  }
-
-  const triagemItems = [
-    { num: '1', label: 'Classificação', desc: 'Onde/Quando/Entrega', color: 'border-white' },
-    { num: '2', label: 'Fracionar', desc: 'Quebrar em partes', color: 'border-white' },
-    { num: '3', label: 'Planejamento', desc: 'Agendar execução', color: 'border-white' },
-    { num: '4', label: 'Execução', desc: 'Foco atual', color: 'border-[#00ff41] text-[#00ff41]' },
+  const triagemStages = [
+    { num: 1, label: 'Classificação', desc: 'Onde/Quando', color: 'border-white' },
+    { num: 2, label: 'Fracionar', desc: 'Quebrar', color: 'border-white' },
+    { num: 3, label: 'Planejamento', desc: 'Agendar', color: 'border-white' },
+    { num: 4, label: 'Execução', desc: 'Foco atual', color: 'border-[#00ff41] text-[#00ff41]' },
   ];
 
   const getPriorityColor = (p: number) => {
@@ -180,24 +167,33 @@ function TasksPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-6 pt-24 pb-20 font-mono">
+    <div className="min-h-screen bg-[#0a0a0a] text-white p-4 sm:p-6 pt-24 pb-20 font-mono">
       <div className="fixed top-6 right-6 flex items-center gap-2 bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800 z-50">
         <WifiOff size={14} className="text-zinc-500" />
         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Hardware Local</span>
       </div>
 
-      <header className="mb-10 flex items-center justify-between">
+      <header className="mb-10 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/' })} className="border-2 border-white rounded-none hover:bg-white hover:text-black transition-none">
+          <Button 
+            aria-label="Voltar para Dashboard"
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate({ to: '/' })} 
+            className="border-2 border-white rounded-none hover:bg-white hover:text-black transition-none w-12 h-12 shrink-0"
+          >
             <ArrowLeft size={20} />
           </Button>
-          <h1 className="text-4xl font-black uppercase tracking-tighter italic">Entrada</h1>
+          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter italic">Entrada</h1>
         </div>
         
         <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
           <DialogTrigger asChild>
-            <Button className="bg-white text-black hover:bg-[#00ff41] hover:text-black font-black uppercase rounded-none border-b-4 border-r-4 border-zinc-400 active:border-0 active:translate-y-1 active:translate-x-1 transition-none h-12 px-6">
-              <Plus className="mr-2" /> Capturar
+            <Button 
+              aria-label="Capturar nova tarefa"
+              className="bg-white text-black hover:bg-[#00ff41] hover:text-black font-black uppercase rounded-none border-b-4 border-r-4 border-zinc-400 active:border-0 active:translate-y-1 active:translate-x-1 transition-none h-14 px-4 sm:px-6"
+            >
+              <Plus className="mr-2" /> <span className="hidden sm:inline">Capturar</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-[#0a0a0a] border-4 border-white rounded-none p-8 sm:max-w-md">
@@ -277,17 +273,17 @@ function TasksPage() {
 
       {/* Triagem Section */}
       <section className="mb-12">
-        <div className="border-4 border-white p-6 bg-zinc-950">
+        <div className="border-4 border-white p-4 sm:p-6 bg-zinc-950">
           <h2 className="text-[12px] font-black uppercase tracking-[0.3em] text-white mb-6 flex items-center gap-2">
             <AlertCircle size={14} className="text-[#ff00ff]" />
             REGISTRAR: Triagem de Atividades
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {triagemItems.map((item) => (
-              <div key={item.num} className={cn("border-2 p-4 flex flex-col gap-1 transition-none", item.color)}>
-                <span className="text-2xl font-black italic opacity-50">#{item.num}</span>
-                <span className="font-black uppercase tracking-tighter text-sm">{item.label}</span>
-                <span className="text-[9px] uppercase font-bold text-zinc-500">{item.desc}</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {triagemStages.map((stage) => (
+              <div key={stage.num} className={cn("border-2 p-3 sm:p-4 flex flex-col gap-1 transition-none", stage.color)}>
+                <span className="text-xl sm:text-2xl font-black italic opacity-50">#{stage.num}</span>
+                <span className="font-black uppercase tracking-tighter text-[10px] sm:text-sm">{stage.label}</span>
+                <span className="text-[8px] sm:text-[9px] uppercase font-bold text-zinc-500">{stage.desc}</span>
               </div>
             ))}
           </div>
@@ -295,29 +291,55 @@ function TasksPage() {
       </section>
 
       <div className="space-y-6">
-        {tasks.length > 0 ? (
-          tasks.map((task) => (
-            <Card key={task.id} className="bg-zinc-950 border-2 border-white p-6 rounded-none flex items-center justify-between group hover:border-[#00ff41] transition-none relative overflow-hidden">
+        {activeTasks.length > 0 ? (
+          activeTasks.map((task) => (
+            <Card key={task.id} className="bg-zinc-950 border-2 border-white p-4 sm:p-6 rounded-none flex flex-col sm:flex-row sm:items-center justify-between group hover:border-[#00ff41] transition-none relative overflow-hidden gap-6">
               {task.prioridade === 1 && (
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#ff0055]" />
+                <div className="absolute top-0 left-0 w-1 sm:w-2 h-full bg-[#ff0055]" />
               )}
-              <div className="flex flex-col gap-2 flex-1 pr-4">
-                <div className="flex items-center gap-3">
+              
+              <div className="flex flex-col gap-2 flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className={cn("text-[9px] font-black uppercase px-2 py-0.5 border", getPriorityColor(task.prioridade))}>
                     P{task.prioridade || 4}
                   </span>
+                  
+                  {/* Triagem Stage Selector */}
+                  <div className="flex border border-zinc-800 bg-zinc-900 p-0.5 rounded-none">
+                    {[1, 2, 3, 4].map((s) => (
+                      <button
+                        key={s}
+                        aria-label={`Mover para estágio ${s}`}
+                        onClick={() => updateTriagemStage(task.id, s)}
+                        className={cn(
+                          "w-5 h-5 text-[8px] font-black flex items-center justify-center transition-none",
+                          (task.triagem_stage || 1) === s 
+                            ? "bg-white text-black" 
+                            : "text-zinc-600 hover:text-white"
+                        )}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+
                   {task.repeticao !== 'none' && (
                     <span className="text-[9px] font-black uppercase bg-zinc-900 text-zinc-400 px-2 py-0.5 border border-zinc-800 flex items-center gap-1">
                       <Clock size={10} /> {task.repeticao === 'daily' ? 'DIÁRIO' : 'SEMANAL'}
                     </span>
                   )}
-                  <h3 className="font-black text-xl uppercase italic tracking-tighter truncate">{task.titulo}</h3>
                 </div>
+                
+                <h3 className="font-black text-xl sm:text-2xl uppercase italic tracking-tighter truncate leading-none">
+                  {task.titulo}
+                </h3>
+                
                 {task.descricao && (
-                  <p className="text-zinc-500 text-[10px] font-bold uppercase leading-tight line-clamp-2">
+                  <p className="text-zinc-500 text-[10px] font-bold uppercase leading-tight line-clamp-2 italic">
                     {task.descricao}
                   </p>
                 )}
+                
                 <div className="flex items-center gap-4 mt-1">
                   <span className="text-[9px] font-black text-zinc-600 uppercase flex items-center gap-1">
                     <Calendar size={10} /> {task.data_execucao}
@@ -325,20 +347,29 @@ function TasksPage() {
                 </div>
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex gap-2 sm:shrink-0 h-12">
                 <Button 
-                  size="sm" 
-                  className="bg-white text-black hover:bg-[#00ff41] text-[10px] font-black uppercase rounded-none border-b-2 border-r-2 border-zinc-300 h-10 px-4 transition-none"
+                  aria-label="Concluir tarefa"
+                  size="icon"
+                  className="bg-[#00ff41] text-black hover:bg-green-400 font-black rounded-none border-b-4 border-r-4 border-green-900 w-12 h-12 transition-none"
+                  onClick={() => completeTask(task)}
+                >
+                  <Check size={20} />
+                </Button>
+                <Button 
+                  aria-label="Mover para Hoje"
+                  className="bg-white text-black hover:bg-[#ff00ff] hover:text-white text-[10px] font-black uppercase rounded-none border-b-4 border-r-4 border-zinc-400 h-12 px-4 transition-none"
                   onClick={() => moveTask(task.id, 'Hoje')}
                 >
                   Hoje
                 </Button>
                 <Button 
-                  size="sm" 
-                  className="bg-zinc-900 text-zinc-500 hover:bg-white hover:text-black text-[10px] font-black uppercase rounded-none border-2 border-zinc-800 h-10 px-4 transition-none"
-                  onClick={() => deleteTask(task.id)}
+                  aria-label="Deletar registro"
+                  size="icon"
+                  className="bg-zinc-900 text-zinc-500 hover:bg-[#ff0055] hover:text-white text-[10px] font-black uppercase rounded-none border-2 border-zinc-800 w-12 h-12 transition-none"
+                  onClick={() => deletePermanent(task.id)}
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={18} />
                 </Button>
               </div>
             </Card>
@@ -346,6 +377,59 @@ function TasksPage() {
         ) : (
           <div className="border-2 border-dashed border-zinc-800 p-20 text-center">
             <p className="text-zinc-700 font-black uppercase tracking-[0.5em] text-xs">Pipeline Vazio</p>
+          </div>
+        )}
+
+        {/* Completed Tasks Accordion */}
+        {completedTasks.length > 0 && (
+          <div className="mt-20">
+            <button 
+              aria-label={showCompleted ? "Recolher tarefas concluídas" : "Expandir tarefas concluídas"}
+              onClick={() => setShowCompleted(!showCompleted)}
+              className="w-full border-t-2 border-dashed border-zinc-800 py-6 flex items-center justify-between group"
+            >
+              <span className="text-zinc-600 font-black uppercase tracking-[0.2em] text-[10px]">
+                Tarefas Concluídas ({completedTasks.length})
+              </span>
+              {showCompleted ? <ChevronUp size={16} className="text-zinc-700" /> : <ChevronDown size={16} className="text-zinc-700" />}
+            </button>
+            
+            {showCompleted && (
+              <div className="space-y-4 pt-4 animate-in slide-in-from-top-2 duration-300">
+                {completedTasks.map((task) => (
+                  <div 
+                    key={task.id} 
+                    className="flex items-center justify-between p-4 bg-zinc-950/50 border border-zinc-900 opacity-40 group hover:opacity-100 transition-opacity"
+                  >
+                    <div className="flex flex-col gap-1 min-w-0 pr-4">
+                      <span className="font-bold text-zinc-400 line-through uppercase tracking-tight truncate">
+                        {task.titulo}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        aria-label="Restaurar tarefa"
+                        size="icon"
+                        variant="ghost"
+                        className="w-10 h-10 border border-zinc-800 text-zinc-600 hover:text-[#00ff41] hover:border-[#00ff41] rounded-none transition-none"
+                        onClick={() => restoreTask(task.id)}
+                      >
+                        <RefreshCw size={14} />
+                      </Button>
+                      <Button 
+                        aria-label="Incinerar permanentemente"
+                        size="icon"
+                        variant="ghost"
+                        className="w-10 h-10 border border-zinc-800 text-zinc-600 hover:text-red-500 hover:border-red-500 rounded-none transition-none"
+                        onClick={() => deletePermanent(task.id)}
+                      >
+                        <Flame size={14} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
