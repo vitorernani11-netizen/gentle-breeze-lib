@@ -3,9 +3,12 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Skull, Calendar, Check, Hash, RefreshCw } from 'lucide-react';
+import { Skull, Calendar as CalendarIcon, Check, Hash, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskActions } from '@/hooks/useTaskActions';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 export const Route = createFileRoute('/purgatory')({
   component: Purgatory,
@@ -15,7 +18,12 @@ function Purgatory() {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { completeTask, rescheduleTask } = useTaskActions(() => fetchOverdueTasks());
+  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
+  const { completeTask, rescheduleTask } = useTaskActions(() => {
+    fetchOverdueTasks();
+    setSelectedTask(null);
+  });
 
   useEffect(() => {
     fetchOverdueTasks();
@@ -98,13 +106,43 @@ function Purgatory() {
                     </div>
                     
                     <div className="pt-3 border-t border-zinc-900 flex gap-2">
-                      <Button 
-                        className="flex-1 h-12 rounded-xl bg-zinc-900 border border-zinc-800 text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-none"
-                        onClick={() => rescheduleTask(task)}
-                      >
-                        <RefreshCw size={14} className="mr-2" />
-                        Reagendar
-                      </Button>
+                      <Dialog open={selectedTask?.id === task.id} onOpenChange={(open) => !open && setSelectedTask(null)}>
+                        <DialogTrigger asChild>
+                          <Button 
+                            className="flex-1 h-12 rounded-xl bg-zinc-900 border border-zinc-800 text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-none"
+                            onClick={() => setSelectedTask(task)}
+                          >
+                            <RefreshCw size={14} className="mr-2" />
+                            Reativar
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-zinc-950 border-zinc-900 rounded-[2.5rem] p-8 sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-center">Nova Data de Execução</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-6 py-6">
+                            <div className="space-y-2">
+                              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Escolha o dia</Label>
+                              <Input 
+                                type="date"
+                                value={newDate}
+                                min={new Date().toISOString().split('T')[0]}
+                                onChange={(e) => setNewDate(e.target.value)}
+                                className="bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold focus-visible:ring-1 ring-zinc-700"
+                              />
+                            </div>
+                            <Button 
+                              onClick={() => rescheduleTask(task, newDate)} 
+                              className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none"
+                            >
+                              Confirmar Reagendamento
+                            </Button>
+                            <p className="text-center text-[10px] text-zinc-500 font-bold uppercase">
+                              Aviso: Esta tarefa tem {task.contagem_adiamentos}/3 adiamentos.
+                            </p>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </Card>
                 ))}
