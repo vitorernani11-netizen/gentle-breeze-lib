@@ -110,7 +110,7 @@ function Dashboard() {
 
     if (tasksData) setTasks(tasksData);
     if (projectsData) setProjects(projectsData);
-    if (academicUrgent) setAcademicUrgent(urgentAcademic);
+    setAcademicUrgent(urgentAcademic);
     if (count !== null) setEliminatedCount(count);
   };
 
