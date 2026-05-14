@@ -39,6 +39,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLin
 import { cn } from '@/lib/utils';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { EisenhowerMatrix } from '@/components/dashboard/EisenhowerMatrix';
+import { EisenhowerGrid } from '@/components/classification/EisenhowerGrid';
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
 import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
@@ -105,7 +106,8 @@ function Dashboard() {
     data_execucao: new Date().toISOString().split('T')[0],
     repeticao: 'none',
     tags: '',
-    lembrete_ead_48h: false
+    lembrete_ead_48h: false,
+    lembrete: ''
   });
 
   const { completeTask, deletePermanent, moveTask, updateTriagemStage, updateTask, addTask } = useTaskActions(() => {
@@ -310,9 +312,10 @@ function Dashboard() {
         tags: tagsArray,
         lembrete_ead_48h: newTask.lembrete_ead_48h,
         lembrete: null, // Initial support for manual tasks from main dashboard
-        hora_vencimento: null,
+        hora_vencimento: newTask.data_execucao && newTask.lembrete ? `${newTask.data_execucao}T${newTask.lembrete}:00.000Z` : null,
         status: 'Entrada',
         status_concluido: false,
+        prioridade: 4,
         created_at: new Date().toISOString()
       };
 
@@ -326,7 +329,8 @@ function Dashboard() {
         data_execucao: new Date().toISOString().split('T')[0],
         repeticao: 'none',
         tags: '',
-        lembrete_ead_48h: false
+        lembrete_ead_48h: false,
+        lembrete: ''
       });
       toast.success('Tarefa enviada para Entrada');
       fetchData();
@@ -415,8 +419,8 @@ function Dashboard() {
 
       <section className="mb-8">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-4 px-2">Hardware: Classificação (Eisenhower)</h3>
-        <EisenhowerMatrix tasks={tasks} onTaskClick={setDetailTask} />
-
+        <EisenhowerGrid tasks={tasks} onTaskClick={setDetailTask} />
+        
         <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mt-8 mb-4 px-2">Hardware: Execução</h3>
         <div className="space-y-0 border-t border-white/10">
           {tasks.length > 0 ? (
