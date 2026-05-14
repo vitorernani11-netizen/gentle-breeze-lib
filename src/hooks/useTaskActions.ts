@@ -47,20 +47,20 @@ export const useTaskActions = (onSuccess?: () => void) => {
     const newCount = (task.contagem_adiamentos || 0) + 1;
     
     if (newCount >= 3) {
-      // Hard delete after 3 postponements
+      // Deletar do banco de dados após 3 adiamentos
       const { error } = await supabase
         .from('tarefas')
-        .update({ 
-          deletado_por_inercia: true,
-          status_concluido: true // Mark as finished but flagged as inertia
-        })
+        .delete()
         .eq('id', task.id);
 
       if (!error) {
-        toast.error(`Tarefa "${task.titulo}" eliminada por inércia.`, {
-          style: { background: '#7f1d1d', color: '#fff', border: 'none' }
+        toast.error('Tarefa deletada por inércia', {
+          style: { background: '#7f1d1d', color: '#fff', border: 'none' },
+          description: `"${task.titulo}" atingiu o limite de 3 reagendamentos.`
         });
         if (onSuccess) onSuccess();
+      } else {
+        toast.error('Erro ao deletar tarefa por inércia');
       }
       return;
     }
