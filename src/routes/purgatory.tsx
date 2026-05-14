@@ -29,6 +29,7 @@ function Purgatory() {
       .select('*, projetos(nome, cor)')
       .eq('user_id', userId)
       .eq('status_concluido', false)
+      .neq('status', 'Entrada') // Tarefas na Entrada não apodrecem no Purgatório, elas ainda não foram agendadas
       .lt('data_execucao', today)
       .order('data_execucao', { ascending: true });
 

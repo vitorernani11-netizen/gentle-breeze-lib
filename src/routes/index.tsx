@@ -66,6 +66,7 @@ function Dashboard() {
       .select('*, projetos(nome, cor)')
       .eq('user_id', userId)
       .eq('data_execucao', today)
+      .eq('status', 'Hoje')
       .eq('status_concluido', false)
       .order('created_at', { ascending: false });
 
@@ -126,16 +127,14 @@ function Dashboard() {
         data_execucao: newTask.data_execucao,
         repeticao: newTask.repeticao,
         tags: tagsArray,
-        status: 'Hoje'
+        status: 'Entrada' // Todas as novas tarefas caem na Entrada por padrão
       }])
       .select('*, projetos(nome, cor)')
       .single();
 
     if (data) {
-      const today = new Date().toISOString().split('T')[0];
-      if (data.data_execucao === today) {
-        setTasks([data, ...tasks]);
-      }
+      // Tarefas agora vão para Entrada, não aparecem imediatamente no Hoje
+      // a menos que o usuário as mova deliberadamente
       setShowAddTask(false);
       setNewTask({
         titulo: '',
@@ -144,7 +143,7 @@ function Dashboard() {
         repeticao: 'none',
         tags: ''
       });
-      toast.success('Tarefa agendada');
+      toast.success('Tarefa enviada para Entrada');
     }
   };
 

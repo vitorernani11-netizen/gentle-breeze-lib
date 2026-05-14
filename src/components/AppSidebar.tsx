@@ -26,10 +26,13 @@ export function AppSidebar() {
   const location = useLocation();
 
   const menuItems = [
+    { label: 'Entrada', icon: Plus, href: '/tasks', color: 'text-zinc-400' },
     { label: 'Hoje', icon: Calendar, href: '/', color: 'text-blue-400' },
     { label: 'Purgatório', icon: Skull, href: '/purgatory', color: 'text-red-400' },
     { label: 'Projetos', icon: Layers, href: '/projects', color: 'text-purple-400' },
     { label: 'Rotinas Diárias', icon: RotateCcw, href: '/routines', color: 'text-green-400' },
+    { label: 'Financeiro', icon: Hash, href: '/finance', color: 'text-emerald-400' },
+    { label: 'Cardápio', icon: Menu, href: '/menu', color: 'text-orange-400' },
   ];
 
   const closeSidebar = () => setOpen(false);
