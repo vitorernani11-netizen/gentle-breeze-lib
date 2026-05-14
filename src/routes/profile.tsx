@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { LogOut, User, Shield, Zap } from 'lucide-react';
@@ -12,21 +11,12 @@ export const Route = createFileRoute('/profile')({
 
 function ProfilePage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const [user] = useState<any>({ email: 'unico@usuario.app' });
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user || { email: 'unico@usuario.app' });
-    });
-  }, [navigate]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
     navigate({ to: '/login' });
-    toast.success('Logout realizado');
+    toast.success('Modo Local: Sessão resetada');
   };
-
-  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20">
@@ -48,7 +38,7 @@ function ProfilePage() {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-bold uppercase tracking-tight">Privacidade</span>
-              <span className="text-[10px] text-zinc-600 font-bold uppercase">Criptografia Ativa</span>
+              <span className="text-[10px] text-zinc-600 font-bold uppercase">Criptografia Local Ativa</span>
             </div>
           </div>
           <Zap size={16} className="text-zinc-800" />
@@ -74,7 +64,7 @@ function ProfilePage() {
           onClick={handleLogout}
         >
           <LogOut size={20} className="mr-2" />
-          Encerrar Sessão
+          Encerrar Sessão (Reset Local)
         </Button>
       </div>
     </div>

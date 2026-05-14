@@ -1,14 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TrendingDown, Clock, Smartphone, Bed, AlertTriangle, Save } from 'lucide-react';
+import { TrendingDown, Smartphone, Bed, AlertTriangle, Save } from 'lucide-react';
 import { toast } from 'sonner';
-import { subDays, format, startOfWeek, endOfWeek } from 'date-fns';
+import { subDays } from 'date-fns';
+import { saveToLocal, loadFromLocal } from '@/lib/storage';
+
+const TASKS_KEY = 'hardware_humano_tasks';
+const CHECKIN_KEY = 'hardware_humano_checkin';
+const SOCIAL_KEY = 'hardware_humano_social';
 
 export const Route = createFileRoute('/failure-report')({
   component: FailureReport,
@@ -28,48 +32,33 @@ function FailureReport() {
     fetchFailureData();
   }, []);
 
-  const fetchFailureData = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-    const sevenDaysAgo = subDays(new Date(), 7).toISOString();
+  const fetchFailureData = () => {
+    const sevenDaysAgo = subDays(new Date(), 7);
 
-    // 1. Deleted by inertia
-    // Since we now hard delete, we would ideally have a log table.
-    // As a temporary fix for the UI, we'll fetch a count of tasks 
-    // where 'deletado_por_inercia' is true if they exist, or use a default.
-    // In a real scenario, we should have a 'log_eventos' table.
-    const { count: inertiaCount } = await supabase
-      .from('tarefas')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('deletado_por_inercia', true);
-    const { data: sleepData } = await supabase
-      .from('checkin_diario')
-      .select('horas_sono')
-      .eq('user_id', userId)
-      .lt('horas_sono', 7)
-      .gte('data', sevenDaysAgo.split('T')[0]);
+    // 1. Inertia Deletions
+    const allTasks = loadFromLocal(TASKS_KEY) || [];
+    const inertiaCount = allTasks.filter((t: any) => t.deletado_por_inercia).length;
 
-    // 3. Social media usage
-    const { data: socialData } = await supabase
-      .from('uso_redes_sociais')
-      .select('minutos')
-      .eq('user_id', userId)
-      .gte('data', sevenDaysAgo.split('T')[0]);
+    // 2. Poor Sleep
+    const checkinHistory = loadFromLocal(CHECKIN_KEY) || [];
+    const poorSleep = checkinHistory.filter((h: any) => {
+      const date = new Date(h.data);
+      return date >= sevenDaysAgo && h.horas_sono && h.horas_sono < 7;
+    }).length;
 
-    const totalSocial = socialData?.reduce((acc, curr) => acc + curr.minutos, 0) || 0;
-    const poorSleep = sleepData?.length || 0;
-    
-    // Success Rate Calculation (Inverse logic)
-    // Starting at 100, subtract points for failures
-    const inertiaPenalty = 15; // Placeholder since we hard delete now, would need a log
+    // 3. Social usage
+    const socialData = loadFromLocal(SOCIAL_KEY) || [];
+    const social7 = socialData.filter((s: any) => new Date(s.data) >= sevenDaysAgo);
+    const totalSocial = social7.reduce((acc: number, curr: any) => acc + curr.minutos, 0);
+
+    // Success Rate
+    const inertiaPenalty = inertiaCount * 15;
     const sleepPenalty = poorSleep * 5;
     const socialPenalty = Math.floor(totalSocial / 60) * 2;
-    
     const calculatedSuccess = Math.max(0, 100 - (inertiaPenalty + sleepPenalty + socialPenalty));
 
     setStats({
-      deletedInertia: 5, // Mocking until a log table is added for hard deletes
+      deletedInertia: inertiaCount,
       poorSleepDays: poorSleep,
       totalSocialMinutes: totalSocial,
       successRate: calculatedSuccess,
@@ -77,29 +66,33 @@ function FailureReport() {
     setLoading(false);
   };
 
-  const handleSaveSocial = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
+  const handleSaveSocial = () => {
     if (!socialMinutes) return;
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const history = loadFromLocal(SOCIAL_KEY) || [];
+      const index = history.findIndex((h: any) => h.data === today);
 
-    const { error } = await supabase
-      .from('uso_redes_sociais')
-      .upsert({
-        user_id: userId,
-        data: new Date().toISOString().split('T')[0],
+      const data = {
+        data: today,
         minutos: parseInt(socialMinutes),
-      }, { onConflict: 'user_id,data' });
+      };
 
-    if (!error) {
+      if (index > -1) history[index] = data;
+      else history.push(data);
+
+      saveToLocal(SOCIAL_KEY, history);
       toast.success('Uso de redes sociais registrado');
       fetchFailureData();
       setSocialMinutes('');
+    } catch (error) {
+      toast.error('Erro ao salvar no hardware');
     }
   };
 
   const getAggressiveSummary = () => {
     const wasteTime = Math.floor(stats.totalSocialMinutes / 60);
-    const lostMoney = (stats.deletedInertia * 50) + (wasteTime * 20); // Arbitrary calculation
+    const lostMoney = (stats.deletedInertia * 50) + (wasteTime * 20);
     
     if (stats.successRate > 80) return "Você está sobrevivendo, mas a mediocridade espreita. Não relaxe.";
     if (stats.successRate > 50) return `Semana patética. Você jogou fora ${wasteTime}h em redes sociais e permitiu que tarefas morressem. Estima-se um prejuízo de R$ ${lostMoney} em custo de oportunidade.`;

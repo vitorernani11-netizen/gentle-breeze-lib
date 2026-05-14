@@ -1,35 +1,29 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, Plus, Wallet, Building2, Landmark } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Building2, Landmark } from 'lucide-react';
 import { BarChart, Bar, Tooltip, ResponsiveContainer, Cell, XAxis, YAxis } from 'recharts';
+import { saveToLocal, loadFromLocal } from '@/lib/storage';
+
+const FINANCE_KEY = 'hardware_humano_finance';
 
 export const Route = createFileRoute('/finance')({
   component: FinancePage,
 });
 
 function FinancePage() {
-  const navigate = useNavigate();
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      fetchRecords(session?.user?.id || '00000000-0000-0000-0000-000000000000');
-    });
+    fetchRecords();
+    setLoading(false);
   }, []);
 
-  const fetchRecords = async (userId: string) => {
-    const { data } = await supabase
-      .from('financeiro')
-      .select('*')
-      .eq('user_id', userId)
-      .order('data', { ascending: false });
-
-    if (data) setRecords(data);
-    setLoading(false);
+  const fetchRecords = () => {
+    const data = loadFromLocal(FINANCE_KEY) || [];
+    setRecords(data);
   };
 
   const calculateBalance = (conta: 'Pessoal' | 'Nabih') => {
@@ -53,8 +47,7 @@ function FinancePage() {
       const dateStr = d.toISOString().split('T')[0];
       
       const dayRecords = records.filter(r => 
-        r.conta === 'Nabih' && 
-        new Date(r.data).toISOString().split('T')[0] === dateStr
+        r.conta === 'Nabih' && r.data === dateStr
       );
 
       const profit = dayRecords.reduce((acc, curr) => {
@@ -81,7 +74,7 @@ function FinancePage() {
           <Landmark size={20} />
           <span className="text-[10px] font-black uppercase tracking-[0.2em]">Fluxo</span>
         </div>
-        <h1 className="text-4xl font-black tracking-tighter uppercase leading-none">Finanças</h1>
+        <h1 className="text-4xl font-black uppercase tracking-tighter leading-none">Finanças</h1>
       </header>
 
       <div className="grid grid-cols-1 gap-4 mb-10">

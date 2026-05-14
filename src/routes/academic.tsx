@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -8,6 +7,9 @@ import { Plus, Trash2, ArrowLeft, GraduationCap, Calendar, Check } from 'lucide-
 import { toast } from 'sonner';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { saveToLocal, loadFromLocal } from '@/lib/storage';
+
+const ACADEMIC_KEY = 'hardware_humano_academic';
 
 export const Route = createFileRoute('/academic')({
   component: AcademicPage,
@@ -15,7 +17,6 @@ export const Route = createFileRoute('/academic')({
 
 function AcademicPage() {
   const navigate = useNavigate();
-  const [session, setSession] = useState<any>(null);
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newActivity, setNewActivity] = useState({
@@ -24,69 +25,63 @@ function AcademicPage() {
   });
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-      fetchActivities(userId);
-      setLoading(false);
-    });
+    fetchActivities();
+    setLoading(false);
   }, []);
 
-  const fetchActivities = async (userId: string) => {
-    const { data } = await supabase
-      .from('atividades_academicas')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('concluido', false)
-      .order('data_entrega', { ascending: true });
-
-    if (data) setActivities(data);
+  const fetchActivities = () => {
+    const data = loadFromLocal(ACADEMIC_KEY) || [];
+    const filtered = data.filter((a: any) => !a.concluido)
+      .sort((a: any, b: any) => new Date(a.data_entrega).getTime() - new Date(b.data_entrega).getTime());
+    setActivities(filtered);
   };
 
-  const addActivity = async (e: React.FormEvent) => {
+  const addActivity = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newActivity.nome.trim()) return;
 
-    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-    const { data, error } = await supabase
-      .from('atividades_academicas')
-      .insert([{ 
-        nome: newActivity.nome, 
+    try {
+      const activity = {
+        id: crypto.randomUUID(),
+        nome: newActivity.nome,
         data_entrega: newActivity.data_entrega,
-        user_id: userId
-      }])
-      .select()
-      .single();
+        concluido: false,
+        created_at: new Date().toISOString()
+      };
 
-    if (data) {
-      setActivities([...activities, data].sort((a, b) => new Date(a.data_entrega).getTime() - new Date(b.data_entrega).getTime()));
+      const all = loadFromLocal(ACADEMIC_KEY) || [];
+      const updated = [...all, activity];
+      saveToLocal(ACADEMIC_KEY, updated);
+
+      setActivities(prev => [...prev, activity].sort((a, b) => new Date(a.data_entrega).getTime() - new Date(b.data_entrega).getTime()));
       setNewActivity({ nome: '', data_entrega: format(new Date(), 'yyyy-MM-dd') });
       toast.success('Atividade adicionada!');
-      if (session) fetchActivities(session.user.id);
+    } catch (error) {
+      toast.error('Erro ao salvar no hardware');
     }
   };
 
-  const completeActivity = async (id: string) => {
-    const { error } = await supabase
-      .from('atividades_academicas')
-      .update({ concluido: true })
-      .eq('id', id);
-
-    if (!error) {
-      setActivities(activities.filter(a => a.id !== id));
+  const completeActivity = (id: string) => {
+    try {
+      const all = loadFromLocal(ACADEMIC_KEY) || [];
+      const updated = all.map((a: any) => a.id === id ? { ...a, concluido: true } : a);
+      saveToLocal(ACADEMIC_KEY, updated);
+      setActivities(prev => prev.filter(a => a.id !== id));
       toast.success('Atividade concluída!');
+    } catch (error) {
+      toast.error('Erro ao salvar no hardware');
     }
   };
 
-  const deleteActivity = async (id: string) => {
-    const { error } = await supabase
-      .from('atividades_academicas')
-      .delete()
-      .eq('id', id);
-
-    if (!error) {
-      setActivities(activities.filter(a => a.id !== id));
+  const deleteActivity = (id: string) => {
+    try {
+      const all = loadFromLocal(ACADEMIC_KEY) || [];
+      const updated = all.filter((a: any) => a.id !== id);
+      saveToLocal(ACADEMIC_KEY, updated);
+      setActivities(prev => prev.filter(a => a.id !== id));
       toast.success('Removido');
+    } catch (error) {
+      toast.error('Erro ao salvar no hardware');
     }
   };
 
