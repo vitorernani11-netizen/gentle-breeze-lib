@@ -34,10 +34,10 @@ function TasksPage() {
   const navigate = useNavigate();
   const [activeTasks, setActiveTasks] = useState<any[]>([]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
-  const [showAddModal, setShowAddModal] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [errorState, setErrorState] = useState<string | null>(null);
+  const [selectedStage, setSelectedStage] = useState<number | null>(null);
   
 
   const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask } = useTaskActions(() => {
@@ -183,19 +183,40 @@ function TasksPage() {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {triagemStages.map((stage) => (
-              <div key={stage.num} className={cn("border-2 p-3 sm:p-4 flex flex-col gap-1 transition-none", stage.color)}>
-                <span className="text-xl sm:text-2xl font-black italic opacity-50">#{stage.num}</span>
+              <button 
+                key={stage.num} 
+                onClick={() => setSelectedStage(selectedStage === stage.num ? null : stage.num)}
+                className={cn(
+                  "border-2 p-3 sm:p-4 flex flex-col gap-1 transition-all text-left", 
+                  stage.color,
+                  selectedStage === stage.num ? "bg-white text-black scale-105 z-10" : "hover:border-[#00ff41] hover:bg-zinc-900"
+                )}
+              >
+                <div className="flex justify-between items-center">
+                  <span className={cn("text-xl sm:text-2xl font-black italic", selectedStage === stage.num ? "opacity-100" : "opacity-50")}>#{stage.num}</span>
+                  {selectedStage === stage.num && <Check size={16} className="text-[#00ff41]" />}
+                </div>
                 <span className="font-black uppercase tracking-tighter text-[10px] sm:text-sm">{stage.label}</span>
-                <span className="text-[8px] sm:text-[9px] uppercase font-bold text-zinc-500">{stage.desc}</span>
-              </div>
+                <span className={cn("text-[8px] sm:text-[9px] uppercase font-bold", selectedStage === stage.num ? "text-zinc-500" : "text-zinc-500")}>{stage.desc}</span>
+              </button>
             ))}
           </div>
+          {selectedStage && (
+            <button 
+              onClick={() => setSelectedStage(null)}
+              className="mt-4 text-[10px] font-black uppercase text-[#00ff41] hover:underline"
+            >
+              [ Limpar Filtro de Triagem ]
+            </button>
+          )}
         </div>
       </section>
 
       <div className="space-y-6">
         {activeTasks.length > 0 ? (
-          activeTasks.map((task) => (
+          activeTasks
+            .filter(task => !selectedStage || (task.triagem_stage || 1) === selectedStage)
+            .map((task) => (
             <Card key={task.id} className="bg-zinc-950 border-2 border-white p-4 sm:p-6 rounded-none flex flex-col sm:flex-row sm:items-center justify-between group hover:border-[#00ff41] transition-none relative overflow-hidden gap-6">
               {task.prioridade === 1 && (
                 <div className="absolute top-0 left-0 w-1 sm:w-2 h-full bg-[#ff0055]" />
