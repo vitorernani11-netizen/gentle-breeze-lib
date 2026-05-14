@@ -384,6 +384,30 @@ export type Database = {
           },
         ]
       }
+      uso_redes_sociais: {
+        Row: {
+          created_at: string
+          data: string
+          id: string
+          minutos: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: string
+          id?: string
+          minutos?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          id?: string
+          minutos?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

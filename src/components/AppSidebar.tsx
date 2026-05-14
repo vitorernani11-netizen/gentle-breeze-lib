@@ -12,7 +12,8 @@ import {
   Hash,
   GraduationCap,
   Inbox,
-  LayoutDashboard
+  LayoutDashboard,
+  AlertTriangle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -59,6 +60,7 @@ export function AppSidebar() {
     { label: 'Purgatório', icon: Skull, href: '/purgatory', color: 'text-red-400' },
     { label: 'Financeiro', icon: Hash, href: '/finance', color: 'text-emerald-400' },
     { label: 'Cardápio', icon: Menu, href: '/menu', color: 'text-orange-400' },
+    { label: 'Fracasso', icon: AlertTriangle, href: '/failure-report', color: 'text-red-600' },
   ];
 
   const closeSidebar = () => setOpen(false);
