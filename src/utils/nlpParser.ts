@@ -15,12 +15,19 @@ export const parseNLP = (input: string): NLPResult => {
   const detectedPatterns: string[] = [];
 
   const patterns = [
+    { regex: /todo dia (\d{1,2})/gi, recurrence: 'monthly', label: 'todo dia ' },
     { regex: /todo dia/gi, recurrence: 'daily', label: 'todo dia' },
     { regex: /toda segunda/gi, recurrence: 'weekly', label: 'toda segunda' },
+    { regex: /toda terça/gi, recurrence: 'weekly', label: 'toda terça' },
+    { regex: /toda quarta/gi, recurrence: 'weekly', label: 'toda quarta' },
+    { regex: /toda quinta/gi, recurrence: 'weekly', label: 'toda quinta' },
+    { regex: /toda sexta/gi, recurrence: 'weekly', label: 'toda sexta' },
+    { regex: /todo sábado/gi, recurrence: 'weekly', label: 'todo sábado' },
+    { regex: /todo domingo/gi, recurrence: 'weekly', label: 'todo domingo' },
     { regex: /amanhã/gi, dateOffset: 1, label: 'amanhã' },
     { regex: /hoje/gi, dateOffset: 0, label: 'hoje' },
     { regex: /às (\d{1,2})h/gi, time: true, label: 'às' },
-    { regex: /todo dia (\d{1,2})/gi, recurrence: 'monthly', label: 'todo dia' },
+    { regex: /às (\d{1,2}):(\d{2})/gi, time: true, label: 'às' },
   ];
 
   const now = new Date();
