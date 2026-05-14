@@ -59,6 +59,12 @@ function Dashboard() {
   const [isSilenced, setIsSilenced] = useState(false);
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   
+  const [stats, setStats] = useState({
+    positive: 0,
+    negative: 0,
+    careerSpeed: 0
+  });
+  
   const [checkin, setCheckin] = useState({
     horas_sono: '',
     marmitas_prontas: false,
