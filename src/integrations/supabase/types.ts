@@ -198,8 +198,10 @@ export type Database = {
           categoria: string | null
           contagem_adiamentos: number | null
           created_at: string | null
+          data_adiamento: string | null
           data_base: string | null
           data_execucao: string | null
+          deletado_por_inercia: boolean | null
           id: string
           projeto_id: string | null
           repeticao: string | null
@@ -214,8 +216,10 @@ export type Database = {
           categoria?: string | null
           contagem_adiamentos?: number | null
           created_at?: string | null
+          data_adiamento?: string | null
           data_base?: string | null
           data_execucao?: string | null
+          deletado_por_inercia?: boolean | null
           id?: string
           projeto_id?: string | null
           repeticao?: string | null
@@ -230,8 +234,10 @@ export type Database = {
           categoria?: string | null
           contagem_adiamentos?: number | null
           created_at?: string | null
+          data_adiamento?: string | null
           data_base?: string | null
           data_execucao?: string | null
+          deletado_por_inercia?: boolean | null
           id?: string
           projeto_id?: string | null
           repeticao?: string | null
