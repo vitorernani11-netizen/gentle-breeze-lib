@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 
-import "../styles.css";
+import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
   return (
@@ -82,6 +82,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/pwa-192x192.png" },
+      {
+        rel: "stylesheet",
+        href: appCss,
+      },
     ],
   }),
   shellComponent: RootShell,
