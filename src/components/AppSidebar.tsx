@@ -1,0 +1,91 @@
+import { Link, useLocation } from '@tanstack/react-router';
+import { 
+  Calendar, 
+  Skull, 
+  Layers, 
+  RotateCcw, 
+  Home, 
+  Plus, 
+  Settings,
+  Menu,
+  ChevronRight
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { useState } from 'react';
+
+export function AppSidebar() {
+  const [open, setOpen] = useState(false);
+  const location = useLocation();
+
+  const menuItems = [
+    { label: 'Hoje', icon: Calendar, href: '/', color: 'text-blue-400' },
+    { label: 'Purgatório', icon: Skull, href: '/purgatory', color: 'text-red-400' },
+    { label: 'Projetos', icon: Layers, href: '/projects', color: 'text-purple-400' },
+    { label: 'Rotinas Diárias', icon: RotateCcw, href: '/routines', color: 'text-green-400' },
+  ];
+
+  const closeSidebar = () => setOpen(false);
+
+  return (
+    <div className="fixed top-4 left-4 z-50">
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon" className="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 rounded-full h-12 w-12 hover:bg-zinc-800 transition-none">
+            <Menu className="h-6 w-6" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-[280px] bg-zinc-950 border-r-zinc-800 p-0 transition-none">
+          <div className="flex flex-col h-full">
+            <SheetHeader className="p-6 border-b border-zinc-900">
+              <SheetTitle className="text-2xl font-black tracking-tighter flex items-center gap-2">
+                FOCUS <span className="text-[10px] bg-white text-black px-1.5 py-0.5 rounded font-bold">2.0</span>
+              </SheetTitle>
+            </SheetHeader>
+            
+            <nav className="flex-1 px-3 py-6 space-y-1">
+              {menuItems.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={closeSidebar}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-none group",
+                    location.pathname === item.href 
+                      ? "bg-zinc-900 text-white" 
+                      : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/50"
+                  )}
+                >
+                  <item.icon className={cn("h-5 w-5", location.pathname === item.href ? item.color : "text-zinc-600")} />
+                  <span className="font-bold uppercase tracking-widest text-xs flex-1">{item.label}</span>
+                  {location.pathname === item.href && <ChevronRight className="h-4 w-4 text-zinc-700" />}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="p-6 border-t border-zinc-900 space-y-4">
+              <Button variant="outline" className="w-full justify-start gap-3 border-zinc-800 bg-transparent rounded-xl text-zinc-400 font-bold uppercase tracking-widest text-[10px] h-11 transition-none">
+                <Settings className="h-4 w-4" />
+                Configurações
+              </Button>
+              <div className="flex items-center gap-3 px-2">
+                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-900 border border-zinc-800" />
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-white uppercase tracking-tight">Usuário</span>
+                  <span className="text-[10px] text-zinc-500 uppercase font-medium">Plano Pro</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
