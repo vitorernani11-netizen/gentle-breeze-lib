@@ -145,7 +145,7 @@ function Dashboard() {
     const academicData = loadFromLocal(ACADEMIC_KEY) || [];
     const urgentAcademic = academicData.filter((a: any) => {
       if (a.concluido) return false;
-      const days = differenceInDays(parseISO(a.data_entrega), new Date());
+      const days = a.data_entrega ? differenceInDays(parseISO(a.data_entrega), new Date()) : 999;
       return days <= 1;
     });
     setAcademicUrgent(urgentAcademic);
