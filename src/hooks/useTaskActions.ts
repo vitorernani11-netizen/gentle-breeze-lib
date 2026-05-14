@@ -67,12 +67,16 @@ export const useTaskActions = (onSuccess?: () => void) => {
 
     const today = new Date().toISOString().split('T')[0];
     const targetDate = newDate || today;
-
+    
+    // We only use 'Hoje' or the date will handle the visibility
+    // Since 'Amanha' exists in the type, if it's not today, we can use Tomorrow logic 
+    // or just keep it as a scheduled task. Let's use 'Hoje' if it is today, 
+    // or we'll need to check the exact type allowed.
     const { error } = await supabase
       .from('tarefas')
       .update({ 
         data_execucao: targetDate, 
-        status: targetDate === today ? 'Hoje' : 'Agendada',
+        status: targetDate === today ? 'Hoje' : 'Amanha',
         contagem_adiamentos: newCount,
         data_adiamento: new Date().toISOString()
       })
