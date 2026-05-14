@@ -35,6 +35,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useTaskActions } from '@/hooks/useTaskActions';
 import { differenceInDays, parseISO, format, isWithinInterval, setHours, setMinutes, addDays, isAfter } from 'date-fns';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine, Cell } from 'recharts';
+import { cn } from '@/lib/utils';
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -341,7 +342,7 @@ function Dashboard() {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20">
+    <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20 max-w-2xl mx-auto">
       {isLocked && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
           <PowerOff size={80} className="text-zinc-800 mb-8 animate-pulse" />
@@ -354,49 +355,27 @@ function Dashboard() {
           </p>
         </div>
       )}
-      <header className="mb-10">
-        <div className="flex items-center gap-2 text-blue-500 mb-2">
-          <Calendar size={20} />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em]">Execução</span>
-        </div>
-        <div className="flex justify-between items-end">
+
+      <header className="mb-12">
+        <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-4xl font-black tracking-tighter uppercase leading-none">Hoje</h1>
-            <p className="text-zinc-500 text-xs font-medium mt-2">
+            <h1 className="text-5xl font-black tracking-tighter uppercase leading-none mb-2">Hoje</h1>
+            <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">
               {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block">
-              <span className="text-[8px] font-black uppercase tracking-widest text-zinc-500 block">Itens Eliminados por Inércia</span>
-              <span className="text-xl font-black text-red-500">{eliminatedCount}</span>
-            </div>
-            
-            <div className="flex flex-col items-center gap-1 bg-zinc-900/50 p-2 rounded-xl border border-zinc-800/50">
-              <span className="text-[8px] font-black uppercase tracking-widest text-zinc-500">Água</span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleAddHydration}
-                className="h-8 gap-2 px-2 hover:bg-blue-500/10 hover:text-blue-400 transition-none"
-              >
-                <Droplets size={14} className="text-blue-500" />
-                <span className="text-sm font-black">{(hydration / 1000).toFixed(1)}L</span>
-              </Button>
-            </div>
-
+          <div className="flex gap-2">
             <Button 
               size="icon" 
               onClick={handleSleepNow}
-              className={`h-14 w-14 rounded-2xl border transition-none ${isSilenced ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800'}`}
+              className={`h-12 w-12 rounded-full border transition-none ${isSilenced ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-zinc-900/50 border-zinc-800 text-zinc-500 hover:text-white'}`}
             >
-              <Moon size={24} fill={isSilenced ? "currentColor" : "none"} />
+              <Moon size={20} fill={isSilenced ? "currentColor" : "none"} />
             </Button>
-
             <Dialog>
               <DialogTrigger asChild>
-                <Button size="icon" className="h-14 w-14 rounded-2xl bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800 transition-none">
-                  <Zap size={24} />
+                <Button size="icon" className="h-12 w-12 rounded-full bg-zinc-900/50 border border-zinc-800 text-zinc-500 hover:text-white transition-none">
+                  <Zap size={20} />
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-zinc-950 border-zinc-900 rounded-[2.5rem] p-8 sm:max-w-md">
@@ -419,266 +398,191 @@ function Dashboard() {
                 </div>
               </DialogContent>
             </Dialog>
-
-            <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
-            <DialogTrigger asChild>
-              <Button size="icon" className="h-14 w-14 rounded-2xl bg-white text-black hover:bg-zinc-200 transition-none shadow-2xl shadow-white/10">
-                <Plus size={28} />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-zinc-950 border-zinc-900 rounded-[2.5rem] p-8 sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-center">Nova Missão</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-6 py-6">
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">O que fazer?</Label>
-                  <Input 
-                    placeholder="Ex: Treino de pernas" 
-                    value={newTask.titulo}
-                    onChange={(e) => setNewTask({ ...newTask, titulo: e.target.value })}
-                    className="bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold focus-visible:ring-1 ring-zinc-700"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Projeto</Label>
-                    <Select value={newTask.projeto_id} onValueChange={(v) => setNewTask({ ...newTask, projeto_id: v })}>
-                      <SelectTrigger className="bg-zinc-900 border-none h-12 rounded-xl px-4 font-bold">
-                        <SelectValue placeholder="Geral" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
-                        <SelectItem value="none">Nenhum</SelectItem>
-                        {projects.map(p => (
-                          <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Repetição</Label>
-                    <Select value={newTask.repeticao} onValueChange={(v) => setNewTask({ ...newTask, repeticao: v })}>
-                      <SelectTrigger className="bg-zinc-900 border-none h-12 rounded-xl px-4 font-bold">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
-                        <SelectItem value="none">Única</SelectItem>
-                        <SelectItem value="daily">Diária</SelectItem>
-                        <SelectItem value="weekly">Semanal</SelectItem>
-                        <SelectItem value="monthly">Mensal</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Tags (separadas por vírgula)</Label>
-                  <Input 
-                    placeholder="foco, urgente" 
-                    value={newTask.tags}
-                    onChange={(e) => setNewTask({ ...newTask, tags: e.target.value })}
-                    className="bg-zinc-900 border-none h-12 rounded-xl px-4 font-bold"
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2 bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-                  <Checkbox 
-                    id="ead_reminder" 
-                    checked={newTask.lembrete_ead_48h}
-                    onCheckedChange={(checked) => setNewTask({ ...newTask, lembrete_ead_48h: !!checked })}
-                  />
-                  <div className="grid gap-1.5 leading-none">
-                    <label
-                      htmlFor="ead_reminder"
-                      className="text-[10px] font-black uppercase tracking-widest text-zinc-400 cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Bell size={10} className="text-yellow-500" />
-                      Lembrete Prazo EAD (48h antes)
-                    </label>
-                  </div>
-                </div>
-
-                <Button onClick={handleCreateTask} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none">
-                  Agendar
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          </div>
         </div>
-      </div>
-    </header>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-        <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2.5rem] flex flex-col gap-4 overflow-hidden">
-          <div className="flex justify-between items-center">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5">
-              <Bed size={12} className="text-indigo-500" /> Saldo de Sono (Meta: 7h)
-            </h3>
-            {hoursSleptToday !== null && hoursSleptToday < 6 && (
-              <Badge variant="outline" className="text-[8px] bg-red-500/10 border-red-500/50 text-red-500 font-black uppercase px-2 py-0">Recuperação Necessária</Badge>
-            )}
-          </div>
-          
-          <div className="h-[120px] w-full mt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={sleepHistory}>
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#3f3f46', fontSize: 10, fontWeight: 900 }} 
-                />
-                <Tooltip 
-                  cursor={{ fill: '#18181b', radius: 8 }}
-                  contentStyle={{ backgroundColor: '#09090b', border: '1px solid #18181b', borderRadius: '12px', fontSize: '10px', fontWeight: 900 }}
-                  itemStyle={{ color: '#fff' }}
-                />
-                <ReferenceLine y={7} stroke="#3f3f46" strokeDasharray="3 3" />
-                <Bar dataKey="hours" radius={[4, 4, 0, 0]}>
-                  {sleepHistory.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.hours < 6 ? '#ef4444' : entry.hours < 7 ? '#f59e0b' : '#3b82f6'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
 
-        {hoursSleptToday !== null && hoursSleptToday < 6 && (
-          <Card className="p-6 bg-indigo-950/20 border-indigo-900/50 rounded-[2.5rem] border-l-4 border-l-indigo-500 flex flex-col justify-center gap-3">
-            <div className="flex items-center gap-2">
-              <Info size={16} className="text-indigo-400" />
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Sugestão de Recuperação</h4>
+        <div className="grid grid-cols-2 gap-4">
+          <Card className="p-5 bg-zinc-900/20 border-zinc-900/50 rounded-3xl flex flex-col gap-1">
+            <span className="text-[8px] font-black uppercase tracking-widest text-zinc-600">Hidratação</span>
+            <div className="flex items-center justify-between">
+              <span className="text-xl font-black">{(hydration / 1000).toFixed(1)}L</span>
+              <Button size="icon" variant="ghost" className="h-8 w-8 text-blue-500 hover:bg-blue-500/10" onClick={handleAddHydration}>
+                <Plus size={16} />
+              </Button>
             </div>
-            <p className="font-bold text-lg leading-tight text-white">
-              Foco em <span className="text-indigo-400 underline decoration-2 underline-offset-4">Manutenção e Descanso</span> hoje. 
-            </p>
-            <p className="text-xs text-zinc-500 font-medium">
-              Sono inferior a 6h detectado. Tarefas complexas foram mitigadas para preservar sua energia.
-            </p>
           </Card>
-        )}
-      </div>
-
-      {/* Task List grouped by Project */}
-      <div className="space-y-10">
-        {/* Urgent Academic Activities */}
-        {academicUrgent.length > 0 && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 px-1">
-              <div className="h-1 w-4 rounded-full bg-red-600" />
-              <h2 className="text-[10px] font-black uppercase tracking-widest text-red-500 flex items-center gap-1">
-                <AlertCircle size={10} /> Emergência Acadêmica
-              </h2>
+          <Card className="p-5 bg-zinc-900/20 border-zinc-900/50 rounded-3xl flex flex-col gap-1">
+            <span className="text-[8px] font-black uppercase tracking-widest text-zinc-600">Eliminados</span>
+            <div className="flex items-center justify-between">
+              <span className="text-xl font-black text-red-500">{eliminatedCount}</span>
+              <AlertCircle size={16} className="text-zinc-800" />
             </div>
-            <div className="space-y-4">
+          </Card>
+        </div>
+      </header>
+
+      {hoursSleptToday !== null && hoursSleptToday < 6 && (
+        <Card className="p-5 bg-indigo-950/20 border-indigo-900/50 rounded-3xl mb-10 border-l-4 border-l-indigo-500">
+          <div className="flex items-center gap-2 mb-1">
+            <Info size={14} className="text-indigo-400" />
+            <h4 className="text-[9px] font-black uppercase tracking-widest text-indigo-400">Hardware em Débito</h4>
+          </div>
+          <p className="text-sm font-bold text-white leading-tight">
+            Prioridade hoje: <span className="text-indigo-400">Manutenção e Descanso</span>.
+          </p>
+        </Card>
+      )}
+
+      <div className="space-y-12">
+        {academicUrgent.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 px-1">Urgência Acadêmica</h2>
+            <div className="space-y-1">
               {academicUrgent.map((activity) => (
-                <Card key={activity.id} className="p-6 bg-red-950/20 border-red-900/50 rounded-[2rem] border-l-4 border-l-red-600 flex flex-col gap-3 transition-none">
-                  <div className="flex justify-between items-start">
-                    <div className="flex flex-col gap-1.5 flex-1 pr-4">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[8px] h-4 bg-red-600 border-none text-white font-black uppercase py-0 px-1.5">
-                          {differenceInDays(parseISO(activity.data_entrega), new Date()) <= 0 ? 'ENTREGA HOJE' : 'ENTREGA AMANHÃ'}
-                        </Badge>
-                        <span className="text-[9px] font-black text-red-400 uppercase flex items-center">
-                          <GraduationCap size={10} className="mr-1" /> Acadêmico
-                        </span>
-                      </div>
-                      <span className="font-bold text-xl leading-tight text-white">{activity.nome}</span>
-                    </div>
-                    
-                    <Button 
-                      size="icon" 
-                      className="h-14 w-14 rounded-2xl bg-red-600 text-white hover:bg-red-700 transition-none shrink-0 border-none"
-                      onClick={async () => {
-                        const { error } = await supabase.from('atividades_academicas').update({ concluido: true }).eq('id', activity.id);
-                        if (!error) {
-                          setAcademicUrgent(academicUrgent.filter(a => a.id !== activity.id));
-                          toast.success('Atividade concluída!');
-                        }
-                      }}
-                    >
-                      <Check size={24} />
-                    </Button>
+                <div key={activity.id} className="flex items-center gap-4 p-4 hover:bg-zinc-900/30 rounded-2xl group transition-all">
+                  <div 
+                    className="h-6 w-6 rounded-lg border-2 border-red-900/50 bg-red-950/20 flex items-center justify-center cursor-pointer group-hover:border-red-500"
+                    onClick={async () => {
+                      const { error } = await supabase.from('atividades_academicas').update({ concluido: true }).eq('id', activity.id);
+                      if (!error) {
+                        setAcademicUrgent(academicUrgent.filter(a => a.id !== activity.id));
+                        toast.success('Atividade concluída!');
+                      }
+                    }}
+                  >
+                    <Check size={14} className="text-red-500 opacity-0 group-hover:opacity-100" />
                   </div>
-                </Card>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-zinc-200 truncate">{activity.nome}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[8px] font-black text-red-500 uppercase tracking-tighter">
+                        {differenceInDays(parseISO(activity.data_entrega), new Date()) <= 0 ? 'Entrega Hoje' : 'Entrega Amanhã'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
-        {tasks.length > 0 ? (
-          Object.entries(
-            tasks.reduce((acc: any, task) => {
-              const key = task.projetos?.nome || 'Geral';
-              if (!acc[key]) acc[key] = [];
-              acc[key].push(task);
-              return acc;
-            }, {})
-          ).map(([group, groupTasks]: [string, any]) => (
-            <div key={group} className="space-y-4">
-              <div className="flex items-center gap-2 px-1">
-                <div className="h-1 w-4 rounded-full bg-blue-900/50" />
-                <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{group}</h2>
-              </div>
-              <div className="space-y-4">
-                {groupTasks.map((task: any) => {
-                  const isComplex = task.tags?.includes('Estudo Complexo') || group === 'Estudo Complexo';
-                  const isMitigated = hoursSleptToday !== null && hoursSleptToday < 6 && isComplex;
-                  
-                  return (
-                    <Card key={task.id} className={`p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] border-l-4 border-l-blue-900/30 flex flex-col gap-3 transition-all group ${isMitigated ? 'opacity-40 grayscale pointer-events-none' : 'hover:bg-zinc-900/30'}`}>
-                      <div className="flex justify-between items-start">
-                        <div className="flex flex-col gap-1.5 flex-1 pr-4">
-                          <div className="flex items-center gap-2">
-                            {task.repeticao !== 'none' && (
-                              <Badge variant="outline" className="text-[8px] h-4 bg-zinc-900 border-zinc-800 text-zinc-400 font-black uppercase py-0 px-1.5">
-                                <RotateCcw size={8} className="mr-1" /> {task.repeticao}
-                              </Badge>
-                            )}
-                            {isMitigated && (
-                              <Badge variant="outline" className="text-[8px] h-4 bg-red-950 border-red-900 text-red-500 font-black uppercase py-0 px-1.5">
-                                BLOQUEADO (SONO BAIXO)
-                              </Badge>
-                            )}
-                          </div>
-                          <span className="font-bold text-xl leading-tight group-hover:text-blue-400 transition-colors">{task.titulo}</span>
-                          
-                          {task.tags && task.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {task.tags.map((tag: string) => (
-                                <span key={tag} className={`text-[9px] font-black uppercase flex items-center px-2 py-1 rounded-md ${tag === 'Estudo Complexo' ? 'text-indigo-400 bg-indigo-950/30' : 'text-zinc-600 bg-zinc-900/50'}`}>
-                                  <Hash size={8} className="mr-0.5" />{tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        
-                        <Button 
-                          size="icon" 
-                          disabled={isMitigated}
-                          className="h-14 w-14 rounded-2xl bg-zinc-900 text-white border border-zinc-800 hover:bg-white hover:text-black transition-none shrink-0"
-                          onClick={() => completeTask(task)}
-                        >
-                          <Check size={24} />
-                        </Button>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="text-center py-24 bg-zinc-950/30 rounded-[2.5rem] border border-dashed border-zinc-900">
-            <Check className="mx-auto mb-4 text-zinc-800" size={40} />
-            <p className="text-zinc-700 font-black uppercase tracking-widest text-[10px]">Território conquistado</p>
+        <section className="space-y-6">
+          <div className="flex justify-between items-center px-1">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">Tarefas</h2>
+            <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 gap-2 text-[9px] font-black uppercase text-zinc-500 hover:text-white">
+                  <Plus size={12} /> Adicionar
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-zinc-950 border-zinc-900 rounded-3xl p-8 sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black uppercase tracking-tighter">Nova Missão</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6 py-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">O que fazer?</Label>
+                    <Input 
+                      placeholder="Título da tarefa" 
+                      value={newTask.titulo}
+                      onChange={(e) => setNewTask({ ...newTask, titulo: e.target.value })}
+                      className="bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Projeto</Label>
+                      <Select value={newTask.projeto_id} onValueChange={(v) => setNewTask({ ...newTask, projeto_id: v })}>
+                        <SelectTrigger className="bg-zinc-900 border-none h-12 rounded-xl">
+                          <SelectValue placeholder="Geral" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-zinc-800">
+                          <SelectItem value="none">Geral</SelectItem>
+                          {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Data</Label>
+                      <Input 
+                        type="date"
+                        value={newTask.data_execucao}
+                        onChange={(e) => setNewTask({ ...newTask, data_execucao: e.target.value })}
+                        className="bg-zinc-900 border-none h-12 rounded-xl"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Tags</Label>
+                    <Input 
+                      placeholder="tag1, tag2" 
+                      value={newTask.tags}
+                      onChange={(e) => setNewTask({ ...newTask, tags: e.target.value })}
+                      className="bg-zinc-900 border-none h-12 rounded-xl"
+                    />
+                  </div>
+                  <Button onClick={handleCreateTask} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest">
+                    Agendar
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
-        )}
+
+          <div className="space-y-1">
+            {tasks.length > 0 ? (
+              tasks.map((task) => {
+                const isComplex = task.tags?.includes('Estudo Complexo');
+                const isMitigated = hoursSleptToday !== null && hoursSleptToday < 6 && isComplex;
+
+                return (
+                  <div 
+                    key={task.id} 
+                    className={cn(
+                      "flex items-center gap-4 p-4 hover:bg-zinc-900/30 rounded-2xl group transition-all",
+                      isMitigated && "opacity-30 grayscale pointer-events-none"
+                    )}
+                  >
+                    <div 
+                      className="h-6 w-6 rounded-lg border-2 border-zinc-800 bg-zinc-950 flex items-center justify-center cursor-pointer group-hover:border-blue-500"
+                      onClick={() => completeTask(task)}
+                    >
+                      <Check size={14} className="text-blue-500 opacity-0 group-hover:opacity-100" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-zinc-200 truncate">{task.titulo}</p>
+                      <div className="flex items-center gap-3 mt-1">
+                        {task.projetos && (
+                          <div className="flex items-center gap-1.5">
+                            <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: task.projetos.cor }} />
+                            <span className="text-[8px] font-black text-zinc-600 uppercase tracking-tighter">{task.projetos.nome}</span>
+                          </div>
+                        )}
+                        {task.tags?.map((tag: string) => (
+                          <span key={tag} className={cn(
+                            "text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded",
+                            tag === 'Estudo Complexo' ? "bg-indigo-950/30 text-indigo-400" : "bg-zinc-900 text-zinc-600"
+                          )}>
+                            {tag}
+                          </span>
+                        ))}
+                        {isMitigated && (
+                          <span className="text-[8px] font-black text-red-500 uppercase tracking-tighter">Bloqueado</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="py-12 text-center">
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-800">Tudo limpo por aqui</p>
+              </div>
+            )}
+          </div>
+        </section>
       </div>
 
-      {/* Morning Check-in Modal */}
       <Dialog open={showCheckin} onOpenChange={setShowCheckin}>
         <DialogContent className="w-[90%] rounded-[2.5rem] bg-zinc-950 border-zinc-900 p-8 sm:max-w-md">
           <DialogHeader>
@@ -716,32 +620,74 @@ function Dashboard() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-4">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 text-center">Marmitas Prontas?</Label>
-              <div className="flex gap-4">
-                <Button 
-                  variant={checkin.marmitas_prontas ? 'default' : 'secondary'}
-                  className={`flex-1 h-16 rounded-2xl font-black uppercase transition-none ${checkin.marmitas_prontas ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-500'}`}
-                  onClick={() => setCheckin({ ...checkin, marmitas_prontas: true })}
-                >
-                  Sim
-                </Button>
-                <Button 
-                  variant={!checkin.marmitas_prontas ? 'default' : 'secondary'}
-                  className={`flex-1 h-16 rounded-2xl font-black uppercase transition-none ${!checkin.marmitas_prontas ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-500'}`}
-                  onClick={() => setCheckin({ ...checkin, marmitas_prontas: false })}
-                >
-                  Não
-                </Button>
-              </div>
-            </div>
-
             <Button onClick={handleSaveCheckin} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none">
               Iniciar o Jogo
             </Button>
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Quick Action Button Fixed */}
+      <div className="fixed bottom-10 right-10">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button size="icon" className="h-16 w-16 rounded-full bg-white text-black shadow-[0_0_50px_rgba(255,255,255,0.15)] hover:scale-105 active:scale-95 transition-all">
+              <Plus size={32} strokeWidth={3} />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-zinc-950 border-zinc-900 rounded-3xl p-8 sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black uppercase tracking-tighter">Ação Rápida</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 py-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">O que fazer?</Label>
+                <Input 
+                  placeholder="Título da tarefa" 
+                  value={newTask.titulo}
+                  onChange={(e) => setNewTask({ ...newTask, titulo: e.target.value })}
+                  className="bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Projeto</Label>
+                  <Select value={newTask.projeto_id} onValueChange={(v) => setNewTask({ ...newTask, projeto_id: v })}>
+                    <SelectTrigger className="bg-zinc-900 border-none h-12 rounded-xl">
+                      <SelectValue placeholder="Geral" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-900 border-zinc-800">
+                      <SelectItem value="none">Geral</SelectItem>
+                      {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Data</Label>
+                  <Input 
+                    type="date"
+                    value={newTask.data_execucao}
+                    onChange={(e) => setNewTask({ ...newTask, data_execucao: e.target.value })}
+                    className="bg-zinc-900 border-none h-12 rounded-xl"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Tags</Label>
+                <Input 
+                  placeholder="tag1, tag2" 
+                  value={newTask.tags}
+                  onChange={(e) => setNewTask({ ...newTask, tags: e.target.value })}
+                  className="bg-zinc-900 border-none h-12 rounded-xl"
+                />
+              </div>
+              <Button onClick={handleCreateTask} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest">
+                Agendar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
