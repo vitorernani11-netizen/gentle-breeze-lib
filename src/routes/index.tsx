@@ -477,6 +477,26 @@ function Dashboard() {
             </div>
 
             <div className="flex flex-col gap-4">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 text-center">O treino das 05h foi realizado?</Label>
+              <div className="flex gap-4">
+                <Button 
+                  variant={checkin.treino_madrugada_realizado ? 'default' : 'secondary'}
+                  className={`flex-1 h-16 rounded-2xl font-black uppercase transition-none ${checkin.treino_madrugada_realizado ? 'bg-blue-600 text-white' : 'bg-zinc-900 text-zinc-500'}`}
+                  onClick={() => setCheckin({ ...checkin, treino_madrugada_realizado: true })}
+                >
+                  <Dumbbell size={20} className="mr-2" /> Sim
+                </Button>
+                <Button 
+                  variant={!checkin.treino_madrugada_realizado ? 'default' : 'secondary'}
+                  className={`flex-1 h-16 rounded-2xl font-black uppercase transition-none ${!checkin.treino_madrugada_realizado ? 'bg-zinc-800 text-zinc-300' : 'bg-zinc-900 text-zinc-500'}`}
+                  onClick={() => setCheckin({ ...checkin, treino_madrugada_realizado: false })}
+                >
+                  Não
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4">
               <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 text-center">Marmitas Prontas?</Label>
               <div className="flex gap-4">
                 <Button 
