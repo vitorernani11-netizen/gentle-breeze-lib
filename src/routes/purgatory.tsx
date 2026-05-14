@@ -31,7 +31,7 @@ function Purgatory() {
 
   const fetchOverdueTasks = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || 'anonymous';
+    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
     const today = new Date().toISOString().split('T')[0];
 
     const { data } = await supabase

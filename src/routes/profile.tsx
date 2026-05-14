@@ -16,11 +16,7 @@ function ProfilePage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) {
-        navigate({ to: '/login' });
-      } else {
-        setUser(user);
-      }
+      setUser(user || { email: 'unico@usuario.app' });
     });
   }, [navigate]);
 

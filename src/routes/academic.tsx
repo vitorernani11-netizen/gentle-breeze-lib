@@ -26,7 +26,8 @@ function AcademicPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session) fetchActivities(session.user.id);
+      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
+      fetchActivities(userId);
       setLoading(false);
     });
   }, []);
@@ -44,14 +45,15 @@ function AcademicPage() {
 
   const addActivity = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newActivity.nome.trim() || !session) return;
+    if (!newActivity.nome.trim()) return;
 
+    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
     const { data, error } = await supabase
       .from('atividades_academicas')
       .insert([{ 
         nome: newActivity.nome, 
         data_entrega: newActivity.data_entrega,
-        user_id: session.user.id 
+        user_id: userId
       }])
       .select()
       .single();

@@ -58,31 +58,17 @@ function RootComponent() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const [hasSession, setHasSession] = useState(false);
+  const [hasSession, setHasSession] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setHasSession(!!session);
-      
-      if (!session && location.pathname !== '/login') {
-        navigate({ to: '/login' });
-      }
-      
+      // Forçamos a sessão como true para o único usuário do app
+      setHasSession(true);
       setIsAuthChecking(false);
     };
 
     checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setHasSession(!!session);
-      if (!session && location.pathname !== '/login') {
-        navigate({ to: '/login' });
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [location.pathname, navigate]);
+  }, []);
 
   if (isAuthChecking) return null;
 

@@ -30,8 +30,7 @@ function FailureReport() {
 
   const fetchFailureData = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-    const userId = session.user.id;
+    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
     const sevenDaysAgo = subDays(new Date(), 7).toISOString();
 
     // 1. Deleted by inertia
@@ -80,12 +79,13 @@ function FailureReport() {
 
   const handleSaveSocial = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session || !socialMinutes) return;
+    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
+    if (!socialMinutes) return;
 
     const { error } = await supabase
       .from('uso_redes_sociais')
       .upsert({
-        user_id: session.user.id,
+        user_id: userId,
         data: new Date().toISOString().split('T')[0],
         minutos: parseInt(socialMinutes),
       }, { onConflict: 'user_id,data' });
