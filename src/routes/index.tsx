@@ -255,7 +255,8 @@ function Dashboard() {
             </DialogContent>
           </Dialog>
         </div>
-      </header>
+      </div>
+    </header>
 
       {/* Task List grouped by Project */}
       <div className="space-y-10">
