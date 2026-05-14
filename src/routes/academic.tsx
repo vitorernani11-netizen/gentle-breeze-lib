@@ -89,8 +89,8 @@ function AcademicPage() {
 
   const getStatusColor = (date: string) => {
     const days = differenceInDays(parseISO(date), new Date());
-    if (days < 1) return 'border-l-red-600 bg-red-950/20';
-    if (days < 3) return 'border-l-yellow-500 bg-yellow-950/20';
+    if (days <= 1) return 'border-l-red-600 bg-red-950/20';
+    if (days <= 3) return 'border-l-yellow-500 bg-yellow-950/20';
     return 'border-l-zinc-800';
   };
 
