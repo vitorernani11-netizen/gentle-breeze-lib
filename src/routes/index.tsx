@@ -20,14 +20,17 @@ import {
   AlertCircle,
   Droplets,
   Dumbbell,
-  Bell
+  Bell,
+  PowerOff,
+  Zap
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { useTaskActions } from '@/hooks/useTaskActions';
-import { differenceInDays, parseISO, format } from 'date-fns';
+import { differenceInDays, parseISO, format, isWithinInterval, setHours, setMinutes } from 'date-fns';
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
