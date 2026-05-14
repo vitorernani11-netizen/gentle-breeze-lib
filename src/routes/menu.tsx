@@ -69,8 +69,6 @@ function MenuPage() {
     const { data: { session } } = await supabase.auth.getSession();
     const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
 
-    if (!userId) {
-
     const { data } = await supabase
       .from('receitas')
       .select('*')
@@ -190,8 +188,6 @@ function MenuPage() {
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* BottomNav removed */}
     </div>
   );
 }
