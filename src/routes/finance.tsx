@@ -137,7 +137,7 @@ function FinancePage() {
                 <div className="flex flex-col overflow-hidden">
                   <span className="font-bold truncate text-sm">{record.descricao || 'Transação'}</span>
                   <span className={`text-[9px] font-black uppercase tracking-widest ${record.conta === 'Nabih' ? 'text-zinc-500' : 'text-zinc-600'}`}>
-                    {record.conta} • {new Date(record.data).toLocaleDateString('pt-BR')}
+                    {record.conta} • {record.data && typeof record.data === 'string' ? new Date(record.data).toLocaleDateString('pt-BR') : 'Sem data'}
                   </span>
                 </div>
               </div>
