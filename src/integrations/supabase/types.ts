@@ -80,6 +80,36 @@ export type Database = {
         }
         Relationships: []
       }
+      receitas: {
+        Row: {
+          created_at: string | null
+          descricao: string | null
+          id: string
+          ingredientes: Json
+          nome: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          ingredientes?: Json
+          nome: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          ingredientes?: Json
+          nome?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       tarefas: {
         Row: {
           categoria: string | null
