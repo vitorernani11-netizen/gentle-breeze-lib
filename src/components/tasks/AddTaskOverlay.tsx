@@ -16,6 +16,7 @@ import { format, startOfToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { parseNLP, NLPResult } from '@/utils/nlpParser';
 
 interface AddTaskOverlayProps {
   open: boolean;
@@ -37,36 +38,63 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   const [vencimento, setVencimento] = useState<Date>(startOfToday());
   const [prioridade, setPrioridade] = useState(4);
   const [lembrete, setLembrete] = useState<string | null>(null);
+  const [nlpData, setNlpData] = useState<NLPResult | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 100);
+    } else {
+      setTitulo('');
+      setDescricao('');
+      setVencimento(startOfToday());
+      setPrioridade(4);
+      setLembrete(null);
+      setNlpData(null);
     }
   }, [open]);
+
+  useEffect(() => {
+    if (titulo.trim()) {
+      const result = parseNLP(titulo);
+      setNlpData(result);
+      
+      // Update UI if NLP detected something and user hasn't manually changed it 
+      // (For now we just auto-apply if detected)
+      if (result.dueDate) setVencimento(result.dueDate);
+      if (result.reminderTime) setLembrete(result.reminderTime);
+    } else {
+      setNlpData(null);
+    }
+  }, [titulo]);
 
   const handleSubmit = () => {
     if (!titulo.trim()) return;
 
+    const result = nlpData || parseNLP(titulo);
+    
+    // Use values from state (which might have been updated by NLP)
+    const finalVencimento = vencimento;
+    const finalLembrete = lembrete;
+
     let horaVencISO = null;
-    if (lembrete) {
-      const [h, m] = lembrete.split(':').map(Number);
-      const d = new Date(vencimento);
+    if (finalLembrete) {
+      const [h, m] = finalLembrete.split(':').map(Number);
+      const d = new Date(finalVencimento);
       d.setHours(h, m, 0, 0);
       horaVencISO = d.toISOString();
     }
 
     onAddTask({
-      titulo,
-      vencimento: format(vencimento, 'yyyy-MM-dd'),
-      recorrencia: 'none',
+      titulo: result.text, // Use cleaned text from NLP
+      vencimento: format(finalVencimento, 'yyyy-MM-dd'),
+      recorrencia: result.recurrence || 'none',
       prioridade,
-      lembrete,
+      lembrete: finalLembrete,
       descricao,
       hora_vencimento: horaVencISO
     });
-    setTitulo('');
-    setDescricao('');
+    
     onClose();
   };
 
@@ -88,13 +116,24 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
           </button>
         </div>
 
-        <Input
-          ref={inputRef}
-          value={titulo}
-          onChange={(e) => setTitulo(e.target.value)}
-          placeholder="Nome da tarefa"
-          className="bg-transparent border-none text-xl font-bold placeholder:text-zinc-800 focus-visible:ring-0 p-0 h-auto mb-2"
-        />
+        <div className="relative">
+          <Input
+            ref={inputRef}
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            placeholder="Nome da tarefa"
+            className="bg-transparent border-none text-xl font-bold placeholder:text-zinc-800 focus-visible:ring-0 p-0 h-auto mb-2 relative z-10"
+          />
+          {nlpData && nlpData.detectedPatterns.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {nlpData.detectedPatterns.map((pattern, idx) => (
+                <span key={idx} className="bg-[#00ff41] text-black text-[10px] font-black px-1.5 py-0.5 uppercase tracking-tighter rounded-sm">
+                  {pattern}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
         
         <Textarea
           value={descricao}
@@ -107,8 +146,11 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
           <div className="flex items-center gap-2">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className={cn("h-9 w-9 rounded-xl border border-zinc-900", vencimento && "text-[#00ff41] border-[#00ff41]/20")}>
+                <Button variant="ghost" className={cn("h-9 px-3 rounded-xl border border-zinc-900", vencimento && "text-[#00ff41] border-[#00ff41]/20")}>
                   <CalendarIcon size={18} />
+                  <span className="ml-2 text-[10px] font-bold uppercase whitespace-nowrap">
+                    {format(vencimento, "dd MMM", { locale: ptBR })}
+                  </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 bg-zinc-950 border-zinc-900">
@@ -123,8 +165,9 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className={cn("h-9 w-9 rounded-xl border border-zinc-900", lembrete && "text-[#00ff41] border-[#00ff41]/20")}>
+                <Button variant="ghost" className={cn("h-9 px-3 rounded-xl border border-zinc-900", lembrete && "text-[#00ff41] border-[#00ff41]/20")}>
                   <Clock size={18} />
+                  {lembrete && <span className="ml-2 text-[10px] font-bold uppercase">{lembrete}</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-48 bg-zinc-950 border-zinc-900 p-2">
