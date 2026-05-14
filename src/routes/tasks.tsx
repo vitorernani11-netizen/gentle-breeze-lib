@@ -120,7 +120,6 @@ function TasksPage() {
         descricao: taskData.descricao || '',
         repeticao: taskData.recorrencia || 'none',
         data_execucao: taskData.vencimento,
-        hora_vencimento: taskData.hora_vencimento || null,
         prioridade: taskData.prioridade || 4,
         triagem_stage: 1,
         user_id: 'local-user',
@@ -128,7 +127,8 @@ function TasksPage() {
         status_concluido: false,
         created_at: new Date().toISOString(),
         tags: [],
-        lembrete: taskData.lembrete
+        lembrete: taskData.lembrete,
+        hora_vencimento: taskData.hora_vencimento
       };
 
       console.log('[Hardware:Entrada]', task);
@@ -332,7 +332,11 @@ function TasksPage() {
                       )}>
                         <Calendar size={10} /> 
                         {formatDate(taskDate, "d MMM", { locale: ptBR }).toUpperCase()}
-                        {task.lembrete && ` • ${task.lembrete}`}
+                        {task.lembrete && (
+                          <span className="ml-1.5 text-[#00ff41] font-black">
+                            {task.lembrete}
+                          </span>
+                        )}
                       </span>
 
                       {task.repeticao && task.repeticao !== 'none' && (

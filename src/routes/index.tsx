@@ -304,6 +304,8 @@ function Dashboard() {
         repeticao: newTask.repeticao,
         tags: tagsArray,
         lembrete_ead_48h: newTask.lembrete_ead_48h,
+        lembrete: null, // Initial support for manual tasks from main dashboard
+        hora_vencimento: null,
         status: 'Entrada',
         status_concluido: false,
         created_at: new Date().toISOString()

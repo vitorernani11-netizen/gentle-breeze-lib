@@ -17,6 +17,7 @@ import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { parseNLP, NLPResult } from '@/utils/nlpParser';
+import { TimePickerPopover } from './TimePickerPopover';
 
 interface AddTaskOverlayProps {
   open: boolean;
@@ -78,19 +79,21 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
     const finalLembrete = lembrete;
 
     let horaVencISO = null;
-    if (finalLembrete) {
-      const [h, m] = finalLembrete.split(':').map(Number);
-      const d = new Date(finalVencimento);
+    if (lembrete) {
+      const [h, m] = lembrete.split(':').map(Number);
+      const d = new Date(vencimento);
       d.setHours(h, m, 0, 0);
       horaVencISO = d.toISOString();
     }
 
+    console.log('[Task:Create]', { title: result.text, time: lembrete });
+
     onAddTask({
-      titulo: result.text, // Use cleaned text from NLP
-      vencimento: format(finalVencimento, 'yyyy-MM-dd'),
+      titulo: result.text,
+      vencimento: format(vencimento, 'yyyy-MM-dd'),
       recorrencia: result.recurrence || 'none',
       prioridade,
-      lembrete: finalLembrete,
+      lembrete: lembrete,
       descricao,
       hora_vencimento: horaVencISO
     });
@@ -163,22 +166,18 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               </PopoverContent>
             </Popover>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" className={cn("h-9 px-3 rounded-xl border border-zinc-900", lembrete && "text-[#00ff41] border-[#00ff41]/20")}>
-                  <Clock size={18} />
-                  {lembrete && <span className="ml-2 text-[10px] font-bold uppercase">{lembrete}</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48 bg-zinc-950 border-zinc-900 p-2 z-[110]">
-                 <div className="grid grid-cols-1 gap-1">
-                    {['09:00', '12:00', '15:00', '18:00', '21:00'].map(t => (
-                      <Button key={t} variant="ghost" className="justify-start font-bold" onClick={() => setLembrete(t)}>{t}</Button>
-                    ))}
-                    <Button variant="ghost" className="justify-start text-red-500" onClick={() => setLembrete(null)}>Limpar</Button>
-                 </div>
-              </PopoverContent>
-            </Popover>
+            <TimePickerPopover selectedTime={lembrete} onSelect={setLembrete}>
+              <Button 
+                variant="ghost" 
+                className={cn(
+                  "h-9 px-3 rounded-xl border border-zinc-900 transition-all", 
+                  lembrete && "text-[#00ff41] border-[#00ff41] shadow-[0_0_10px_rgba(0,255,65,0.2)]"
+                )}
+              >
+                <Clock size={18} />
+                {lembrete && <span className="ml-2 text-[10px] font-black tracking-tighter">{lembrete}</span>}
+              </Button>
+            </TimePickerPopover>
 
             <Popover>
               <PopoverTrigger asChild>
