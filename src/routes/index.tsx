@@ -366,8 +366,8 @@ function Dashboard() {
               {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
               <span className="text-[8px] font-black uppercase tracking-widest text-zinc-500 block">Itens Eliminados por Inércia</span>
               <span className="text-xl font-black text-red-500">{eliminatedCount}</span>
             </div>
@@ -384,6 +384,14 @@ function Dashboard() {
                 <span className="text-sm font-black">{(hydration / 1000).toFixed(1)}L</span>
               </Button>
             </div>
+
+            <Button 
+              size="icon" 
+              onClick={handleSleepNow}
+              className={`h-14 w-14 rounded-2xl border transition-none ${isSilenced ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800'}`}
+            >
+              <Moon size={24} fill={isSilenced ? "currentColor" : "none"} />
+            </Button>
 
             <Dialog>
               <DialogTrigger asChild>
