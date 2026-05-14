@@ -37,6 +37,7 @@ function Dashboard() {
   const [showAddTask, setShowAddTask] = useState(false);
   const [tasks, setTasks] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
+  const [academicUrgent, setAcademicUrgent] = useState<any[]>([]);
   const [eliminatedCount, setEliminatedCount] = useState(0);
   
   const [checkin, setCheckin] = useState({
