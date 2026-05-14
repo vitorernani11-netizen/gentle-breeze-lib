@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Plus, Trash2, ArrowLeft, Hash } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTaskActions } from '@/hooks/useTaskActions';
 
 export const Route = createFileRoute('/tasks')({
   component: TasksPage,
@@ -17,6 +18,11 @@ function TasksPage() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [newTitle, setNewTitle] = useState('');
   const [loading, setLoading] = useState(true);
+  const { moveTask } = useTaskActions(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) fetchTasks(session.user.id);
+    });
+  });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -59,25 +65,7 @@ function TasksPage() {
     }
   };
 
-  const updateStatus = async (id: string, status: 'Hoje' | 'Amanha') => {
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
-
-    const { error } = await supabase
-      .from('tarefas')
-      .update({ 
-        status, 
-        data_execucao: status === 'Hoje' ? today : tomorrowStr 
-      })
-      .eq('id', id);
-
-    if (!error) {
-      setTasks(tasks.filter(t => t.id !== id));
-      toast.success(status === 'Hoje' ? 'Movida para Hoje' : 'Movida para Amanhã');
-    }
-  };
+  // Logic moved to useTaskActions hook
 
   const deleteTask = async (id: string) => {
     const { error } = await supabase.from('tarefas').delete().eq('id', id);
@@ -145,14 +133,14 @@ function TasksPage() {
                       <Button 
                         size="sm" 
                         className="bg-zinc-900 border border-zinc-800 hover:bg-white hover:text-black text-[10px] font-black uppercase tracking-tighter h-10 px-4 rounded-xl transition-none"
-                        onClick={() => updateStatus(task.id, 'Hoje')}
+                        onClick={() => moveTask(task.id, 'Hoje')}
                       >
                         Hoje
                       </Button>
                       <Button 
                         size="sm" 
                         className="bg-zinc-900 border border-zinc-800 hover:bg-white hover:text-black text-[10px] font-black uppercase tracking-tighter h-10 px-4 rounded-xl transition-none"
-                        onClick={() => updateStatus(task.id, 'Amanha')}
+                        onClick={() => moveTask(task.id, 'Amanha')}
                       >
                         Amanhã
                       </Button>
