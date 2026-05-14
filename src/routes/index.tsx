@@ -22,7 +22,10 @@ import {
   Dumbbell,
   Bell,
   PowerOff,
-  Zap
+  Zap,
+  Moon,
+  Bed,
+  Info
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +33,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useTaskActions } from '@/hooks/useTaskActions';
-import { differenceInDays, parseISO, format, isWithinInterval, setHours, setMinutes } from 'date-fns';
+import { differenceInDays, parseISO, format, isWithinInterval, setHours, setMinutes, addDays, isAfter } from 'date-fns';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine, Cell } from 'recharts';
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -49,6 +53,9 @@ function Dashboard() {
   const [hydration, setHydration] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [anxietyContent, setAnxietyContent] = useState('');
+  const [sleepHistory, setSleepHistory] = useState<any[]>([]);
+  const [hoursSleptToday, setHoursSleptToday] = useState<number | null>(null);
+  const [isSilenced, setIsSilenced] = useState(false);
   
   const [checkin, setCheckin] = useState({
     horas_sono: '',
@@ -153,7 +160,7 @@ function Dashboard() {
 
     const urgentAcademic = academicData?.filter(a => {
       const days = differenceInDays(parseISO(a.data_entrega), new Date());
-      return days <= 1; // "Faltar 1 dia" included
+      return days <= 1;
     }) || [];
 
     // Fetch hydration
@@ -164,11 +171,74 @@ function Dashboard() {
       .eq('data', today)
       .single();
 
+    // Fetch sleep history (last 7 days)
+    const { data: sleepData } = await supabase
+      .from('checkin_diario')
+      .select('data, horas_sono')
+      .eq('user_id', userId)
+      .order('data', { ascending: false })
+      .limit(7);
+
+    // Fetch profile for silencing status
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('notificacoes_silenciadas_ate')
+      .eq('id', userId)
+      .single();
+
     if (tasksData) setTasks(tasksData);
     if (projectsData) setProjects(projectsData);
     setAcademicUrgent(urgentAcademic);
     if (count !== null) setEliminatedCount(count);
     if (hydrationData) setHydration(hydrationData.quantidade_ml);
+    
+    if (sleepData) {
+      const history = sleepData.reverse().map(d => ({
+        name: format(parseISO(d.data), 'dd/MM'),
+        hours: d.horas_sono || 0
+      }));
+      setSleepHistory(history);
+      
+      const todaySleep = sleepData.find(d => d.data === today);
+      if (todaySleep) setHoursSleptToday(todaySleep.horas_sono);
+    }
+
+    if (profileData?.notificacoes_silenciadas_ate) {
+      const silentUntil = parseISO(profileData.notificacoes_silenciadas_ate);
+      setIsSilenced(isAfter(silentUntil, new Date()));
+    }
+  };
+
+  const handleSleepNow = async () => {
+    if (!session) return;
+    
+    // Set silenced until 05:00 tomorrow
+    let targetDate = setHours(setMinutes(new Date(), 0), 5);
+    if (new Date().getHours() >= 5) {
+      targetDate = addDays(targetDate, 1);
+    }
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({
+        id: session.user.id,
+        notificacoes_silenciadas_ate: targetDate.toISOString()
+      });
+
+    const { error: eventError } = await supabase
+      .from('sleep_events')
+      .insert([{
+        user_id: session.user.id,
+        inicio_sono: new Date().toISOString()
+      }]);
+
+    if (!profileError && !eventError) {
+      setIsSilenced(true);
+      toast.success('Modo Sono Ativado', {
+        description: 'Notificações silenciadas até as 05:00.',
+        icon: <Moon className="h-4 w-4" />
+      });
+    }
   };
 
   const checkTodayCheckin = async (userId: string) => {
@@ -296,8 +366,8 @@ function Dashboard() {
               {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
               <span className="text-[8px] font-black uppercase tracking-widest text-zinc-500 block">Itens Eliminados por Inércia</span>
               <span className="text-xl font-black text-red-500">{eliminatedCount}</span>
             </div>
@@ -314,6 +384,14 @@ function Dashboard() {
                 <span className="text-sm font-black">{(hydration / 1000).toFixed(1)}L</span>
               </Button>
             </div>
+
+            <Button 
+              size="icon" 
+              onClick={handleSleepNow}
+              className={`h-14 w-14 rounded-2xl border transition-none ${isSilenced ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800'}`}
+            >
+              <Moon size={24} fill={isSilenced ? "currentColor" : "none"} />
+            </Button>
 
             <Dialog>
               <DialogTrigger asChild>
@@ -430,6 +508,57 @@ function Dashboard() {
         </div>
       </div>
     </header>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2.5rem] flex flex-col gap-4 overflow-hidden">
+          <div className="flex justify-between items-center">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 flex items-center gap-1.5">
+              <Bed size={12} className="text-indigo-500" /> Saldo de Sono (Meta: 7h)
+            </h3>
+            {hoursSleptToday !== null && hoursSleptToday < 6 && (
+              <Badge variant="outline" className="text-[8px] bg-red-500/10 border-red-500/50 text-red-500 font-black uppercase px-2 py-0">Recuperação Necessária</Badge>
+            )}
+          </div>
+          
+          <div className="h-[120px] w-full mt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={sleepHistory}>
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#3f3f46', fontSize: 10, fontWeight: 900 }} 
+                />
+                <Tooltip 
+                  cursor={{ fill: '#18181b', radius: 8 }}
+                  contentStyle={{ backgroundColor: '#09090b', border: '1px solid #18181b', borderRadius: '12px', fontSize: '10px', fontWeight: 900 }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <ReferenceLine y={7} stroke="#3f3f46" strokeDasharray="3 3" />
+                <Bar dataKey="hours" radius={[4, 4, 0, 0]}>
+                  {sleepHistory.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.hours < 6 ? '#ef4444' : entry.hours < 7 ? '#f59e0b' : '#3b82f6'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        {hoursSleptToday !== null && hoursSleptToday < 6 && (
+          <Card className="p-6 bg-indigo-950/20 border-indigo-900/50 rounded-[2.5rem] border-l-4 border-l-indigo-500 flex flex-col justify-center gap-3">
+            <div className="flex items-center gap-2">
+              <Info size={16} className="text-indigo-400" />
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Sugestão de Recuperação</h4>
+            </div>
+            <p className="font-bold text-lg leading-tight text-white">
+              Foco em <span className="text-indigo-400 underline decoration-2 underline-offset-4">Manutenção e Descanso</span> hoje. 
+            </p>
+            <p className="text-xs text-zinc-500 font-medium">
+              Sono inferior a 6h detectado. Tarefas complexas foram mitigadas para preservar sua energia.
+            </p>
+          </Card>
+        )}
+      </div>
 
       {/* Task List grouped by Project */}
       <div className="space-y-10">
@@ -493,40 +622,51 @@ function Dashboard() {
                 <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{group}</h2>
               </div>
               <div className="space-y-4">
-                {groupTasks.map((task: any) => (
-                  <Card key={task.id} className="p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] border-l-4 border-l-blue-900/30 flex flex-col gap-3 transition-none group hover:bg-zinc-900/30">
-                    <div className="flex justify-between items-start">
-                      <div className="flex flex-col gap-1.5 flex-1 pr-4">
-                        <div className="flex items-center gap-2">
-                          {task.repeticao !== 'none' && (
-                            <Badge variant="outline" className="text-[8px] h-4 bg-zinc-900 border-zinc-800 text-zinc-400 font-black uppercase py-0 px-1.5">
-                              <RotateCcw size={8} className="mr-1" /> {task.repeticao}
-                            </Badge>
+                {groupTasks.map((task: any) => {
+                  const isComplex = task.tags?.includes('Estudo Complexo') || group === 'Estudo Complexo';
+                  const isMitigated = hoursSleptToday !== null && hoursSleptToday < 6 && isComplex;
+                  
+                  return (
+                    <Card key={task.id} className={`p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] border-l-4 border-l-blue-900/30 flex flex-col gap-3 transition-all group ${isMitigated ? 'opacity-40 grayscale pointer-events-none' : 'hover:bg-zinc-900/30'}`}>
+                      <div className="flex justify-between items-start">
+                        <div className="flex flex-col gap-1.5 flex-1 pr-4">
+                          <div className="flex items-center gap-2">
+                            {task.repeticao !== 'none' && (
+                              <Badge variant="outline" className="text-[8px] h-4 bg-zinc-900 border-zinc-800 text-zinc-400 font-black uppercase py-0 px-1.5">
+                                <RotateCcw size={8} className="mr-1" /> {task.repeticao}
+                              </Badge>
+                            )}
+                            {isMitigated && (
+                              <Badge variant="outline" className="text-[8px] h-4 bg-red-950 border-red-900 text-red-500 font-black uppercase py-0 px-1.5">
+                                BLOQUEADO (SONO BAIXO)
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="font-bold text-xl leading-tight group-hover:text-blue-400 transition-colors">{task.titulo}</span>
+                          
+                          {task.tags && task.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {task.tags.map((tag: string) => (
+                                <span key={tag} className={`text-[9px] font-black uppercase flex items-center px-2 py-1 rounded-md ${tag === 'Estudo Complexo' ? 'text-indigo-400 bg-indigo-950/30' : 'text-zinc-600 bg-zinc-900/50'}`}>
+                                  <Hash size={8} className="mr-0.5" />{tag}
+                                </span>
+                              ))}
+                            </div>
                           )}
                         </div>
-                        <span className="font-bold text-xl leading-tight group-hover:text-blue-400 transition-colors">{task.titulo}</span>
                         
-                        {task.tags && task.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {task.tags.map((tag: string) => (
-                              <span key={tag} className="text-[9px] font-black text-zinc-600 uppercase flex items-center bg-zinc-900/50 px-2 py-1 rounded-md">
-                                <Hash size={8} className="mr-0.5" />{tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                        <Button 
+                          size="icon" 
+                          disabled={isMitigated}
+                          className="h-14 w-14 rounded-2xl bg-zinc-900 text-white border border-zinc-800 hover:bg-white hover:text-black transition-none shrink-0"
+                          onClick={() => completeTask(task)}
+                        >
+                          <Check size={24} />
+                        </Button>
                       </div>
-                      
-                      <Button 
-                        size="icon" 
-                        className="h-14 w-14 rounded-2xl bg-zinc-900 text-white border border-zinc-800 hover:bg-white hover:text-black transition-none shrink-0"
-                        onClick={() => completeTask(task)}
-                      >
-                        <Check size={24} />
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           ))

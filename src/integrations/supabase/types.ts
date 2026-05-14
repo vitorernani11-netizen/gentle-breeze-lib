@@ -161,6 +161,24 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          id: string
+          notificacoes_silenciadas_ate: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id: string
+          notificacoes_silenciadas_ate?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          notificacoes_silenciadas_ate?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       projetos: {
         Row: {
           cor: string | null
@@ -270,6 +288,30 @@ export type Database = {
           id?: string
           itens?: Json | null
           titulo?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sleep_events: {
+        Row: {
+          created_at: string | null
+          fim_sono: string | null
+          id: string
+          inicio_sono: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          fim_sono?: string | null
+          id?: string
+          inicio_sono?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          fim_sono?: string | null
+          id?: string
+          inicio_sono?: string | null
           user_id?: string
         }
         Relationships: []
