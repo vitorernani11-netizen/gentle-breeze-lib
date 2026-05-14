@@ -1,4 +1,4 @@
-import { format, addDays, nextMonday, nextTuesday, nextWednesday, nextThursday, nextFriday, nextSaturday, nextSunday, setHours, setMinutes } from 'date-fns';
+import { format, addDays, nextMonday, nextTuesday, nextWednesday, nextThursday, nextFriday, nextSaturday, nextSunday, setHours, setMinutes, startOfToday } from 'date-fns';
 
 export interface NLPResult {
   text: string;
@@ -54,7 +54,7 @@ export const parseNLP = (input: string): NLPResult => {
       }
 
       if (p.dateOffset !== undefined && !dueDate) {
-        dueDate = addDays(new Date(), p.dateOffset);
+        dueDate = addDays(startOfToday(), p.dateOffset);
       }
 
       if (p.daySetter && !dueDate) {
