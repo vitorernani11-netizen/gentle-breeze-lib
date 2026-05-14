@@ -259,35 +259,35 @@ function TasksPage() {
                 </h3>
                 
                 {task.descricao && (
-                  <p className="text-zinc-500 text-[10px] font-bold uppercase leading-tight line-clamp-2 italic">
+                  <p className="text-zinc-600 text-[9px] font-medium uppercase leading-tight line-clamp-2 italic">
                     {task.descricao}
                   </p>
                 )}
                 
-                <div className="flex items-center gap-4 mt-1">
-                  <span className="text-[9px] font-black text-zinc-600 uppercase flex items-center gap-1">
+                <div className="flex items-center gap-3 mt-1">
+                  <span className="text-[8px] font-bold text-zinc-700 uppercase flex items-center gap-1">
                     <Calendar size={10} /> {task.data_execucao}
                   </span>
                   {task.lembrete && (
-                    <span className="text-[9px] font-black text-[#00ff41] uppercase flex items-center gap-1">
+                    <span className="text-[8px] font-bold text-zinc-600 uppercase flex items-center gap-1">
                       <Clock size={10} /> {task.lembrete}
                     </span>
                   )}
                 </div>
               </div>
               
-              <div className="flex gap-2 sm:shrink-0 h-12">
+              <div className="flex gap-2 sm:shrink-0 h-10">
                 <Button 
                   aria-label="Concluir tarefa"
                   size="icon"
-                  className="bg-[#00ff41] text-black hover:bg-green-400 font-black rounded-none border-b-4 border-r-4 border-green-900 w-12 h-12 transition-none"
+                  className="bg-zinc-100 text-black hover:bg-white font-bold rounded-xl w-10 h-10 transition-all active:scale-95"
                   onClick={() => completeTask(task)}
                 >
-                  <Check size={20} />
+                  <Check size={18} />
                 </Button>
                 <Button 
                   aria-label="Mover para Hoje"
-                  className="bg-white text-black hover:bg-[#ff00ff] hover:text-white text-[10px] font-black uppercase rounded-none border-b-4 border-r-4 border-zinc-400 h-12 px-4 transition-none"
+                  className="bg-zinc-900 text-zinc-400 hover:text-zinc-100 text-[9px] font-bold uppercase rounded-xl border border-zinc-800 h-10 px-3 transition-all"
                   onClick={() => moveTask(task.id, 'Hoje')}
                 >
                   Hoje
@@ -295,10 +295,11 @@ function TasksPage() {
                 <Button 
                   aria-label="Deletar registro"
                   size="icon"
-                  className="bg-zinc-900 text-zinc-500 hover:bg-[#ff0055] hover:text-white text-[10px] font-black uppercase rounded-none border-2 border-zinc-800 w-12 h-12 transition-none"
+                  variant="ghost"
+                  className="text-zinc-700 hover:text-red-500 h-10 w-10"
                   onClick={() => deletePermanent(task.id)}
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={16} />
                 </Button>
               </div>
             </Card>
