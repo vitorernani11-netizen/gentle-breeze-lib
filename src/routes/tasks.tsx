@@ -197,31 +197,27 @@ function TasksPage() {
 
 
       {/* Triagem Section */}
-      <section className="mb-6">
-        <div className="border border-zinc-900 p-3 bg-zinc-950/50 rounded-2xl">
-          <h2 className="text-[8px] font-bold uppercase tracking-[0.2em] text-zinc-700 mb-3 flex items-center gap-2">
-            <AlertCircle size={10} className="text-zinc-800" />
-            TRIAGEM
-          </h2>
-          <div className="flex flex-row overflow-x-auto gap-2 pb-1 scrollbar-none">
+      <section className="mb-4">
+        <div className="border border-zinc-900/50 p-2 bg-zinc-950/30 rounded-xl">
+          <div className="flex flex-row overflow-x-auto gap-1.5 pb-0.5 scrollbar-none">
             {triagemStages.map((stage) => (
               <button 
                 key={stage.num} 
                 onClick={() => setSelectedStage(selectedStage === stage.num ? null : stage.num)}
                 className={cn(
-                  "border border-zinc-900 px-4 py-2 flex items-center gap-2 transition-all rounded-xl shrink-0", 
-                  selectedStage === stage.num ? "bg-zinc-100 text-black border-white" : "hover:bg-zinc-900/50"
+                  "border border-zinc-900/50 px-3 py-1.5 flex items-center gap-1.5 transition-all rounded-lg shrink-0", 
+                  selectedStage === stage.num ? "bg-zinc-100 text-black border-white" : "hover:bg-zinc-900/30"
                 )}
               >
-                <span className={cn("text-[10px] font-black italic", selectedStage === stage.num ? "opacity-100" : "opacity-30")}>#{stage.num}</span>
-                <span className="font-bold uppercase tracking-tight text-[10px] whitespace-nowrap">{stage.label}</span>
+                <span className={cn("text-[8px] font-black italic", selectedStage === stage.num ? "opacity-100" : "opacity-30")}>#{stage.num}</span>
+                <span className="font-bold uppercase tracking-tight text-[8px] whitespace-nowrap">{stage.label}</span>
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-3">
         {activeTasks.length > 0 ? (
           activeTasks
             .filter(task => !selectedStage || (task.triagem_stage || 1) === selectedStage)
