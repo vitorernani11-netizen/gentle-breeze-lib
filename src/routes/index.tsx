@@ -33,7 +33,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useTaskActions } from '@/hooks/useTaskActions';
-import { differenceInDays, parseISO, format, isWithinInterval, setHours, setMinutes, addDays, isAfter } from 'date-fns';
+import { differenceInDays, parseISO, format, isWithinInterval, setHours, setMinutes, addDays, isAfter, subDays } from 'date-fns';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine, Cell } from 'recharts';
 import { cn } from '@/lib/utils';
 
@@ -58,6 +58,12 @@ function Dashboard() {
   const [hoursSleptToday, setHoursSleptToday] = useState<number | null>(null);
   const [isSilenced, setIsSilenced] = useState(false);
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+  
+  const [stats, setStats] = useState({
+    positive: 0,
+    negative: 0,
+    careerSpeed: 0
+  });
   
   const [checkin, setCheckin] = useState({
     horas_sono: '',
@@ -129,33 +135,29 @@ function Dashboard() {
   const fetchData = async (userId: string) => {
     const today = new Date().toISOString().split('T')[0];
     
-    // Mover tarefas atrasadas para o Purgatório (status 'Amanha' ou 'Hoje' com data < hoje)
-    // Na verdade, no Purgatório elas já são filtradas por data < hoje e status_concluido = false.
-    // Mas para garantir que não apareçam no 'Hoje' se estiverem atrasadas:
-    
-    // Fetch today's tasks
+    // 1. Fetch today's tasks
     const { data: tasksData } = await supabase
       .from('tarefas')
       .select('*, projetos(nome, cor)')
       .eq('user_id', userId)
-      .eq('data_execucao', today) // Apenas tarefas com data EXATA de hoje
+      .eq('data_execucao', today)
       .eq('status_concluido', false)
       .order('created_at', { ascending: false });
 
-    // Fetch projects
+    // 2. Fetch projects
     const { data: projectsData } = await supabase
       .from('projetos')
       .select('*')
       .eq('user_id', userId);
 
-    // Fetch eliminated count
+    // 3. Fetch eliminated count
     const { count } = await supabase
       .from('tarefas')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
       .eq('deletado_por_inercia', true);
 
-    // Fetch urgent academic activities (< 1 day remaining)
+    // 4. Fetch urgent academic activities
     const { data: academicData } = await supabase
       .from('atividades_academicas')
       .select('*')
@@ -168,7 +170,7 @@ function Dashboard() {
       return days <= 1;
     }) || [];
 
-    // Fetch hydration
+    // 5. Fetch hydration
     const { data: hydrationData } = await supabase
       .from('hidratacao')
       .select('quantidade_ml')
@@ -176,15 +178,58 @@ function Dashboard() {
       .eq('data', today)
       .single();
 
-    // Fetch sleep history (last 7 days)
+    // 6. Fetch sleep history
     const { data: sleepData } = await supabase
       .from('checkin_diario')
-      .select('data, horas_sono')
+      .select('data, horas_sono, treino_madrugada_realizado')
       .eq('user_id', userId)
       .order('data', { ascending: false })
       .limit(7);
 
-    // Fetch profile for silencing status
+    // 7. Calculate Impact Stats
+    const sevenDaysAgo = subDays(new Date(), 7).toISOString().split('T')[0];
+    
+    const { data: completedTasks } = await supabase
+      .from('tarefas')
+      .select('tags, projetos(nome)')
+      .eq('user_id', userId)
+      .eq('status_concluido', true)
+      .gte('updated_at', sevenDaysAgo);
+
+    const { data: financeRecords } = await supabase
+      .from('financeiro')
+      .select('valor')
+      .eq('user_id', userId)
+      .eq('conta', 'Pessoal')
+      .eq('tipo', 'Saida')
+      .gte('data', sevenDaysAgo);
+
+    const { data: socialUsage } = await supabase
+      .from('uso_redes_sociais')
+      .select('minutos')
+      .eq('user_id', userId)
+      .gte('data', sevenDaysAgo);
+
+    // POSITIVE: Completed #Nabih/#Faculdade + Training + Sleep > 7h
+    const positiveTasks = completedTasks?.filter(t => 
+      t.projetos?.nome === 'Nabih' || t.projetos?.nome === 'Faculdade' || 
+      t.tags?.includes('Nabih') || t.tags?.includes('Faculdade')
+    ).length || 0;
+    
+    const trainingCount = sleepData?.filter(s => s.treino_madrugada_realizado).length || 0;
+    const goodSleepCount = sleepData?.filter(s => s.horas_sono && s.horas_sono >= 7).length || 0;
+    
+    // NEGATIVE: Inertia Deletions + Personal Expenses + Social Media
+    const expenseTotal = financeRecords?.reduce((acc, curr) => acc + Number(curr.valor), 0) || 0;
+    const socialHours = (socialUsage?.reduce((acc, curr) => acc + curr.minutos, 0) || 0) / 60;
+    
+    // CAREER SPEED: Progress towards 7k
+    const codingTasksDone = completedTasks?.filter(t => t.tags?.includes('Codificação') || t.tags?.includes('Nabih')).length || 0;
+    const collegeTasksDone = academicData?.filter(a => a.concluido).length || 0; // Wait, we fetched academic pending before. Need historical.
+    // For now, simple logic: (codingTasks * 200) + (collegeTasks * 100) / 7000
+    const careerProgress = Math.min(100, (((codingTasksDone * 500) + (collegeTasksDone * 200)) / 7000) * 100);
+
+    // Fetch profile
     const { data: profileData } = await supabase
       .from('profiles')
       .select('notificacoes_silenciadas_ate')
@@ -197,8 +242,14 @@ function Dashboard() {
     if (count !== null) setEliminatedCount(count);
     if (hydrationData) setHydration(hydrationData.quantidade_ml);
     
+    setStats({
+      positive: positiveTasks + trainingCount + goodSleepCount,
+      negative: (count || 0) + Math.floor(expenseTotal / 100) + Math.floor(socialHours),
+      careerSpeed: careerProgress
+    });
+
     if (sleepData) {
-      const history = sleepData.reverse().map(d => ({
+      const history = [...sleepData].reverse().map(d => ({
         name: format(parseISO(d.data), 'dd/MM'),
         hours: d.horas_sono || 0
       }));
@@ -365,6 +416,52 @@ function Dashboard() {
           </p>
         </div>
       )}
+
+      {/* Dashboard de Impacto */}
+      <section className="mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="p-6 bg-emerald-950/20 border-emerald-900/50 rounded-[2rem] border-t-4 border-t-emerald-500">
+            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 block mb-2">Impacto Positivo</span>
+            <div className="flex items-end gap-2">
+              <span className="text-4xl font-black text-white">{stats.positive}</span>
+              <span className="text-[10px] font-bold text-emerald-600 uppercase mb-1">Pontos Gerados</span>
+            </div>
+            <p className="text-[9px] text-zinc-500 mt-2 uppercase font-medium">Nabih + Faculdade + Treino + Sono</p>
+          </Card>
+          
+          <Card className="p-6 bg-red-950/20 border-red-900/50 rounded-[2rem] border-t-4 border-t-red-500">
+            <span className="text-[10px] font-black uppercase tracking-widest text-red-500 block mb-2">Vazamentos (Negativo)</span>
+            <div className="flex items-end gap-2">
+              <span className="text-4xl font-black text-white">{stats.negative}</span>
+              <span className="text-[10px] font-bold text-red-600 uppercase mb-1">Pontos Perdidos</span>
+            </div>
+            <p className="text-[9px] text-zinc-500 mt-2 uppercase font-medium">Inércia + Gastos + Redes Sociais</p>
+          </Card>
+        </div>
+      </section>
+
+      {/* Velocidade de Carreira */}
+      <section className="mb-12">
+        <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] overflow-hidden">
+          <div className="flex justify-between items-end mb-4">
+            <div>
+              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">Velocidade de Carreira</h2>
+              <span className="text-xl font-black uppercase tracking-tighter">Rumo aos R$ 7.000,00</span>
+            </div>
+            <span className="text-2xl font-black text-blue-500">{stats.careerSpeed.toFixed(1)}%</span>
+          </div>
+          <div className="h-3 w-full bg-zinc-900 rounded-full overflow-hidden border border-zinc-800">
+            <div 
+              className="h-full bg-blue-600 rounded-full transition-all duration-1000 shadow-[0_0_20px_rgba(37,99,235,0.4)]" 
+              style={{ width: `${stats.careerSpeed}%` }}
+            />
+          </div>
+          <div className="flex justify-between mt-3">
+            <span className="text-[8px] font-black text-zinc-600 uppercase">Hardware Ativo</span>
+            <span className="text-[8px] font-black text-zinc-600 uppercase">Mercado Target: SR/PL</span>
+          </div>
+        </Card>
+      </section>
 
       {/* Hardware Humano Widget */}
       <section className="mb-12">

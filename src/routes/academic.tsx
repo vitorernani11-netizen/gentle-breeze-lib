@@ -60,6 +60,7 @@ function AcademicPage() {
       setActivities([...activities, data].sort((a, b) => new Date(a.data_entrega).getTime() - new Date(b.data_entrega).getTime()));
       setNewActivity({ nome: '', data_entrega: format(new Date(), 'yyyy-MM-dd') });
       toast.success('Atividade adicionada!');
+      if (session) fetchActivities(session.user.id);
     }
   };
 

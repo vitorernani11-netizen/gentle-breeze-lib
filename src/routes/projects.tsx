@@ -72,7 +72,7 @@ function Projects() {
         setNewProjectName('');
         setShowAdd(false);
         toast.success('Projeto criado com sucesso');
-        fetchProjects(); // Garantir que os contadores de tarefas estejam atualizados
+        fetchProjects(); 
       }
     } catch (error: any) {
       console.error('Erro ao criar projeto:', error);

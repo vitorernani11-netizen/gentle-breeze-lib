@@ -71,6 +71,10 @@ function TasksPage() {
         setTasks([data, ...tasks]);
         setNewTitle('');
         toast.success('Tarefa adicionada à Entrada');
+        
+        // Refresh global dashboard data
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) fetchTasks(session.user.id);
       }
     } catch (error: any) {
       console.error('Erro ao adicionar tarefa:', error);
