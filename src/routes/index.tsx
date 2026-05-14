@@ -95,8 +95,22 @@ function Dashboard() {
       .eq('user_id', userId)
       .eq('deletado_por_inercia', true);
 
+    // Fetch urgent academic activities (< 1 day remaining)
+    const { data: academicData } = await supabase
+      .from('atividades_academicas')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('concluido', false)
+      .order('data_entrega', { ascending: true });
+
+    const urgentAcademic = academicData?.filter(a => {
+      const days = differenceInDays(parseISO(a.data_entrega), new Date());
+      return days <= 0; // "Faltar 1 dia" interpreted as today or already passed
+    }) || [];
+
     if (tasksData) setTasks(tasksData);
     if (projectsData) setProjects(projectsData);
+    if (academicUrgent) setAcademicUrgent(urgentAcademic);
     if (count !== null) setEliminatedCount(count);
   };
 
