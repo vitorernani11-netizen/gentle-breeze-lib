@@ -413,48 +413,6 @@ function Dashboard() {
         </div>
       </section>
 
-      <Dialog open={showCheckin} onOpenChange={setShowCheckin}>
-        <DialogContent className="w-[90%] rounded-[2.5rem] bg-zinc-950 border-zinc-900 p-8 sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-center uppercase tracking-tighter">Check-in Matinal</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-8 py-6">
-            <div className="space-y-4 text-center">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Horas de Sono</Label>
-              <Input
-                type="number"
-                placeholder="0.0"
-                value={checkin.horas_sono}
-                onChange={(e) => setCheckin({ ...checkin, horas_sono: e.target.value })}
-                className="bg-zinc-900 border-none h-20 text-4xl font-black rounded-3xl text-center focus-visible:ring-0"
-              />
-            </div>
-            <div className="flex flex-col gap-4">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 text-center">O treino das 05h foi realizado?</Label>
-              <div className="flex gap-4">
-                <Button 
-                  variant={checkin.treino_madrugada_realizado ? 'default' : 'secondary'}
-                  className={`flex-1 h-16 rounded-2xl font-black uppercase transition-none ${checkin.treino_madrugada_realizado ? 'bg-blue-600 text-white' : 'bg-zinc-900 text-zinc-500'}`}
-                  onClick={() => setCheckin({ ...checkin, treino_madrugada_realizado: true })}
-                >
-                  <Dumbbell size={20} className="mr-2" /> Sim
-                </Button>
-                <Button 
-                  variant={!checkin.treino_madrugada_realizado ? 'default' : 'secondary'}
-                  className={`flex-1 h-16 rounded-2xl font-black uppercase transition-none ${!checkin.treino_madrugada_realizado ? 'bg-zinc-800 text-zinc-300' : 'bg-zinc-900 text-zinc-500'}`}
-                  onClick={() => setCheckin({ ...checkin, treino_madrugada_realizado: false })}
-                >
-                  Não
-                </Button>
-              </div>
-            </div>
-            <Button onClick={handleSaveCheckin} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none">
-              Iniciar o Jogo
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
       <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
         <DialogContent className="bg-zinc-950 border-zinc-900 rounded-3xl p-8 sm:max-w-md">
           <DialogHeader>
