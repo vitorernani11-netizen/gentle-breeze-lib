@@ -284,7 +284,7 @@ function Dashboard() {
 
     try {
       const tagsString = String(newTask.tags || '');
-      const tagsArray = tagsString.split(',').map(t => t.trim()).filter(t => t !== '');
+      const tagsArray = tagsString ? tagsString.split(',').map(t => t.trim()).filter(t => t !== '') : [];
       const task = {
         id: crypto.randomUUID(),
         titulo: newTask.titulo,

@@ -17,7 +17,7 @@ function ProfilePage() {
           <User size={40} className="text-zinc-500" />
         </div>
         <h1 className="text-3xl font-black uppercase tracking-tighter leading-none mb-1">
-          {user.email?.split('@')[0]}
+          {String(user?.email || '').split('@')[0] || 'Usuário'}
         </h1>
         <p className="text-[10px] text-zinc-600 font-black uppercase tracking-widest">Plano Focus Pro</p>
       </header>
