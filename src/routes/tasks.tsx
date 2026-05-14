@@ -23,6 +23,7 @@ import { useTaskActions } from '@/hooks/useTaskActions';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { cn } from '@/lib/utils';
 import { SmartInput } from '@/components/tasks/SmartInput';
+import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
 
 const TASKS_KEY = 'hardware_humano_data';
 
