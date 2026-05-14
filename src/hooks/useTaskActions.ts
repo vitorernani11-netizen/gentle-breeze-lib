@@ -1,7 +1,7 @@
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { toast } from 'sonner';
 
-const TASKS_KEY = 'hardware_humano_tasks';
+const TASKS_KEY = 'hardware_humano_data'; // Unificando conforme instrução de persistência local
 
 export const useTaskActions = (onSuccess?: () => void) => {
   const completeTask = (task: any) => {

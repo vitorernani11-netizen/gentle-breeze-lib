@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { loadFromLocal } from '@/lib/storage';
 
-const TASKS_KEY = 'hardware_humano_tasks';
+const TASKS_KEY = 'hardware_humano_data';
 const PROJECTS_KEY = 'hardware_humano_projects';
 
 export const Route = createFileRoute('/purgatory')({
