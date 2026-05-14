@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skull, Calendar, Check, Hash, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTaskActions } from '@/hooks/useTaskActions';
 
 export const Route = createFileRoute('/purgatory')({
   component: Purgatory,
@@ -14,6 +15,7 @@ function Purgatory() {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { completeTask, rescheduleTask } = useTaskActions(() => fetchOverdueTasks());
 
   useEffect(() => {
     fetchOverdueTasks();
@@ -37,52 +39,7 @@ function Purgatory() {
     setLoading(false);
   };
 
-  const rescheduleTask = async (task: any) => {
-    const newCount = (task.contagem_adiamentos || 0) + 1;
-    
-    if (newCount >= 3) {
-      // Hard delete
-      const { error } = await supabase
-        .from('tarefas')
-        .delete()
-        .eq('id', task.id);
-
-      if (!error) {
-        setTasks(tasks.filter(t => t.id !== task.id));
-        toast.error(`Tarefa "${task.titulo}" deletada por inércia.`, {
-          style: { background: '#7f1d1d', color: '#fff', border: 'none' }
-        });
-      }
-      return;
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    const { error } = await supabase
-      .from('tarefas')
-      .update({ 
-        data_execucao: today, 
-        status: 'Hoje',
-        contagem_adiamentos: newCount
-      })
-      .eq('id', task.id);
-
-    if (!error) {
-      setTasks(tasks.filter(t => t.id !== task.id));
-      toast.warning(`Reagendada. Aviso: ${newCount}/3 adiamentos.`);
-    }
-  };
-
-  const completeTask = async (id: string) => {
-    const { error } = await supabase
-      .from('tarefas')
-      .update({ status_concluido: true })
-      .eq('id', id);
-
-    if (!error) {
-      setTasks(tasks.filter(t => t.id !== id));
-      toast.success('Dívida técnica paga!');
-    }
-  };
+  // Logic moved to useTaskActions hook
 
   if (loading) return null;
 
