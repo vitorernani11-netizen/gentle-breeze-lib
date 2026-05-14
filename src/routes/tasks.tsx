@@ -48,20 +48,29 @@ function TasksPage() {
     e.preventDefault();
     if (!newTitle.trim() || !session) return;
 
-    const { data, error } = await supabase
-      .from('tarefas')
-      .insert([{ 
-        titulo: newTitle, 
-        user_id: session.user.id,
-        status: 'Entrada'
-      }])
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('tarefas')
+        .insert([{ 
+          titulo: newTitle, 
+          user_id: session.user.id,
+          status: 'Entrada'
+        }])
+        .select()
+        .single();
 
-    if (data) {
-      setTasks([data, ...tasks]);
-      setNewTitle('');
-      toast.success('Tarefa na Entrada');
+      if (error) throw error;
+
+      if (data) {
+        setTasks([data, ...tasks]);
+        setNewTitle('');
+        toast.success('Tarefa adicionada à Entrada');
+      }
+    } catch (error: any) {
+      console.error('Erro ao adicionar tarefa:', error);
+      toast.error('Falha ao salvar tarefa: ' + (error.message || 'Erro de conexão'), {
+        style: { background: '#7f1d1d', color: '#fff', border: 'none' }
+      });
     }
   };
 
