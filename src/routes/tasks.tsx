@@ -110,15 +110,16 @@ function TasksPage() {
     recorrencia: string;
     prioridade: number;
     lembrete: string | null;
+    descricao?: string;
   }) => {
     try {
       const task = {
         id: crypto.randomUUID(),
         titulo: taskData.titulo,
-        descricao: '',
+        descricao: taskData.descricao || '',
         repeticao: taskData.recorrencia || 'none',
         data_execucao: taskData.vencimento,
-        hora_vencimento: taskData.lembrete, // Using lembrete as time for now or explicitly
+        hora_vencimento: taskData.lembrete, // Mapping lembrete to hora_vencimento for logic
         prioridade: taskData.prioridade || 4,
         triagem_stage: 1,
         user_id: 'local-user',
