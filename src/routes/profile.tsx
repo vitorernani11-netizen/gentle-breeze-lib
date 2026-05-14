@@ -1,22 +1,14 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { LogOut, User, Shield, Zap } from 'lucide-react';
-import { toast } from 'sonner';
+import { User, Shield, Zap } from 'lucide-react';
 
 export const Route = createFileRoute('/profile')({
   component: ProfilePage,
 });
 
 function ProfilePage() {
-  const navigate = useNavigate();
   const [user] = useState<any>({ email: 'unico@usuario.app' });
-
-  const handleLogout = () => {
-    navigate({ to: '/login' });
-    toast.success('Modo Local: Sessão resetada');
-  };
 
   return (
     <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20">
