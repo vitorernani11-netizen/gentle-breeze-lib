@@ -49,6 +49,17 @@ const ACADEMIC_KEY = 'hardware_humano_academic';
 const FINANCE_KEY = 'hardware_humano_finance';
 const SOCIAL_KEY = 'hardware_humano_social';
 
+const safeParseDate = (value: unknown) => {
+  try {
+    if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+    if (typeof value !== 'string' || !value.trim()) return null;
+    const parsed = parseISO(value);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  } catch {
+    return null;
+  }
+};
+
 export const Route = createFileRoute('/')({
   component: Dashboard,
 });
@@ -132,8 +143,8 @@ function Dashboard() {
     const today = new Date().toISOString().split('T')[0];
     const sevenDaysAgo = subDays(new Date(), 7);
     
-    // Helper para validação de data
-    const isValidDate = (d: any) => d && !isNaN(new Date(d).getTime());
+    // Helper para validação de data segura contra dados antigos/corrompidos
+    const isValidDate = (d: any) => Boolean(safeParseDate(d));
 
     const allTasks = (loadFromLocal(TASKS_KEY) || []).filter((t: any) => isValidDate(t.created_at || t.data_execucao));
     const todayTasks = allTasks.filter((t: any) => t.data_execucao === today && !t.status_concluido);
@@ -149,7 +160,9 @@ function Dashboard() {
     const urgentAcademic = academicData.filter((a: any) => {
       if (a.concluido) return false;
       try {
-        const days = differenceInDays(parseISO(a.data_entrega), new Date());
+        const deliveryDate = safeParseDate(a.data_entrega);
+        if (!deliveryDate) return false;
+        const days = differenceInDays(deliveryDate, new Date());
         return days <= 1;
       } catch (e) { return false; }
     });
@@ -168,7 +181,8 @@ function Dashboard() {
       let name = '??';
       try {
         if (d.data) {
-          name = format(parseISO(d.data), 'dd/MM');
+          const parsedDate = safeParseDate(d.data);
+          name = parsedDate ? format(parsedDate, 'dd/MM') : '??';
         }
       } catch (e) {
         console.error('Erro ao formatar data do checkin:', d.data);
@@ -186,11 +200,10 @@ function Dashboard() {
       setIsRecoveryMode(currentCheckin.horas_sono !== null && currentCheckin.horas_sono < 6);
     }
 
-    const completedLast7 = allTasks.filter((t: any) => 
-      t && t.status_concluido && 
-      (t.updated_at || t.created_at) && 
-      isAfter(parseISO(t.updated_at || t.created_at), sevenDaysAgo)
-    );
+    const completedLast7 = allTasks.filter((t: any) => {
+      const parsedDate = safeParseDate(t?.updated_at || t?.created_at);
+      return t && t.status_concluido && parsedDate && isAfter(parsedDate, sevenDaysAgo);
+    });
     const positiveTasks = completedLast7.filter((t: any) => {
       const proj = projectsData.find((p: any) => p.id === t.projeto_id);
       return proj?.nome === 'Nabih' || proj?.nome === 'Faculdade' || t.tags?.includes('Nabih') || t.tags?.includes('Faculdade');
@@ -200,18 +213,17 @@ function Dashboard() {
     const goodSleepCount = sortedCheckins.filter((s: any) => s.horas_sono && s.horas_sono >= 7).length;
     
     const financeRecords = (loadFromLocal(FINANCE_KEY) || []).filter((f: any) => isValidDate(f.data));
-    const expenses7 = financeRecords.filter((f: any) => 
-      f && f.tipo === 'Saida' && 
-      f.data && 
-      isAfter(parseISO(f.data), sevenDaysAgo)
-    );
+    const expenses7 = financeRecords.filter((f: any) => {
+      const parsedDate = safeParseDate(f?.data);
+      return f && f.tipo === 'Saida' && parsedDate && isAfter(parsedDate, sevenDaysAgo);
+    });
     const expenseTotal = expenses7.reduce((acc: number, curr: any) => acc + Number(curr.valor), 0);
     
     const socialUsage = (loadFromLocal(SOCIAL_KEY) || []).filter((s: any) => isValidDate(s.data));
-    const social7 = socialUsage.filter((s: any) => 
-      s && s.data && 
-      isAfter(parseISO(s.data), sevenDaysAgo)
-    );
+    const social7 = socialUsage.filter((s: any) => {
+      const parsedDate = safeParseDate(s?.data);
+      return s && parsedDate && isAfter(parsedDate, sevenDaysAgo);
+    });
     const socialHours = social7.reduce((acc: number, curr: any) => acc + curr.minutos, 0) / 60;
     
     setStats({
@@ -221,9 +233,8 @@ function Dashboard() {
     });
 
     const silentUntil = loadFromLocal('hardware_humano_silence');
-    if (silentUntil) {
-      setIsSilenced(isAfter(parseISO(silentUntil), new Date()));
-    }
+    const silentDate = safeParseDate(silentUntil);
+    setIsSilenced(Boolean(silentDate && isAfter(silentDate, new Date())));
   };
 
   const handleSleepNow = () => {
