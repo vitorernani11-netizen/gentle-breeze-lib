@@ -33,7 +33,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useTaskActions } from '@/hooks/useTaskActions';
-import { differenceInDays, parseISO, format, isWithinInterval, setHours, setMinutes, addDays, isAfter } from 'date-fns';
+import { differenceInDays, parseISO, format, isWithinInterval, setHours, setMinutes, addDays, isAfter, subDays } from 'date-fns';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine, Cell } from 'recharts';
 import { cn } from '@/lib/utils';
 
