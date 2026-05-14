@@ -5,23 +5,36 @@ const TASKS_KEY = 'hardware_humano_data'; // Unificando conforme instrução de 
 
 export const useTaskActions = (onSuccess?: () => void) => {
   const completeTask = (task: any) => {
+    if (!task?.id) {
+      toast.error('Erro de integridade: ID da tarefa não encontrado.');
+      return;
+    }
+
     try {
       const allTasks = loadFromLocal(TASKS_KEY) || [];
       const updatedTasks = allTasks.map((t: any) => {
         if (t.id === task.id) {
           if (task.repeticao && task.repeticao !== 'none') {
-            const [year, month, day] = t.data_execucao.split('-').map(Number);
-            const currentDate = new Date(year, month - 1, day);
-            let nextDate = new Date(currentDate);
+            try {
+              const [year, month, day] = t.data_execucao.split('-').map(Number);
+              const currentDate = new Date(year, month - 1, day);
+              
+              if (isNaN(currentDate.getTime())) throw new Error('Data inválida');
 
-            if (task.repeticao === 'daily') nextDate.setDate(currentDate.getDate() + 1);
-            if (task.repeticao === 'weekly') nextDate.setDate(currentDate.getDate() + 7);
-            if (task.repeticao === 'monthly') nextDate.setMonth(currentDate.getMonth() + 1);
+              let nextDate = new Date(currentDate);
+              if (task.repeticao === 'daily') nextDate.setDate(currentDate.getDate() + 1);
+              if (task.repeticao === 'weekly') nextDate.setDate(currentDate.getDate() + 7);
+              if (task.repeticao === 'monthly') nextDate.setMonth(currentDate.getMonth() + 1);
 
-            const nextDateStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
-            
-            toast.success(`Recorrência agendada para ${nextDate.toLocaleDateString('pt-BR')}`);
-            return { ...t, data_execucao: nextDateStr, status: 'Hoje' };
+              const nextDateStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
+              
+              toast.success(`Recorrência: ${nextDate.toLocaleDateString('pt-BR')}`);
+              return { ...t, data_execucao: nextDateStr, status: 'Hoje' };
+            } catch (dateError) {
+              console.error('Erro no cálculo de recorrência:', dateError);
+              toast.error('Erro ao calcular próxima data. Resetando para hoje.');
+              return { ...t, data_execucao: new Date().toISOString().split('T')[0], status: 'Hoje' };
+            }
           } else {
             toast.success('Tarefa concluída!');
             return { ...t, status_concluido: true };
@@ -34,11 +47,16 @@ export const useTaskActions = (onSuccess?: () => void) => {
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Erro ao completar tarefa:', error);
-      toast.error('Erro ao salvar no hardware');
+      toast.error('Falha crítica ao atualizar tarefa no hardware.');
     }
   };
 
   const rescheduleTask = (task: any, newDate?: string) => {
+    if (!task?.id) {
+      toast.error('Identificador de tarefa inválido.');
+      return;
+    }
+
     try {
       const allTasks = loadFromLocal(TASKS_KEY) || [];
       const newCount = (task.contagem_adiamentos || 0) + 1;
@@ -66,18 +84,20 @@ export const useTaskActions = (onSuccess?: () => void) => {
           }
           return t;
         });
-        toast.warning(`Reagendada para ${new Date(targetDate).toLocaleDateString('pt-BR')}. Aviso: ${newCount}/3 adiamentos.`);
+        toast.warning(`Reagendada (${newCount}/3 adiamentos)`);
       }
 
       saveToLocal(TASKS_KEY, updatedTasks);
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Erro ao reagendar tarefa:', error);
-      toast.error('Erro ao salvar no hardware');
+      toast.error('Erro ao registrar reagendamento no hardware.');
     }
   };
 
   const moveTask = (id: string, status: 'Hoje' | 'Amanha') => {
+    if (!id) return;
+
     try {
       const allTasks = loadFromLocal(TASKS_KEY) || [];
       const today = new Date().toISOString().split('T')[0];
@@ -97,11 +117,11 @@ export const useTaskActions = (onSuccess?: () => void) => {
       });
 
       saveToLocal(TASKS_KEY, updatedTasks);
-      toast.success(status === 'Hoje' ? 'Movida para Hoje' : 'Movida para Amanhã');
+      toast.success(status === 'Hoje' ? 'Mover: Hoje' : 'Mover: Amanhã');
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Erro ao mover tarefa:', error);
-      toast.error('Erro ao salvar no hardware');
+      toast.error('Falha na movimentação do pipeline.');
     }
   };
 
