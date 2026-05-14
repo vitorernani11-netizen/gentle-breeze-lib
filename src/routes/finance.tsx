@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowUpCircle, ArrowDownCircle, TrendingUp, TrendingDown, Plus, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
-import { BarChart, Bar, XValues, YValues, CartesianGrid, Tooltip, ResponsiveContainer, Cell, XAxis, YAxis } from 'recharts';
+import { BarChart, Bar, CartesianGrid, Tooltip, ResponsiveContainer, Cell, XAxis, YAxis } from 'recharts';
 
 export const Route = createFileRoute('/finance')({
   component: FinancePage,
