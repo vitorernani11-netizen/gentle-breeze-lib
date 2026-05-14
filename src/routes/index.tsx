@@ -272,6 +272,18 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20">
+      {isLocked && (
+        <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
+          <PowerOff size={80} className="text-zinc-800 mb-8 animate-pulse" />
+          <h2 className="text-3xl font-black tracking-tighter uppercase mb-4">Hardware exausto</h2>
+          <p className="text-zinc-500 font-bold uppercase tracking-widest text-sm max-w-xs">
+            PROJETO X: DESLIGAMENTO OBRIGATÓRIO.
+          </p>
+          <p className="text-zinc-700 text-[10px] font-black uppercase tracking-[0.3em] mt-12">
+            Acesso liberado às 06:00 após Check-in
+          </p>
+        </div>
+      )}
       <header className="mb-10">
         <div className="flex items-center gap-2 text-blue-500 mb-2">
           <Calendar size={20} />
