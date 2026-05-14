@@ -125,5 +125,45 @@ export const useTaskActions = (onSuccess?: () => void) => {
     }
   };
 
-  return { completeTask, rescheduleTask, moveTask };
+  const updateTriagemStage = (id: string, stage: number) => {
+    try {
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
+      const updatedTasks = allTasks.map((t: any) => 
+        t.id === id ? { ...t, triagem_stage: stage } : t
+      );
+      saveToLocal(TASKS_KEY, updatedTasks);
+      toast.success(`Pipeline: Estágio ${stage} ativado`);
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      toast.error('Erro ao atualizar pipeline');
+    }
+  };
+
+  const restoreTask = (id: string) => {
+    try {
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
+      const updatedTasks = allTasks.map((t: any) => 
+        t.id === id ? { ...t, status_concluido: false } : t
+      );
+      saveToLocal(TASKS_KEY, updatedTasks);
+      toast.success('Tarefa restaurada');
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      toast.error('Erro ao restaurar tarefa');
+    }
+  };
+
+  const deletePermanent = (id: string) => {
+    try {
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
+      const updatedTasks = allTasks.filter((t: any) => t.id !== id);
+      saveToLocal(TASKS_KEY, updatedTasks);
+      toast.success('Registro incinerado');
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      toast.error('Erro ao incinerar registro');
+    }
+  };
+
+  return { completeTask, rescheduleTask, moveTask, updateTriagemStage, restoreTask, deletePermanent };
 };
