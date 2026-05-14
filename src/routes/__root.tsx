@@ -8,7 +8,6 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { Toaster } from "sonner";
-import { AppSidebar } from "@/components/AppSidebar";
 
 import appCss from "../styles.css?url";
 
@@ -21,6 +20,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#000000" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { property: "og:title", content: "Focus" },
+      { name: "twitter:title", content: "Focus" },
+      { name: "description", content: "A web application for task management, financial tracking, and meal planning." },
+      { property: "og:description", content: "A web application for task management, financial tracking, and meal planning." },
+      { name: "twitter:description", content: "A web application for task management, financial tracking, and meal planning." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/01e685b2-96c8-4f55-9558-4fb6d1d9b5fa/id-preview-c84a8e4f--30c1b0f2-cc8c-4fbe-945e-f1331bb68af9.lovable.app-1778735616823.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/01e685b2-96c8-4f55-9558-4fb6d1d9b5fa/id-preview-c84a8e4f--30c1b0f2-cc8c-4fbe-945e-f1331bb68af9.lovable.app-1778735616823.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       { rel: "manifest", href: "/manifest.webmanifest" },
@@ -41,7 +49,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-black">
+      <body>
         {children}
         <Scripts />
       </body>
@@ -54,10 +62,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppSidebar />
-      <div className="flex flex-col min-h-screen">
-        <Outlet />
-      </div>
+      <Outlet />
       <Toaster position="top-center" theme="dark" />
     </QueryClientProvider>
   );
