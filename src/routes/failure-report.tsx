@@ -140,7 +140,7 @@ function FailureReport() {
           <Card className="p-6 bg-zinc-900/20 border-zinc-900/50 rounded-3xl space-y-4">
             <div className="flex items-center gap-3">
               <Bed className="text-indigo-500" size={18} />
-              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 text-left">Sono < 7h</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 text-left">Dormir Menos de 7h</span>
             </div>
             <div className="flex items-end gap-2">
               <span className="text-3xl font-black text-white">{stats.poorSleepDays}</span>
