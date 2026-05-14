@@ -160,7 +160,7 @@ function Dashboard() {
 
     const urgentAcademic = academicData?.filter(a => {
       const days = differenceInDays(parseISO(a.data_entrega), new Date());
-      return days <= 1; // "Faltar 1 dia" included
+      return days <= 1;
     }) || [];
 
     // Fetch hydration
@@ -171,11 +171,74 @@ function Dashboard() {
       .eq('data', today)
       .single();
 
+    // Fetch sleep history (last 7 days)
+    const { data: sleepData } = await supabase
+      .from('checkin_diario')
+      .select('data, horas_sono')
+      .eq('user_id', userId)
+      .order('data', { ascending: false })
+      .limit(7);
+
+    // Fetch profile for silencing status
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('notificacoes_silenciadas_ate')
+      .eq('id', userId)
+      .single();
+
     if (tasksData) setTasks(tasksData);
     if (projectsData) setProjects(projectsData);
     setAcademicUrgent(urgentAcademic);
     if (count !== null) setEliminatedCount(count);
     if (hydrationData) setHydration(hydrationData.quantidade_ml);
+    
+    if (sleepData) {
+      const history = sleepData.reverse().map(d => ({
+        name: format(parseISO(d.data), 'dd/MM'),
+        hours: d.horas_sono || 0
+      }));
+      setSleepHistory(history);
+      
+      const todaySleep = sleepData.find(d => d.data === today);
+      if (todaySleep) setHoursSleptToday(todaySleep.horas_sono);
+    }
+
+    if (profileData?.notificacoes_silenciadas_ate) {
+      const silentUntil = parseISO(profileData.notificacoes_silenciadas_ate);
+      setIsSilenced(isAfter(silentUntil, new Date()));
+    }
+  };
+
+  const handleSleepNow = async () => {
+    if (!session) return;
+    
+    // Set silenced until 05:00 tomorrow
+    let targetDate = setHours(setMinutes(new Date(), 0), 5);
+    if (new Date().getHours() >= 5) {
+      targetDate = addDays(targetDate, 1);
+    }
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({
+        id: session.user.id,
+        notificacoes_silenciadas_ate: targetDate.toISOString()
+      });
+
+    const { error: eventError } = await supabase
+      .from('sleep_events')
+      .insert([{
+        user_id: session.user.id,
+        inicio_sono: new Date().toISOString()
+      }]);
+
+    if (!profileError && !eventError) {
+      setIsSilenced(true);
+      toast.success('Modo Sono Ativado', {
+        description: 'Notificações silenciadas até as 05:00.',
+        icon: <Moon className="h-4 w-4" />
+      });
+    }
   };
 
   const checkTodayCheckin = async (userId: string) => {
