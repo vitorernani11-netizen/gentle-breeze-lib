@@ -27,9 +27,8 @@ function TasksPage() {
       const { data: { session: currentSession } } = await supabase.auth.getSession();
       setSession(currentSession);
       
-      if (currentSession?.user?.id) {
-        await fetchTasks(currentSession.user.id);
-      }
+      const userId = currentSession?.user?.id || '00000000-0000-0000-0000-000000000000';
+      await fetchTasks(userId);
       setLoading(false);
     };
 
@@ -48,8 +47,8 @@ function TasksPage() {
   }, []);
 
   const fetchTasks = async (userId: string) => {
-    if (!userId || userId === 'anonymous') {
-      console.log('Tentativa de busca ignorada: usuário anônimo ou nulo');
+    if (!userId) {
+      console.log('Tentativa de busca ignorada: usuário nulo');
       return;
     }
     
@@ -74,14 +73,15 @@ function TasksPage() {
 
   const addTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim() || !session) return;
+    if (!newTitle.trim()) return;
 
     try {
+      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
       const { data, error } = await supabase
         .from('tarefas')
         .insert([{ 
           titulo: newTitle, 
-          user_id: session.user.id,
+          user_id: userId,
           status: 'Entrada'
         }])
         .select()
