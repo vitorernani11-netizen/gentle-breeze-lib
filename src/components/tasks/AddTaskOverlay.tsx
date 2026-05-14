@@ -15,9 +15,7 @@ import { cn } from '@/lib/utils';
 import { format, startOfToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { parseNLP, NLPResult } from '@/utils/nlpParser';
-import { TimePickerPopover } from './TimePickerPopover';
 import { CalendarPopover } from './CalendarPopover';
 import { ReminderManager } from './ReminderManager';
 
@@ -40,6 +38,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [vencimento, setVencimento] = useState<Date>(startOfToday());
+  const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
   const [prioridade, setPrioridade] = useState(4);
   const [lembrete, setLembrete] = useState<string | null>(null);
   const [reminders, setReminders] = useState<any[]>([]);
@@ -53,6 +52,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       setTitulo('');
       setDescricao('');
       setVencimento(startOfToday());
+      setRecurrence('none');
       setPrioridade(4);
       setLembrete(null);
       setReminders([]);
@@ -65,10 +65,16 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       const result = parseNLP(titulo);
       setNlpData(result);
       
-      // Update UI if NLP detected something and user hasn't manually changed it 
-      // (For now we just auto-apply if detected)
-      if (result.dueDate) setVencimento(result.dueDate);
+      if (result.dueDate) {
+         const newDate = new Date(result.dueDate);
+         if (result.reminderTime) {
+            const [h, m] = result.reminderTime.split(':').map(Number);
+            newDate.setHours(h, m, 0, 0);
+         }
+         setVencimento(newDate);
+      }
       if (result.reminderTime) setLembrete(result.reminderTime);
+      if (result.recurrence) setRecurrence(result.recurrence);
     } else {
       setNlpData(null);
     }
@@ -79,26 +85,17 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
 
     const result = nlpData || parseNLP(titulo);
     
-    // Use values from state (which might have been updated by NLP)
-    const finalVencimento = vencimento;
-    const finalLembrete = lembrete;
+    // Formatting for LocalStorage as requested: due_date: "2026-05-14T17:00:00.000Z"
+    const horaVencISO = vencimento.toISOString();
 
-    let horaVencISO = null;
-    if (lembrete) {
-      const [h, m] = lembrete.split(':').map(Number);
-      const d = new Date(vencimento);
-      d.setHours(h, m, 0, 0);
-      horaVencISO = d.toISOString();
-    }
-
-    console.log('[Task:Create]', { title: result.text, time: lembrete });
+    console.log('[Task:Create]', { title: result.text, due_date: horaVencISO, recurrence });
 
     onAddTask({
       titulo: result.text,
       vencimento: format(vencimento, 'yyyy-MM-dd'),
-      recorrencia: result.recurrence || 'none',
+      recorrencia: recurrence,
       prioridade,
-      lembrete: lembrete,
+      lembrete: format(vencimento, 'HH:mm'),
       reminders: reminders,
       descricao,
       hora_vencimento: horaVencISO
@@ -153,11 +150,16 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-4">
           <div className="flex items-center gap-2">
-            <CalendarPopover selectedDate={vencimento} onSelect={setVencimento}>
+            <CalendarPopover 
+              selectedDate={vencimento} 
+              onSelect={setVencimento}
+              recurrence={recurrence}
+              onRecurrenceSelect={setRecurrence}
+            >
               <Button variant="ghost" className={cn("h-9 px-3 rounded-xl border border-zinc-900", vencimento && "text-[#00ff41] border-[#00ff41]/20")}>
                 <CalendarIcon size={18} />
                 <span className="ml-2 text-[10px] font-bold uppercase whitespace-nowrap">
-                  {format(vencimento, "dd MMM", { locale: ptBR })}
+                  {format(vencimento, "dd MMM", { locale: ptBR })} • {format(vencimento, 'HH:mm')}
                 </span>
               </Button>
             </CalendarPopover>
