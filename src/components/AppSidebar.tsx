@@ -54,7 +54,6 @@ export function AppSidebar() {
   const systemItems = [
     { label: 'Acadêmico', icon: GraduationCap, href: '/academic', color: 'text-purple-400' },
     { label: 'Purgatório', icon: Skull, href: '/purgatory', color: 'text-red-400' },
-    { label: 'Financeiro', icon: Hash, href: '/finance', color: 'text-emerald-400' },
     { label: 'Cardápio', icon: Menu, href: '/menu', color: 'text-orange-400' },
     { label: 'Fracasso', icon: AlertTriangle, href: '/failure-report', color: 'text-red-600' },
   ];

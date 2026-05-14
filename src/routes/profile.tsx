@@ -57,16 +57,7 @@ function ProfilePage() {
         </Card>
       </div>
 
-      <div className="mt-12">
-        <Button 
-          variant="ghost" 
-          className="w-full h-16 rounded-2xl border border-zinc-900 text-red-500 font-black uppercase tracking-widest hover:bg-red-950/20 hover:text-red-400 transition-none"
-          onClick={handleLogout}
-        >
-          <LogOut size={20} className="mr-2" />
-          Encerrar Sessão (Reset Local)
-        </Button>
-      </div>
+      {/* Logout removido para modo 100% local */}
     </div>
   );
 }
