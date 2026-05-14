@@ -23,6 +23,7 @@ import { useTaskActions } from '@/hooks/useTaskActions';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { cn } from '@/lib/utils';
 import { SmartInput } from '@/components/tasks/SmartInput';
+import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
 
 const TASKS_KEY = 'hardware_humano_data';
 
@@ -39,9 +40,10 @@ function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [errorState, setErrorState] = useState<string | null>(null);
   const [selectedStage, setSelectedStage] = useState<number | null>(null);
+  const [detailTask, setDetailTask] = useState<any | null>(null);
   
 
-  const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask } = useTaskActions(() => {
+  const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask, updateTask } = useTaskActions(() => {
     fetchTasks();
     if (location.pathname === '/tasks' && window.location.hash === '#redirect-to-today') {
        navigate({ to: '/' });
@@ -222,7 +224,13 @@ function TasksPage() {
             .filter(task => !selectedStage || (task.triagem_stage || 1) === selectedStage)
             .map((task) => (
             <Card key={task.id} className="bg-zinc-950/30 border border-zinc-900/50 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between group hover:border-zinc-800 transition-all gap-4">
-              <div className="flex flex-col gap-2 flex-1 min-w-0">
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setDetailTask(task)}
+                onKeyDown={(e) => { if (e.key === 'Enter') setDetailTask(task); }}
+                className="flex flex-col gap-2 flex-1 min-w-0 text-left cursor-pointer"
+              >
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={cn("text-[8px] font-bold uppercase px-1.5 py-0.5 border rounded-md", 
                     task.prioridade === 1 ? "text-red-500 border-red-500/20 bg-red-500/5" :
@@ -238,7 +246,7 @@ function TasksPage() {
                       <button
                         key={s}
                         aria-label={`Mover para estágio ${s}`}
-                        onClick={() => updateTriagemStage(task.id, s)}
+                        onClick={(e) => { e.stopPropagation(); updateTriagemStage(task.id, s); }}
                         className={cn(
                           "w-5 h-5 text-[8px] font-bold flex items-center justify-center rounded-md transition-all",
                           (task.triagem_stage || 1) === s 
@@ -370,6 +378,13 @@ function TasksPage() {
           </div>
         )}
       </div>
+
+      <TaskDetailModal
+        task={detailTask}
+        open={!!detailTask}
+        onClose={() => setDetailTask(null)}
+        onUpdate={updateTask}
+      />
     </div>
   );
 }
