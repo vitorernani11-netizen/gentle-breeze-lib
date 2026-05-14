@@ -367,7 +367,7 @@ function TasksPage() {
                   aria-label="Deletar registro"
                   size="icon"
                   className="bg-zinc-900 text-zinc-500 hover:bg-[#ff0055] hover:text-white text-[10px] font-black uppercase rounded-none border-2 border-zinc-800 w-12 h-12 transition-none"
-                  onClick={() => deleteTask(task.id)}
+                  onClick={() => deletePermanent(task.id)}
                 >
                   <Trash2 size={18} />
                 </Button>
