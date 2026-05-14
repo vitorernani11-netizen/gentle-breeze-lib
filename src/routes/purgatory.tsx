@@ -1,14 +1,16 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Skull, Calendar as CalendarIcon, Check, Hash, RefreshCw } from 'lucide-react';
-import { toast } from 'sonner';
+import { Skull, Check, RefreshCw } from 'lucide-react';
 import { useTaskActions } from '@/hooks/useTaskActions';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { loadFromLocal } from '@/lib/storage';
+
+const TASKS_KEY = 'hardware_humano_tasks';
+const PROJECTS_KEY = 'hardware_humano_projects';
 
 export const Route = createFileRoute('/purgatory')({
   component: Purgatory,
@@ -20,6 +22,7 @@ function Purgatory() {
   const [loading, setLoading] = useState(true);
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
+  
   const { completeTask, rescheduleTask } = useTaskActions(() => {
     fetchOverdueTasks();
     setSelectedTask(null);
@@ -29,29 +32,31 @@ function Purgatory() {
     fetchOverdueTasks();
   }, []);
 
-  const fetchOverdueTasks = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-    const today = new Date().toISOString().split('T')[0];
+  const fetchOverdueTasks = () => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
+      const allProjects = loadFromLocal(PROJECTS_KEY) || [];
 
-    const { data } = await supabase
-      .from('tarefas')
-      .select('*, projetos(nome, cor)')
-      .eq('user_id', userId)
-      .eq('status_concluido', false)
-      .neq('status', 'Entrada') 
-      .lt('data_execucao', today) // Pega tudo que tem data_execucao anterior a hoje
-      .order('data_execucao', { ascending: true });
+      const filtered = allTasks.filter((t: any) => 
+        !t.status_concluido && 
+        t.status !== 'Entrada' && 
+        t.data_execucao < today
+      ).map((t: any) => {
+        const project = allProjects.find((p: any) => p.id === t.projeto_id);
+        return { ...t, projetos: project ? { nome: project.nome, cor: project.cor } : null };
+      }).sort((a: any, b: any) => a.data_execucao.localeCompare(b.data_execucao));
 
-    if (data) setTasks(data);
-    setLoading(false);
+      setTasks(filtered);
+    } catch (error) {
+      console.error('Erro ao buscar tarefas atrasadas localmente:', error);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  // Logic moved to useTaskActions hook
 
   if (loading) return null;
 
-  // Grouping tasks by project
   const groupedTasks = tasks.reduce((acc: any, task) => {
     const key = task.projetos?.nome || 'Sem Projeto';
     if (!acc[key]) acc[key] = [];
