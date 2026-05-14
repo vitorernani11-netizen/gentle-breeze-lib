@@ -43,13 +43,6 @@ function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [errorState, setErrorState] = useState<string | null>(null);
   
-  const [newTask, setNewTask] = useState({
-    titulo: '',
-    descricao: '',
-    recorrencia: 'none',
-    vencimento: '',
-    prioridade: '4'
-  });
 
   const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask } = useTaskActions(() => {
     fetchTasks();
@@ -135,12 +128,6 @@ function TasksPage() {
     }
   };
 
-  const handleAddTask = (e: React.FormEvent) => {
-    e.preventDefault();
-...
-      toast.error('O hardware rejeitou o novo registro.');
-    }
-  };
 
   if (loading) {
     return (
