@@ -1,12 +1,14 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Plus, Trash2, ArrowLeft, Hash } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, Hash, WifiOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskActions } from '@/hooks/useTaskActions';
+import { saveToLocal, loadFromLocal } from '@/lib/storage';
+
+const TASKS_KEY = 'hardware_humano_tasks';
 
 export const Route = createFileRoute('/tasks')({
   component: TasksPage,
@@ -14,93 +16,62 @@ export const Route = createFileRoute('/tasks')({
 
 function TasksPage() {
   const navigate = useNavigate();
-  const [session, setSession] = useState<any>(null);
   const [tasks, setTasks] = useState<any[]>([]);
   const [newTitle, setNewTitle] = useState('');
   const [loading, setLoading] = useState(true);
   const { moveTask } = useTaskActions(() => {
-    const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-    fetchTasks(userId);
+    fetchTasks();
   });
 
   useEffect(() => {
-    const initAuth = async () => {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      setSession(currentSession);
-      
-      const userId = currentSession?.user?.id || '00000000-0000-0000-0000-000000000000';
-      await fetchTasks(userId);
-      setLoading(false);
-    };
-
-    initAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-      const userId = newSession?.user?.id || '00000000-0000-0000-0000-000000000000';
-      fetchTasks(userId);
-    });
-
-    return () => subscription.unsubscribe();
+    fetchTasks();
+    setLoading(false);
   }, []);
 
-  const fetchTasks = async (userId: string) => {
-    if (!userId) return;
-    
-    const { data, error } = await supabase
-      .from('tarefas')
-      .select('*, projetos(nome, cor)')
-      .eq('user_id', userId)
-      .eq('status', 'Entrada')
-      .eq('status_concluido', false)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Erro Supabase fetchTasks:', error);
-      toast.error('Erro ao carregar tarefas');
-      return;
-    }
-
-    if (data) setTasks(data);
+  const fetchTasks = () => {
+    const allTasks = loadFromLocal(TASKS_KEY) || [];
+    const filteredTasks = allTasks.filter((t: any) => 
+      t.status === 'Entrada' && !t.status_concluido
+    ).sort((a: any, b: any) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    setTasks(filteredTasks);
   };
 
-  const addTask = async (e: React.FormEvent) => {
+  const addTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
     try {
-      const userId = session?.user?.id || '00000000-0000-0000-0000-000000000000';
-      const { data, error } = await supabase
-        .from('tarefas')
-        .insert([{ 
-          titulo: newTitle, 
-          user_id: userId,
-          status: 'Entrada'
-        }])
-        .select()
-        .single();
+      const newTask = {
+        id: crypto.randomUUID(),
+        titulo: newTitle,
+        user_id: 'local-user',
+        status: 'Entrada',
+        status_concluido: false,
+        created_at: new Date().toISOString(),
+        tags: []
+      };
 
-      if (error) throw error;
-
-      if (data) {
-        setTasks(prev => [data, ...prev]);
-        setNewTitle('');
-        toast.success('Tarefa adicionada à Entrada');
-      }
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
+      const updatedTasks = [newTask, ...allTasks];
+      saveToLocal(TASKS_KEY, updatedTasks);
+      
+      setTasks(prev => [newTask, ...prev]);
+      setNewTitle('');
+      toast.success('Tarefa adicionada à Entrada');
     } catch (error: any) {
       console.error('Erro ao adicionar tarefa:', error);
-      toast.error('Falha ao salvar tarefa: ' + (error.message || 'Erro de conexão'), {
-        style: { background: '#7f1d1d', color: '#fff', border: 'none' }
-      });
+      toast.error('Falha ao salvar tarefa no hardware');
     }
   };
 
-  const deleteTask = async (id: string) => {
-    const { error } = await supabase.from('tarefas').delete().eq('id', id);
-    if (!error) {
-      setTasks(tasks.filter(t => t.id !== id));
-      toast.success('Tarefa removida');
-    }
+  const deleteTask = (id: string) => {
+    const allTasks = loadFromLocal(TASKS_KEY) || [];
+    const updatedTasks = allTasks.filter((t: any) => t.id !== id);
+    saveToLocal(TASKS_KEY, updatedTasks);
+    setTasks(tasks.filter(t => t.id !== id));
+    toast.success('Tarefa removida');
   };
 
   if (loading) return null;
@@ -114,6 +85,11 @@ function TasksPage() {
 
   return (
     <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20">
+      <div className="fixed top-6 right-6 flex items-center gap-2 bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800">
+        <WifiOff size={14} className="text-zinc-500" />
+        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Modo Offline: Local</span>
+      </div>
+
       <header className="mb-10 flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/' })} className="transition-none">
           <ArrowLeft size={24} />
@@ -121,13 +97,7 @@ function TasksPage() {
         <h1 className="text-3xl font-black uppercase tracking-tighter">Entrada</h1>
       </header>
 
-      <form 
-        onSubmit={(e) => {
-          e.preventDefault();
-          addTask(e);
-        }} 
-        className="flex gap-2 mb-10"
-      >
+      <form onSubmit={addTask} className="flex gap-2 mb-10">
         <Input
           placeholder="O que está na mente?"
           value={newTitle}
