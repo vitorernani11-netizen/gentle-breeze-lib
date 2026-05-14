@@ -417,6 +417,52 @@ function Dashboard() {
         </div>
       )}
 
+      {/* Dashboard de Impacto */}
+      <section className="mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="p-6 bg-emerald-950/20 border-emerald-900/50 rounded-[2rem] border-t-4 border-t-emerald-500">
+            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 block mb-2">Impacto Positivo</span>
+            <div className="flex items-end gap-2">
+              <span className="text-4xl font-black text-white">{stats.positive}</span>
+              <span className="text-[10px] font-bold text-emerald-600 uppercase mb-1">Pontos Gerados</span>
+            </div>
+            <p className="text-[9px] text-zinc-500 mt-2 uppercase font-medium">Nabih + Faculdade + Treino + Sono</p>
+          </Card>
+          
+          <Card className="p-6 bg-red-950/20 border-red-900/50 rounded-[2rem] border-t-4 border-t-red-500">
+            <span className="text-[10px] font-black uppercase tracking-widest text-red-500 block mb-2">Vazamentos (Negativo)</span>
+            <div className="flex items-end gap-2">
+              <span className="text-4xl font-black text-white">{stats.negative}</span>
+              <span className="text-[10px] font-bold text-red-600 uppercase mb-1">Pontos Perdidos</span>
+            </div>
+            <p className="text-[9px] text-zinc-500 mt-2 uppercase font-medium">Inércia + Gastos + Redes Sociais</p>
+          </Card>
+        </div>
+      </section>
+
+      {/* Velocidade de Carreira */}
+      <section className="mb-12">
+        <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] overflow-hidden">
+          <div className="flex justify-between items-end mb-4">
+            <div>
+              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-1">Velocidade de Carreira</h2>
+              <span className="text-xl font-black uppercase tracking-tighter">Rumo aos R$ 7.000,00</span>
+            </div>
+            <span className="text-2xl font-black text-blue-500">{stats.careerSpeed.toFixed(1)}%</span>
+          </div>
+          <div className="h-3 w-full bg-zinc-900 rounded-full overflow-hidden border border-zinc-800">
+            <div 
+              className="h-full bg-blue-600 rounded-full transition-all duration-1000 shadow-[0_0_20px_rgba(37,99,235,0.4)]" 
+              style={{ width: `${stats.careerSpeed}%` }}
+            />
+          </div>
+          <div className="flex justify-between mt-3">
+            <span className="text-[8px] font-black text-zinc-600 uppercase">Hardware Ativo</span>
+            <span className="text-[8px] font-black text-zinc-600 uppercase">Mercado Target: SR/PL</span>
+          </div>
+        </Card>
+      </section>
+
       {/* Hardware Humano Widget */}
       <section className="mb-12">
         <div className="flex items-center gap-2 mb-4">
