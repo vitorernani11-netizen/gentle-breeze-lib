@@ -303,6 +303,33 @@ function Dashboard() {
               </Button>
             </div>
 
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="icon" className="h-14 w-14 rounded-2xl bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800 transition-none">
+                  <Zap size={24} />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-zinc-950 border-zinc-900 rounded-[2.5rem] p-8 sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black uppercase tracking-tighter text-center">Anxiety Dump</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-6 py-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Descarregue seus pensamentos</Label>
+                    <Textarea 
+                      placeholder="O que está te preocupando? Solte tudo aqui..." 
+                      value={anxietyContent}
+                      onChange={(e) => setAnxietyContent(e.target.value)}
+                      className="bg-zinc-900 border-none min-h-[150px] rounded-2xl px-6 py-4 font-bold focus-visible:ring-1 ring-zinc-700 resize-none"
+                    />
+                  </div>
+                  <Button onClick={handleSaveAnxietyDump} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest text-lg transition-none">
+                    Descarregar e Relaxar
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
             <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
             <DialogTrigger asChild>
               <Button size="icon" className="h-14 w-14 rounded-2xl bg-white text-black hover:bg-zinc-200 transition-none shadow-2xl shadow-white/10">
