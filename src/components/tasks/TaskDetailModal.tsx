@@ -9,10 +9,8 @@ import {
   Flag,
   Tag,
   Bell,
-  Hash,
-  Check,
-  X,
-} from 'lucide-react';
+    Check,
+  } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TaskDetailModalProps {
@@ -99,23 +97,15 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-2">
           <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-            <Hash size={12} />
             <span>Entrada</span>
           </div>
-          <button
-            aria-label="Fechar"
-            onClick={onClose}
-            className="text-zinc-500 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-zinc-900"
-          >
-            <X size={20} />
-          </button>
         </div>
 
         {/* Body: 2 cols on desktop, stack on mobile */}
         <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] max-h-[80vh] overflow-y-auto">
           {/* Main column */}
           <div className="p-6 space-y-4 md:border-r border-zinc-800">
-            <div className="flex items-start gap-3">
+            <div>
               <Input
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
