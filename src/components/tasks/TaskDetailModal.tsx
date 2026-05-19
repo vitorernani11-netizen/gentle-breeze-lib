@@ -191,12 +191,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               <span className="text-zinc-700">Auto-save ativo</span>
             )}
           </div>
-          <Button
-            onClick={onClose}
-            className="bg-white text-black hover:bg-zinc-200 text-[10px] font-bold uppercase rounded-lg h-8 px-4"
-          >
-            Fechar
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
