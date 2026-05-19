@@ -44,7 +44,7 @@ function TasksPage() {
   const [errorState, setErrorState] = useState<string | null>(null);
   const [selectedStage, setSelectedStage] = useState<number | null>(null);
   const [detailTask, setDetailTask] = useState<any | null>(null);
-  const [isAddingTask, setIsAddingTask] = useState(false);
+  
   
 
   const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask, updateTask, rescheduleTask, addTask } = useTaskActions(() => {
