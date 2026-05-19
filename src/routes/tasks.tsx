@@ -187,7 +187,7 @@ function TasksPage() {
       <div className="grid grid-cols-1 gap-0 border-t border-white/10">
         {activeTasks.length > 0 ? (
           activeTasks
-            .filter(task => !selectedStage || (task.triagem_stage || 1) === selectedStage)
+            .filter(task => !selectedStage || (task.fase_pipeline || 1) === selectedStage)
             .map((task) => (
               <TaskCard 
                 key={task.id}
@@ -200,6 +200,7 @@ function TasksPage() {
                 onDelete={deletePermanent}
                 onClick={setDetailTask}
                 onUpdateStage={updateTriagemStage}
+                onUpdatePriority={(id, p) => updateTask(id, { prioridade: p })}
               />
             ))
         ) : (
