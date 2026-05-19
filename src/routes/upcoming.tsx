@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { isAfter, parseISO, startOfToday } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, WifiOff, Calendar } from 'lucide-react';
+import { WifiOff } from 'lucide-react';
 import { useTaskActions } from '@/hooks/useTaskActions';
 import { loadFromLocal } from '@/lib/storage';
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
+import { groupTasksByDate, type DateGroup } from '@/utils/dateHelpers';
 
 const TASKS_KEY = 'hardware_humano_data';
 
