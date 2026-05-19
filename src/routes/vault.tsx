@@ -30,6 +30,7 @@ function VaultPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [selectedNote, setSelectedNote] = useState<any | null>(null);
 
   useEffect(() => {
     fetchVaultData();
