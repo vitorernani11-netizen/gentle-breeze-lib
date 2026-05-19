@@ -84,7 +84,7 @@ function TasksPage() {
         return isDateValid;
       });
 
-      const active = validTasks.map((t: any) => {
+      const mappedTasks = validTasks.map((t: any) => {
         // Migration: ensure fase_pipeline and priority string
         if (t.fase_pipeline === undefined) {
           t.fase_pipeline = t.triagem_stage || (typeof t.prioridade === 'number' ? t.prioridade : 1);
@@ -93,7 +93,9 @@ function TasksPage() {
           t.prioridade = `P${t.prioridade}`;
         }
         return t;
-      }).filter((t: any) => 
+      });
+
+      const active = mappedTasks.filter((t: any) => 
         t && t.status === 'Entrada' && !t.status_concluido
       ).sort((a: any, b: any) => {
         const dateA = new Date(a.created_at || 0).getTime();
@@ -101,7 +103,7 @@ function TasksPage() {
         return dateB - dateA;
       });
 
-      const completed = validTasks.filter((t: any) => 
+      const completed = mappedTasks.filter((t: any) => 
         t && t.status === 'Entrada' && t.status_concluido
       ).sort((a: any, b: any) => {
         const dateA = new Date(a.created_at || 0).getTime();
