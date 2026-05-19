@@ -13,7 +13,8 @@ import {
   GraduationCap,
   Inbox,
   LayoutDashboard,
-  AlertTriangle
+  AlertTriangle,
+  Archive
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -49,6 +50,7 @@ export function AppSidebar() {
     { label: 'Hoje', icon: Calendar, href: '/', color: 'text-blue-400' },
     { label: 'Entrada', icon: Inbox, href: '/tasks', color: 'text-zinc-400' },
     { label: 'Rotinas', icon: RotateCcw, href: '/routines', color: 'text-green-400' },
+    { label: 'Cofre', icon: Archive, href: '/vault', color: 'text-purple-400' },
   ];
 
   const systemItems = [
