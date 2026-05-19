@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Archive, ArrowLeft, Search, Trash2 } from 'lucide-react';
 import { loadFromLocal } from '@/lib/storage';
 import { FolderCard } from '@/components/vault/FolderCard';
+import { NoteModal } from '@/components/vault/NoteModal';
 import { useVaultActions } from '@/hooks/useVaultActions';
 
 const VAULT_KEY = 'hardware_humano_vault';
