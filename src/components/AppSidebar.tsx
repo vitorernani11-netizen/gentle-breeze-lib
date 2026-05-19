@@ -13,7 +13,8 @@ import {
   GraduationCap,
   Inbox,
   LayoutDashboard,
-  AlertTriangle
+  AlertTriangle,
+  Archive
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
