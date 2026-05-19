@@ -124,11 +124,18 @@ function VaultPage() {
 
           {filteredItems.length > 0 ? (
             filteredItems.map((item) => (
-              <Card key={item.id} className="p-6 bg-zinc-950 border-2 border-zinc-900 rounded-none hover:border-white transition-all group">
+              <Card 
+                key={item.id} 
+                onClick={() => setSelectedNote(item)}
+                className="p-6 bg-zinc-950 border-2 border-zinc-900 rounded-none hover:border-white transition-all group cursor-pointer"
+              >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-black text-lg uppercase tracking-tight">{item.titulo}</h4>
                   <button 
-                    onClick={() => deleteVaultItem(item.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteVaultItem(item.id);
+                    }}
                     className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-zinc-600 hover:text-red-500"
                   >
                     <Trash2 size={16} />
