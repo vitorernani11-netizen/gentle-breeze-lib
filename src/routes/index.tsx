@@ -390,84 +390,102 @@ function Dashboard() {
 
       <section className="mb-8">
         {(() => {
-          // Grouping logic
-          const groupedTasks = {
-            academic: tasks.filter(t => {
-              const proj = projects.find(p => p.id === t.projeto_id);
-              return proj?.nome?.toLowerCase().includes('faculdade') || 
-                     proj?.nome?.toLowerCase().includes('curso') ||
-                     t.tags?.some((tag: string) => tag.toLowerCase().includes('faculdade') || tag.toLowerCase().includes('curso'));
-            }),
-            projects: tasks.filter(t => {
-              const proj = projects.find(p => p.id === t.projeto_id);
-              return proj?.nome?.toLowerCase().includes('nabih') || 
-                     proj?.nome?.toLowerCase().includes('projeto') ||
-                     t.tags?.some((tag: string) => tag.toLowerCase().includes('nabih'));
-            }),
-            management: tasks.filter(t => {
-              const proj = projects.find(p => p.id === t.projeto_id);
-              const isAcademic = proj?.nome?.toLowerCase().includes('faculdade') || 
-                                proj?.nome?.toLowerCase().includes('curso') ||
-                                t.tags?.some((tag: string) => tag.toLowerCase().includes('faculdade') || tag.toLowerCase().includes('curso'));
-              const isProject = proj?.nome?.toLowerCase().includes('nabih') || 
-                               proj?.nome?.toLowerCase().includes('projeto') ||
-                               t.tags?.some((tag: string) => tag.toLowerCase().includes('nabih'));
-              return !isAcademic && !isProject;
-            })
+          // Filtering Reference and Non-execution items
+          const executionTasks = tasks.filter(t => {
+            const isReference = t.tags?.some((tag: string) => 
+              tag.toLowerCase().includes('referência') || 
+              tag.toLowerCase().includes('referencia') || 
+              tag.toLowerCase().includes('wishlist') ||
+              tag.toLowerCase().includes('leitura') ||
+              tag.toLowerCase().includes('ideia')
+            ) || t.status === 'Referência';
+            return !isReference;
+          });
+
+          // Grouping logic based on Projects
+          const groupedTasks: Record<string, { title: string, color: string, tasks: any[] }> = {
+            'faculdade': { title: '#FACULDADE / CURSOS', color: '#00ff41', tasks: [] },
+            'esfiha': { title: '#ESFIHA', color: '#ffaa00', tasks: [] },
+            'riolax': { title: '#RIOLAX', color: '#00ccff', tasks: [] },
+            'youtube': { title: '#YOUTUBE DARK', color: '#ff0055', tasks: [] },
+            'gestao': { title: '#GESTÃO PESSOAL', color: '#ffffff', tasks: [] },
+            'outros': { title: '#OUTROS PROJETOS', color: '#a1a1aa', tasks: [] }
           };
 
+          executionTasks.forEach(t => {
+            const proj = projects.find(p => p.id === t.projeto_id);
+            const projName = proj?.nome?.toLowerCase() || '';
+            const tags = t.tags?.map((tag: string) => tag.toLowerCase()) || [];
+
+            if (projName.includes('faculdade') || projName.includes('curso') || tags.includes('faculdade')) {
+              groupedTasks.faculdade.tasks.push(t);
+            } else if (projName.includes('esfiha')) {
+              groupedTasks.esfiha.tasks.push(t);
+            } else if (projName.includes('riolax')) {
+              groupedTasks.riolax.tasks.push(t);
+            } else if (projName.includes('youtube')) {
+              groupedTasks.youtube.tasks.push(t);
+            } else if (projName.includes('gestão') || projName.includes('pessoal') || projName.includes('casa')) {
+              groupedTasks.gestao.tasks.push(t);
+            } else {
+              groupedTasks.outros.tasks.push(t);
+            }
+          });
+
           // Apply Filter Mode
-          let filteredTasks = { ...groupedTasks };
-          if (filterMode === 'INTERVAL') {
-            filteredTasks = {
-              academic: groupedTasks.academic,
-              projects: [],
-              management: groupedTasks.management.filter(t => t.tags?.some((tag: string) => tag.toLowerCase().includes('rápida') || tag.toLowerCase().includes('rapida')))
+          let finalGroups = { ...groupedTasks };
+
+          if (filterMode === 'DELAYED') {
+            const now = new Date();
+            const filterDelayed = (taskList: any[]) => taskList.filter(t => {
+              if (!t.hora_vencimento) return false;
+              return isBefore(new Date(t.hora_vencimento), now);
+            });
+            
+            finalGroups = Object.keys(groupedTasks).reduce((acc, key) => {
+              acc[key] = { ...groupedTasks[key], tasks: filterDelayed(groupedTasks[key].tasks) };
+              return acc;
+            }, {} as any);
+          } else if (filterMode === 'INTERVAL') {
+            finalGroups = {
+              faculdade: groupedTasks.faculdade,
+              gestao: { 
+                ...groupedTasks.gestao, 
+                tasks: groupedTasks.gestao.tasks.filter(t => t.tags?.some((tag: string) => tag.toLowerCase().includes('rápida') || tag.toLowerCase().includes('rapida'))) 
+              },
+              esfiha: { title: '', color: '', tasks: [] },
+              riolax: { title: '', color: '', tasks: [] },
+              youtube: { title: '', color: '', tasks: [] },
+              outros: { title: '', color: '', tasks: [] }
             };
           } else if (filterMode === 'POST18') {
-            filteredTasks = {
-              academic: [],
-              projects: groupedTasks.projects,
-              management: []
+            finalGroups = {
+              faculdade: { title: '', color: '', tasks: [] },
+              gestao: { title: '', color: '', tasks: [] },
+              esfiha: groupedTasks.esfiha,
+              riolax: groupedTasks.riolax,
+              youtube: groupedTasks.youtube,
+              outros: { title: '', color: '', tasks: [] }
             };
           }
 
-          const hasTasks = filteredTasks.academic.length > 0 || 
-                          filteredTasks.projects.length > 0 || 
-                          filteredTasks.management.length > 0;
+          const hasAnyTasks = Object.values(finalGroups).some(g => g.tasks.length > 0);
 
-          return hasTasks ? (
-            <div className="space-y-2">
-              <TodayContextGroup
-                title="#FACULDADE / CURSOS"
-                color="#00ff41"
-                tasks={filteredTasks.academic}
-                onTaskClick={setDetailTask}
-                onComplete={completeTask}
-                onMoveToToday={(id) => moveTask(id, 'Hoje')}
-                onDelete={deletePermanent}
-                onUpdateStage={updateTriagemStage}
-              />
-              <TodayContextGroup
-                title="#PROJETOS / NABIH"
-                color="#ff00ff"
-                tasks={filteredTasks.projects}
-                onTaskClick={setDetailTask}
-                onComplete={completeTask}
-                onMoveToToday={(id) => moveTask(id, 'Hoje')}
-                onDelete={deletePermanent}
-                onUpdateStage={updateTriagemStage}
-              />
-              <TodayContextGroup
-                title="#GESTÃO / PESSOAL"
-                color="#ffffff"
-                tasks={filteredTasks.management}
-                onTaskClick={setDetailTask}
-                onComplete={completeTask}
-                onMoveToToday={(id) => moveTask(id, 'Hoje')}
-                onDelete={deletePermanent}
-                onUpdateStage={updateTriagemStage}
-              />
+          return hasAnyTasks ? (
+            <div className="space-y-4">
+              {Object.entries(finalGroups).map(([key, group]) => (
+                <TodayContextGroup
+                  key={key}
+                  title={group.title}
+                  color={group.color}
+                  tasks={group.tasks}
+                  onTaskClick={setDetailTask}
+                  onComplete={completeTask}
+                  onMoveToToday={(id) => moveTask(id, 'Hoje')}
+                  onDelete={deletePermanent}
+                  onUpdateStage={updateTriagemStage}
+                />
+              ))}
             </div>
           ) : (
             <div className="py-20 text-center border-4 border-dashed border-zinc-900">
