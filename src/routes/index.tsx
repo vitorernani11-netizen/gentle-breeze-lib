@@ -343,6 +343,17 @@ function Dashboard() {
       {/* Filtros de Janela de Tempo (Foco TDAH) */}
       <section className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
         <Button
+          onClick={() => setFilterMode('DELAYED')}
+          className={cn(
+            "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
+            filterMode === 'DELAYED' 
+              ? "bg-[#ff0055] text-black border-[#ff0055]" 
+              : "bg-black text-[#ff0055] border-[#ff0055] hover:bg-[#ff0055]/10"
+          )}
+        >
+          🔥 Atrasadas
+        </Button>
+        <Button
           onClick={() => setFilterMode('INTERVAL')}
           className={cn(
             "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
@@ -351,7 +362,7 @@ function Dashboard() {
               : "bg-black text-[#00ff41] border-[#00ff41] hover:bg-[#00ff41]/10"
           )}
         >
-          Intervalo
+          ⏱️ Intervalo
         </Button>
         <Button
           onClick={() => setFilterMode('POST18')}
@@ -362,7 +373,7 @@ function Dashboard() {
               : "bg-black text-[#ff00ff] border-[#ff00ff] hover:bg-[#ff00ff]/10"
           )}
         >
-          Pós-18h
+          🌙 Pós-18h
         </Button>
         <Button
           onClick={() => setFilterMode('ALL')}
