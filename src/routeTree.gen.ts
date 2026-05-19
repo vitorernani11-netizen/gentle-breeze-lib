@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VaultRouteImport } from './routes/vault'
+import { Route as UpcomingRouteImport } from './routes/upcoming'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as RoutinesRouteImport } from './routes/routines'
 import { Route as PurgatoryRouteImport } from './routes/purgatory'
@@ -25,6 +26,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const VaultRoute = VaultRouteImport.update({
   id: '/vault',
   path: '/vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UpcomingRoute = UpcomingRouteImport.update({
+  id: '/upcoming',
+  path: '/upcoming',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TasksRoute = TasksRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/purgatory': typeof PurgatoryRoute
   '/routines': typeof RoutinesRoute
   '/tasks': typeof TasksRoute
+  '/upcoming': typeof UpcomingRoute
   '/vault': typeof VaultRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/purgatory': typeof PurgatoryRoute
   '/routines': typeof RoutinesRoute
   '/tasks': typeof TasksRoute
+  '/upcoming': typeof UpcomingRoute
   '/vault': typeof VaultRoute
 }
 export interface FileRoutesById {
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/purgatory': typeof PurgatoryRoute
   '/routines': typeof RoutinesRoute
   '/tasks': typeof TasksRoute
+  '/upcoming': typeof UpcomingRoute
   '/vault': typeof VaultRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/purgatory'
     | '/routines'
     | '/tasks'
+    | '/upcoming'
     | '/vault'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/purgatory'
     | '/routines'
     | '/tasks'
+    | '/upcoming'
     | '/vault'
   id:
     | '__root__'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/purgatory'
     | '/routines'
     | '/tasks'
+    | '/upcoming'
     | '/vault'
   fileRoutesById: FileRoutesById
 }
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   PurgatoryRoute: typeof PurgatoryRoute
   RoutinesRoute: typeof RoutinesRoute
   TasksRoute: typeof TasksRoute
+  UpcomingRoute: typeof UpcomingRoute
   VaultRoute: typeof VaultRoute
 }
 
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/vault'
       fullPath: '/vault'
       preLoaderRoute: typeof VaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/upcoming': {
+      id: '/upcoming'
+      path: '/upcoming'
+      fullPath: '/upcoming'
+      preLoaderRoute: typeof UpcomingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tasks': {
@@ -287,6 +307,7 @@ const rootRouteChildren: RootRouteChildren = {
   PurgatoryRoute: PurgatoryRoute,
   RoutinesRoute: RoutinesRoute,
   TasksRoute: TasksRoute,
+  UpcomingRoute: UpcomingRoute,
   VaultRoute: VaultRoute,
 }
 export const routeTree = rootRouteImport
