@@ -8,6 +8,7 @@ import { loadFromLocal } from '@/lib/storage';
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
 import { groupTasksByDate, type DateGroup } from '@/utils/dateHelpers';
+import { cn } from '@/lib/utils';
 
 const TASKS_KEY = 'hardware_humano_data';
 
