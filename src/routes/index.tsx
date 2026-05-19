@@ -156,8 +156,10 @@ function Dashboard() {
     const isValidDate = (d: any) => Boolean(safeParseDate(d));
 
     const allTasks = (loadFromLocal(TASKS_KEY) || []).filter((t: any) => isValidDate(t.created_at || t.data_execucao));
-    const todayTasks = allTasks.filter((t: any) => !t.status_concluido && t.status === 'Hoje');
-    setTasks(todayTasks);
+    
+    // Pegamos todas as tarefas não concluídas para que os filtros (especialmente o de Atrasadas) funcionem globalmente
+    const activeTasks = allTasks.filter((t: any) => !t.status_concluido);
+    setTasks(activeTasks);
 
     const projectsData = loadFromLocal(PROJECTS_KEY) || [];
     setProjects(projectsData);
