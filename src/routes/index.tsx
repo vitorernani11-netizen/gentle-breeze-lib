@@ -299,47 +299,6 @@ function Dashboard() {
     }
   };
 
-  const handleCreateTask = () => {
-    if (!newTask.titulo) return;
-
-    try {
-      const tagsString = String(newTask.tags || '');
-      const tagsArray = tagsString ? tagsString.split(',').map(t => t.trim()).filter(t => t !== '') : [];
-      const task = {
-        id: crypto.randomUUID(),
-        titulo: newTask.titulo,
-        projeto_id: newTask.projeto_id !== 'none' ? newTask.projeto_id : null,
-        data_execucao: newTask.data_execucao,
-        repeticao: newTask.repeticao,
-        tags: tagsArray,
-        lembrete_ead_48h: newTask.lembrete_ead_48h,
-        lembrete: null, // Initial support for manual tasks from main dashboard
-        hora_vencimento: newTask.data_execucao && newTask.lembrete ? `${newTask.data_execucao}T${newTask.lembrete}:00.000Z` : null,
-        status: 'Entrada',
-        status_concluido: false,
-        prioridade: 4,
-        created_at: new Date().toISOString()
-      };
-
-      const allTasks = loadFromLocal(TASKS_KEY) || [];
-      saveToLocal(TASKS_KEY, [task, ...allTasks]);
-
-      setShowAddTask(false);
-      setNewTask({
-        titulo: '',
-        projeto_id: 'none',
-        data_execucao: new Date().toISOString().split('T')[0],
-        repeticao: 'none',
-        tags: '',
-        lembrete_ead_48h: false,
-        lembrete: ''
-      });
-      toast.success('Tarefa enviada para Entrada');
-      fetchData();
-    } catch (error) {
-      toast.error('Erro ao salvar no hardware');
-    }
-  };
 
   const handleAddHydration = () => {
     try {
