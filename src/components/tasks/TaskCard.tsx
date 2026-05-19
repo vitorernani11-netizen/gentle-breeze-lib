@@ -1,9 +1,8 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Trash2 } from 'lucide-react';
+import { Clock, Trash2 } from 'lucide-react';
 import { format as formatDate, parseISO, isBefore, startOfToday, isToday } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 interface TaskCardProps {
@@ -113,7 +112,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             <Trash2 size={12} />
           </Button>
         </div>
+      </div>
     </Card>
-
   );
 };
