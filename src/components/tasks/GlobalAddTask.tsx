@@ -15,7 +15,23 @@ const PROJECTS_KEY = 'hardware_humano_projects';
 
 export const GlobalAddTask: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [mode, setMode] = useState<'choice' | 'action' | 'memory'>('choice');
+  const [memoryData, setMemoryData] = useState({ titulo: '', conteudo: '', projeto_id: '', categoria: 'notes' });
   const { addTask } = useTaskActions();
+  const { addVaultItem } = useVaultActions();
+  
+  const projects = loadFromLocal(PROJECTS_KEY) || [];
+
+  const handleOpen = () => {
+    setIsOpen(true);
+    setMode('choice');
+    setMemoryData({ titulo: '', conteudo: '', projeto_id: '', categoria: 'notes' });
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setMode('choice');
+  };
 
   const handleAddTask = (taskData: {
     titulo: string;
