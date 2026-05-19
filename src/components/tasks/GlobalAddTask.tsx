@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Zap, Brain, X, ChevronRight, ClipboardList, Book, Lightbulb, Folder } from 'lucide-react';
+import { Plus, Zap, Brain, X, ChevronRight, ClipboardList, Book, Lightbulb, Folder, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AddTaskOverlay } from './AddTaskOverlay';
 import { useTaskActions } from '@/hooks/useTaskActions';
