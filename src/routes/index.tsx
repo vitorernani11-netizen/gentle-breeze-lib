@@ -42,7 +42,9 @@ import { EisenhowerMatrix } from '@/components/dashboard/EisenhowerMatrix';
 import { EisenhowerGrid } from '@/components/classification/EisenhowerGrid';
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
+import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
 import { TodayContextGroup } from '@/components/tasks/TodayContextGroup';
+
 
 const TASKS_KEY = 'hardware_humano_data';
 const PROJECTS_KEY = 'hardware_humano_projects';
