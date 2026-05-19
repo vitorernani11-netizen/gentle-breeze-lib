@@ -472,21 +472,6 @@ function Dashboard() {
               youtube: { title: '', color: '', tasks: [] },
               outros: { title: '', color: '', tasks: [] }
             };
-          // Apply Filter Mode (already filtered executionTasks, but some modes have specific grouping)
-          let finalGroups = { ...groupedTasks };
-
-          if (filterMode === 'INTERVAL') {
-            finalGroups = {
-              faculdade: groupedTasks.faculdade,
-              gestao: { 
-                ...groupedTasks.gestao, 
-                tasks: groupedTasks.gestao.tasks.filter(t => t.tags?.some((tag: string) => tag.toLowerCase().includes('rápida') || tag.toLowerCase().includes('rapida'))) 
-              },
-              esfiha: { title: '', color: '', tasks: [] },
-              riolax: { title: '', color: '', tasks: [] },
-              youtube: { title: '', color: '', tasks: [] },
-              outros: { title: '', color: '', tasks: [] }
-            };
           } else if (filterMode === 'POST18') {
             finalGroups = {
               faculdade: { title: '', color: '', tasks: [] },
