@@ -168,15 +168,17 @@ export const GlobalAddTask: React.FC = () => {
                 <div className="space-y-1">
                   <label className="text-[8px] font-black uppercase tracking-widest text-zinc-500 ml-1">Projeto</label>
                   <Select 
-                    value={memoryData.projeto_id || 'none'} 
+                    value={memoryData.projeto_id} 
                     onValueChange={(v) => setMemoryData({ ...memoryData, projeto_id: v })}
                   >
-                    <SelectTrigger className="bg-zinc-900 border-zinc-800 h-10 rounded-none font-bold text-[10px] uppercase">
-                      <SelectValue placeholder="Selecione o Projeto" />
+                    <SelectTrigger className={cn(
+                      "bg-zinc-900 border-zinc-800 h-10 rounded-none font-bold text-[10px] uppercase transition-colors",
+                      !memoryData.projeto_id && "text-zinc-600 border-dashed"
+                    )}>
+                      <SelectValue placeholder="Escolher Pasta de Destino" />
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-950 border-zinc-800 rounded-none">
-                      <SelectItem value="none">Nenhum</SelectItem>
-                      {projects.map((p: any) => (
+                      {CORE_PROJECTS.map((p) => (
                         <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
                       ))}
                     </SelectContent>
