@@ -212,7 +212,7 @@ export const GlobalAddTask: React.FC = () => {
 
               <Button 
                 onClick={handleAddMemory}
-                disabled={!memoryData.titulo}
+                disabled={!memoryData.titulo || !memoryData.projeto_id}
                 className="w-full h-14 bg-white text-black hover:bg-zinc-200 font-black uppercase tracking-widest text-sm transition-all rounded-none disabled:opacity-20 mt-4"
               >
                 Arquivar no Cofre
