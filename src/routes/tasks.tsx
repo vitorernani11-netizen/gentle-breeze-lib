@@ -112,34 +112,6 @@ function TasksPage() {
     }
   };
 
-  const onSmartAddTask = (taskData: {
-    titulo: string;
-    vencimento: string;
-    recorrencia: string;
-    prioridade: number;
-    lembrete: string | null;
-    reminders?: any[];
-    descricao?: string;
-    hora_vencimento?: string | null;
-  }) => {
-    const task = addTask({
-      titulo: taskData.titulo,
-      descricao: taskData.descricao || '',
-      repeticao: taskData.recorrencia || 'none',
-      data_execucao: taskData.vencimento,
-      prioridade: taskData.prioridade || 4,
-      status: 'Entrada',
-      lembrete: taskData.lembrete,
-      reminders: taskData.reminders || [],
-      hora_vencimento: taskData.hora_vencimento
-    });
-
-    if (task) {
-      toast.success('Tarefa capturada', {
-        className: 'bg-black border-2 border-[#00ff41] text-[#00ff41] font-mono'
-      });
-    }
-  };
 
 
   if (loading) {
