@@ -79,6 +79,7 @@ function RootComponent() {
       <div className="flex flex-col min-h-screen">
         <Outlet />
       </div>
+      <GlobalAddTask />
       <Toaster position="top-center" theme="dark" />
     </QueryClientProvider>
   );
