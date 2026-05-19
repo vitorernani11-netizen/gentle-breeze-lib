@@ -392,7 +392,10 @@ function Dashboard() {
 
       <section className="mb-8">
         {(() => {
-          // Filtering Reference and Non-execution items
+          const today = new Date().toISOString().split('T')[0];
+          const now = new Date();
+
+          // Filtering Reference and Non-execution items + Time filters
           const executionTasks = tasks.filter(t => {
             const isReference = t.tags?.some((tag: string) => 
               tag.toLowerCase().includes('referência') || 
@@ -401,7 +404,27 @@ function Dashboard() {
               tag.toLowerCase().includes('leitura') ||
               tag.toLowerCase().includes('ideia')
             ) || t.status === 'Referência';
-            return !isReference;
+            
+            if (isReference) return false;
+
+            // Filtro para Atrasadas (Global: busca em todos os status)
+            if (filterMode === 'DELAYED') {
+              const taskDate = t.data_execucao;
+              if (taskDate < today) return true;
+              if (taskDate === today && t.hora_vencimento) {
+                // Se a data é hoje, checamos se o horário já passou
+                return isBefore(new Date(t.hora_vencimento), now);
+              }
+              return false;
+            }
+
+            // Filtro rigoroso para "Hoje" quando no modo padrão ou específicos de horário
+            // Nota: Só mostramos tarefas que explicitamente estão para Hoje ou que o usuário quer ver no dashboard
+            if (filterMode === 'ALL' || filterMode === 'INTERVAL' || filterMode === 'POST18') {
+              return t.data_execucao === today;
+            }
+
+            return true;
           });
 
           // Grouping logic based on Projects
@@ -434,20 +457,35 @@ function Dashboard() {
             }
           });
 
-          // Apply Filter Mode
+          // Apply Filter Mode (already filtered executionTasks, but some modes have specific grouping)
           let finalGroups = { ...groupedTasks };
 
-          if (filterMode === 'DELAYED') {
-            const now = new Date();
-            const filterDelayed = (taskList: any[]) => taskList.filter(t => {
-              if (!t.hora_vencimento) return false;
-              return isBefore(new Date(t.hora_vencimento), now);
-            });
-            
-            finalGroups = Object.keys(groupedTasks).reduce((acc, key) => {
-              acc[key] = { ...groupedTasks[key], tasks: filterDelayed(groupedTasks[key].tasks) };
-              return acc;
-            }, {} as any);
+          if (filterMode === 'INTERVAL') {
+            finalGroups = {
+              faculdade: groupedTasks.faculdade,
+              gestao: { 
+                ...groupedTasks.gestao, 
+                tasks: groupedTasks.gestao.tasks.filter(t => t.tags?.some((tag: string) => tag.toLowerCase().includes('rápida') || tag.toLowerCase().includes('rapida'))) 
+              },
+              esfiha: { title: '', color: '', tasks: [] },
+              riolax: { title: '', color: '', tasks: [] },
+              youtube: { title: '', color: '', tasks: [] },
+              outros: { title: '', color: '', tasks: [] }
+            };
+          } else if (filterMode === 'POST18') {
+            finalGroups = {
+              faculdade: { title: '', color: '', tasks: [] },
+              gestao: { title: '', color: '', tasks: [] },
+              esfiha: groupedTasks.esfiha,
+              riolax: groupedTasks.riolax,
+              youtube: groupedTasks.youtube,
+              outros: { title: '', color: '', tasks: [] }
+            };
+          } else if (filterMode === 'DELAYED') {
+            // No modo Delayed, se o usuário quer "ignorar projetos", poderíamos achatar, 
+            // mas manter as categorias ajuda na organização. O filtro já é global.
+            finalGroups = { ...groupedTasks };
+          }
           } else if (filterMode === 'INTERVAL') {
             finalGroups = {
               faculdade: groupedTasks.faculdade,
