@@ -60,7 +60,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               P{task.prioridade || 4}
             </span>
             
-            <div className=\"flex items-center gap-0.5 border border-zinc-800 bg-zinc-950 p-0.5\">
+            <div className="flex items-center gap-0.5 border border-zinc-800 bg-zinc-950 p-0.5">
               {[1, 2, 3, 4].map((stage) => (
                 <button
                   key={stage}
@@ -69,10 +69,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                     onUpdateStage(task.id, stage);
                   }}
                   className={cn(
-                    \"w-4 h-4 text-[8px] font-black transition-colors\",
+                    "w-4 h-4 text-[8px] font-black transition-colors",
                     (task.prioridade || 4) === stage 
-                      ? \"bg-white text-black\" 
-                      : \"bg-black text-zinc-500 hover:text-zinc-300\"
+                      ? "bg-white text-black" 
+                      : "bg-black text-zinc-500 hover:text-zinc-300"
                   )}
                 >
                   {stage}
