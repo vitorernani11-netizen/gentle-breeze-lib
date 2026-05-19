@@ -467,54 +467,6 @@ function Dashboard() {
       </section>
 
 
-      <section className="mt-8">
-        <div className="flex justify-center">
-           <Button onClick={() => setShowAddTask(true)} className="bg-zinc-100 text-black hover:bg-white rounded-full h-10 px-6 text-xs font-bold uppercase tracking-tight">
-             <Plus size={14} className="mr-2" /> Capturar
-           </Button>
-        </div>
-      </section>
-
-      <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
-        <DialogContent className="bg-zinc-950 border-zinc-900 rounded-3xl p-8 sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-black uppercase tracking-tighter">Nova Missão</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 py-6">
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">O que fazer?</Label>
-              <Input 
-                placeholder="Título da tarefa" 
-                value={newTask.titulo}
-                onChange={(e) => setNewTask({ ...newTask, titulo: e.target.value })}
-                className="bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold"
-              />
-            </div>
-            <Button onClick={handleCreateTask} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest">
-              Agendar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-      <AddTaskOverlay 
-        open={showAddTask}
-        onClose={() => setShowAddTask(false)}
-        onAddTask={(taskData) => {
-           addTask({
-            titulo: taskData.titulo,
-            descricao: taskData.descricao || '',
-            repeticao: taskData.recorrencia || 'none',
-            data_execucao: taskData.vencimento,
-            prioridade: taskData.prioridade || 4,
-            status: 'Entrada',
-            lembrete: taskData.lembrete,
-            reminders: taskData.reminders || [],
-            hora_vencimento: taskData.hora_vencimento
-          });
-          setShowAddTask(false);
-          fetchData();
-        }}
-      />
 
       {detailTask && (
         <TaskDetailModal 
