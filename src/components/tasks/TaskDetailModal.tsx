@@ -108,7 +108,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] max-h-[80vh] overflow-y-auto">
           {/* Main column */}
           <div className="p-6 space-y-4 md:border-r border-zinc-800">
-            <div className="flex items-start gap-3">
+            <div>
               <Input
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
