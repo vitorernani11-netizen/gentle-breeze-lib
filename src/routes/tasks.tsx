@@ -84,7 +84,16 @@ function TasksPage() {
         return isDateValid;
       });
 
-      const active = validTasks.filter((t: any) => 
+      const active = validTasks.map((t: any) => {
+        // Migration: ensure fase_pipeline and priority string
+        if (t.fase_pipeline === undefined) {
+          t.fase_pipeline = t.triagem_stage || (typeof t.prioridade === 'number' ? t.prioridade : 1);
+        }
+        if (typeof t.prioridade === 'number') {
+          t.prioridade = `P${t.prioridade}`;
+        }
+        return t;
+      }).filter((t: any) => 
         t && t.status === 'Entrada' && !t.status_concluido
       ).sort((a: any, b: any) => {
         const dateA = new Date(a.created_at || 0).getTime();
