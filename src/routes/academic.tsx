@@ -106,9 +106,6 @@ function AcademicPage() {
     <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20">
       <header className="mb-10">
         <div className="flex items-center gap-4 mb-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/' })} className="transition-none -ml-3">
-            <ArrowLeft size={24} />
-          </Button>
           <div className="flex items-center gap-2 text-purple-500">
             <GraduationCap size={20} />
             <span className="text-[10px] font-black uppercase tracking-[0.2em]">Acadêmico</span>

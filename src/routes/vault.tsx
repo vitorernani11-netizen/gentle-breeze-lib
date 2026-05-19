@@ -66,14 +66,16 @@ function VaultPage() {
     <div className="min-h-screen bg-black text-white p-6 pt-24 pb-20 font-sans">
       <header className="mb-10">
         <div className="flex items-center gap-4 mb-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => selectedFolderId ? setSelectedFolderId(null) : navigate({ to: '/' })} 
-            className="border border-zinc-800 rounded-xl hover:bg-zinc-900 transition-all w-10 h-10 shrink-0"
-          >
-            <ArrowLeft size={18} />
-          </Button>
+          {selectedFolderId && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedFolderId(null)}
+              className="border border-zinc-800 rounded-xl hover:bg-zinc-900 transition-all w-10 h-10 shrink-0"
+            >
+              <ArrowLeft size={18} />
+            </Button>
+          )}
           <div className="flex items-center gap-2 text-zinc-400">
             <Archive size={18} />
             <h1 className="text-2xl font-black uppercase tracking-tight italic">
