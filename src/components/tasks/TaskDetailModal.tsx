@@ -105,7 +105,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           <button
             aria-label="Fechar"
             onClick={onClose}
-            className="text-zinc-500 hover:text-white transition-colors p-1 rounded-md hover:bg-zinc-900"
+            className="text-zinc-500 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-zinc-900"
           >
             <X size={20} />
           </button>
