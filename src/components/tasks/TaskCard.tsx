@@ -61,7 +61,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             </span>
             
             <h3 className="font-bold text-sm uppercase tracking-tight truncate leading-none">
-              {task.titulo}
+              {task.titulo} {task.repeticao && task.repeticao !== 'none' && '🔄'}
             </h3>
 
             {isOverdue && (
