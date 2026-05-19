@@ -93,6 +93,12 @@ export const useTaskActions = (onSuccess?: () => void) => {
       }
 
       saveToLocal(TASKS_KEY, updatedTasks);
+      window.dispatchEvent(new Event('storage'));
+      console.log('[Task:Reschedule]', { 
+        taskId: task.id, 
+        oldDate: task.data_execucao, 
+        newDate: newDate || new Date().toISOString().split('T')[0] 
+      });
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error('Erro ao reagendar tarefa:', error);

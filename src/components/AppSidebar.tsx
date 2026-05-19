@@ -1,8 +1,9 @@
 import { Link, useLocation } from '@tanstack/react-router';
 import { 
-  Calendar, 
-  Skull, 
-  RotateCcw, 
+  Calendar,
+  Clock,
+  Skull,
+  RotateCcw,
   Menu,
   GraduationCap,
   Inbox,
@@ -28,6 +29,7 @@ export function AppSidebar() {
   const mainItems = [
     { label: 'Hoje', icon: Calendar, href: '/', color: 'text-blue-400' },
     { label: 'Entrada', icon: Inbox, href: '/tasks', color: 'text-zinc-400' },
+    { label: 'Em Breve', icon: Clock, href: '/upcoming', color: 'text-orange-400' },
     { label: 'Rotinas', icon: RotateCcw, href: '/routines', color: 'text-green-400' },
     { label: 'Cofre', icon: Archive, href: '/vault', color: 'text-purple-400' },
   ];

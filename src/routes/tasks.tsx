@@ -96,7 +96,7 @@ function TasksPage() {
       });
 
       const active = mappedTasks.filter((t: any) => 
-        t && t.status === 'Entrada' && !t.status_concluido
+        t && !t.status_concluido && (t.status === 'Entrada' || t.fase_pipeline === null || t.fase_pipeline === undefined)
       ).sort((a: any, b: any) => {
         const dateA = new Date(a.created_at || 0).getTime();
         const dateB = new Date(b.created_at || 0).getTime();
@@ -201,7 +201,13 @@ function TasksPage() {
       <div className="grid grid-cols-1 gap-0 border-t border-white/10">
         {activeTasks.length > 0 ? (
           activeTasks
-            .filter(task => !selectedStage || (task.fase_pipeline || 1) === selectedStage)
+            .filter(task => {
+              if (!selectedStage) return true;
+              if (selectedStage === 1) {
+                return task.fase_pipeline === 1 || task.fase_pipeline === null || task.fase_pipeline === undefined;
+              }
+              return task.fase_pipeline === selectedStage;
+            })
             .map((task) => (
               <TaskCard 
                 key={task.id}
