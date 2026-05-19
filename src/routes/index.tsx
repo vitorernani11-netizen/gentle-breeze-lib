@@ -472,21 +472,10 @@ function Dashboard() {
               youtube: { title: '', color: '', tasks: [] },
               outros: { title: '', color: '', tasks: [] }
             };
-          } else if (filterMode === 'POST18') {
-            finalGroups = {
-              faculdade: { title: '', color: '', tasks: [] },
-              gestao: { title: '', color: '', tasks: [] },
-              esfiha: groupedTasks.esfiha,
-              riolax: groupedTasks.riolax,
-              youtube: groupedTasks.youtube,
-              outros: { title: '', color: '', tasks: [] }
-            };
-          } else if (filterMode === 'DELAYED') {
-            // No modo Delayed, se o usuário quer "ignorar projetos", poderíamos achatar, 
-            // mas manter as categorias ajuda na organização. O filtro já é global.
-            finalGroups = { ...groupedTasks };
-          }
-          } else if (filterMode === 'INTERVAL') {
+          // Apply Filter Mode (already filtered executionTasks, but some modes have specific grouping)
+          let finalGroups = { ...groupedTasks };
+
+          if (filterMode === 'INTERVAL') {
             finalGroups = {
               faculdade: groupedTasks.faculdade,
               gestao: { 
