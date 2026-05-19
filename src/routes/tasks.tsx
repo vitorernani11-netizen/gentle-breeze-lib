@@ -129,10 +129,13 @@ function TasksPage() {
     { num: 4, label: 'EXECUÇÃO', desc: 'Foco atual', color: 'border-[#00ff41] text-[#00ff41]' },
   ];
 
-  const getPriorityColor = (p: number) => {
+  const getPriorityColor = (p: string | number) => {
     switch (p) {
+      case 'P1':
       case 1: return 'text-[#ff0055] border-[#ff0055]';
+      case 'P2':
       case 2: return 'text-[#ffaa00] border-[#ffaa00]';
+      case 'P3':
       case 3: return 'text-[#00ccff] border-[#00ccff]';
       default: return 'text-zinc-400 border-zinc-800';
     }

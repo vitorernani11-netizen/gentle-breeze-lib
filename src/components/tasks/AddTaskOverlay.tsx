@@ -26,7 +26,7 @@ interface AddTaskOverlayProps {
     titulo: string;
     vencimento: string;
     recorrencia: string;
-    prioridade: number;
+    prioridade: string;
     lembrete: string | null;
     reminders: any[];
     descricao?: string;
@@ -39,7 +39,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   const [descricao, setDescricao] = useState('');
   const [vencimento, setVencimento] = useState<Date>(startOfToday());
   const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
-  const [prioridade, setPrioridade] = useState(4);
+  const [prioridade, setPrioridade] = useState<string>('P4');
   const [lembrete, setLembrete] = useState<string | null>(null);
   const [reminders, setReminders] = useState<any[]>([]);
   const [nlpData, setNlpData] = useState<NLPResult | null>(null);
@@ -53,7 +53,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       setDescricao('');
       setVencimento(startOfToday());
       setRecurrence('none');
-      setPrioridade(4);
+      setPrioridade('P4');
       setLembrete(null);
       setReminders([]);
       setNlpData(null);
@@ -181,15 +181,15 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className={cn(
                   "h-9 w-9 rounded-xl border border-zinc-900",
-                  prioridade === 1 && "text-red-500 border-red-500/20",
-                  prioridade === 2 && "text-orange-500 border-orange-500/20",
-                  prioridade === 3 && "text-blue-500 border-blue-500/20"
+                  prioridade === 'P1' && "text-red-500 border-red-500/20",
+                  prioridade === 'P2' && "text-orange-500 border-orange-500/20",
+                  prioridade === 'P3' && "text-blue-500 border-blue-500/20"
                 )}>
                   <Flag size={18} />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-40 bg-zinc-950 border-zinc-900 p-2 z-[110]">
-                {[1, 2, 3, 4].map(p => (
+                {['P1', 'P2', 'P3', 'P4'].map(p => (
                   <Button 
                     key={p} 
                     variant="ghost" 
@@ -197,11 +197,11 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
                     onClick={() => setPrioridade(p)}
                   >
                     <Flag size={14} className={cn(
-                      p === 1 && "text-red-500",
-                      p === 2 && "text-orange-500",
-                      p === 3 && "text-blue-500"
+                      p === 'P1' && "text-red-500",
+                      p === 'P2' && "text-orange-500",
+                      p === 'P3' && "text-blue-500"
                     )} />
-                    P{p}
+                    {p}
                   </Button>
                 ))}
               </PopoverContent>
