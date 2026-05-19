@@ -132,6 +132,13 @@ function Dashboard() {
     checkTodayCheckin();
     fetchData();
     setLoading(false);
+
+    const handleStorageChange = () => {
+      console.log('[Hardware:Sync] Storage change detected on Dashboard');
+      fetchData();
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const handleSaveAnxietyDump = () => {
