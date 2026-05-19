@@ -102,13 +102,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             <Hash size={12} />
             <span>Entrada</span>
           </div>
-          <button
-            aria-label="Fechar"
-            onClick={onClose}
-            className="text-zinc-500 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-zinc-900"
-          >
-            <X size={20} />
-          </button>
         </div>
 
         {/* Body: 2 cols on desktop, stack on mobile */}
