@@ -104,15 +104,6 @@ function Dashboard() {
     treino_madrugada_realizado: false,
   });
 
-  const [newTask, setNewTask] = useState({
-    titulo: '',
-    projeto_id: '',
-    data_execucao: new Date().toISOString().split('T')[0],
-    repeticao: 'none',
-    tags: '',
-    lembrete_ead_48h: false,
-    lembrete: ''
-  });
 
   const { completeTask, deletePermanent, moveTask, updateTriagemStage, updateTask, addTask } = useTaskActions(() => {
     fetchData();
