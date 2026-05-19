@@ -97,27 +97,6 @@ export function AppSidebar() {
               ))}
             </div>
 
-            <div className="space-y-3">
-              <div className="px-4 flex justify-between items-center">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Projetos</span>
-                <Link to="/projects" onClick={closeSidebar}>
-                  <Plus size={12} className="text-zinc-600 hover:text-white" />
-                </Link>
-              </div>
-              <div className="space-y-1">
-                {projects.map((p) => (
-                  <Link
-                    key={p.id}
-                    to="/projects"
-                    onClick={closeSidebar}
-                    className="flex items-center gap-3 px-4 py-2 rounded-xl text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/50 transition-none"
-                  >
-                    <div className="h-2 w-2 rounded-full" style={{ backgroundColor: p.cor || '#3f3f46' }} />
-                    <span className="font-bold uppercase tracking-widest text-[10px] flex-1 truncate">{p.nome}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
 
             <div className="space-y-3">
               <span className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">Sistemas</span>

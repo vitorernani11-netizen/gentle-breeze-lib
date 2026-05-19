@@ -177,7 +177,7 @@ export const GlobalAddTask: React.FC = () => {
                     )}>
                       <SelectValue placeholder="Escolher Pasta de Destino" />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-950 border-zinc-800 rounded-none">
+                    <SelectContent className="bg-zinc-950 border-zinc-800 rounded-none z-[9999]">
                       {CORE_PROJECTS.map((p) => (
                         <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
                       ))}
