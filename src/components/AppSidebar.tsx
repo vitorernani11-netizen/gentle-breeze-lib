@@ -2,17 +2,10 @@ import { Link, useLocation } from '@tanstack/react-router';
 import { 
   Calendar, 
   Skull, 
-  Layers, 
   RotateCcw, 
-  Home, 
-  Plus, 
-  Settings,
   Menu,
-  ChevronRight,
-  Hash,
   GraduationCap,
   Inbox,
-  LayoutDashboard,
   AlertTriangle,
   Archive
 } from 'lucide-react';
@@ -25,26 +18,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useState, useEffect } from 'react';
-import { loadFromLocal } from '@/lib/storage';
-
-const PROJECTS_KEY = 'hardware_humano_projects';
+import { useState } from 'react';
 
 export function AppSidebar() {
   const [open, setOpen] = useState(false);
-  const [projects, setProjects] = useState<any[]>([]);
   const location = useLocation();
 
-  useEffect(() => {
-    const fetchProjects = () => {
-      const data = loadFromLocal(PROJECTS_KEY) || [];
-      setProjects(data.slice(0, 5));
-    };
-
-    fetchProjects();
-    // Refresh when sidebar opens
-    if (open) fetchProjects();
-  }, [open]);
 
   const mainItems = [
     { label: 'Hoje', icon: Calendar, href: '/', color: 'text-blue-400' },
