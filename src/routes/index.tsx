@@ -76,7 +76,7 @@ function Dashboard() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showCheckin, setShowCheckin] = useState(false);
-  const [showAddTask, setShowAddTask] = useState(false);
+  
   const [detailTask, setDetailTask] = useState<any | null>(null);
   const [filterMode, setFilterMode] = useState<'ALL' | 'INTERVAL' | 'POST18'>('ALL');
 
