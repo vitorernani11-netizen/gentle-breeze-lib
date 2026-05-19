@@ -161,15 +161,6 @@ function TasksPage() {
 
       <header className="mb-8 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button 
-            aria-label="Voltar para Dashboard"
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate({ to: '/' })} 
-            className="border border-zinc-800 rounded-xl hover:bg-zinc-900 transition-all w-10 h-10 shrink-0"
-          >
-            <ArrowLeft size={18} />
-          </Button>
           <h1 className="text-2xl font-black uppercase tracking-tight italic">Entrada</h1>
         </div>
       </header>
