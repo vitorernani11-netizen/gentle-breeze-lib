@@ -9,10 +9,8 @@ import {
   Flag,
   Tag,
   Bell,
-  Hash,
-  Check,
-  X,
-} from 'lucide-react';
+    Check,
+  } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TaskDetailModalProps {
