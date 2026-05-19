@@ -44,7 +44,7 @@ function TasksPage() {
   const [errorState, setErrorState] = useState<string | null>(null);
   const [selectedStage, setSelectedStage] = useState<number | null>(null);
   const [detailTask, setDetailTask] = useState<any | null>(null);
-  const [isAddingTask, setIsAddingTask] = useState(false);
+  
   
 
   const { moveTask, updateTriagemStage, restoreTask, deletePermanent, completeTask, updateTask, rescheduleTask, addTask } = useTaskActions(() => {
@@ -112,34 +112,6 @@ function TasksPage() {
     }
   };
 
-  const onSmartAddTask = (taskData: {
-    titulo: string;
-    vencimento: string;
-    recorrencia: string;
-    prioridade: number;
-    lembrete: string | null;
-    reminders?: any[];
-    descricao?: string;
-    hora_vencimento?: string | null;
-  }) => {
-    const task = addTask({
-      titulo: taskData.titulo,
-      descricao: taskData.descricao || '',
-      repeticao: taskData.recorrencia || 'none',
-      data_execucao: taskData.vencimento,
-      prioridade: taskData.prioridade || 4,
-      status: 'Entrada',
-      lembrete: taskData.lembrete,
-      reminders: taskData.reminders || [],
-      hora_vencimento: taskData.hora_vencimento
-    });
-
-    if (task) {
-      toast.success('Tarefa capturada', {
-        className: 'bg-black border-2 border-[#00ff41] text-[#00ff41] font-mono'
-      });
-    }
-  };
 
 
   if (loading) {
@@ -297,19 +269,7 @@ function TasksPage() {
         onUpdate={updateTask}
       />
 
-      <AddTaskOverlay
-        open={isAddingTask}
-        onClose={() => setIsAddingTask(false)}
-        onAddTask={onSmartAddTask}
-      />
 
-      <Button
-        onClick={() => setIsAddingTask(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-black border-2 shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-110 hover:bg-[#ff00ff] transition-all z-50 flex items-center justify-center p-0 text-gray-50 border-slate-700"
-        aria-label="Adicionar nova tarefa"
-      >
-        <Plus size={32} strokeWidth={3} />
-      </Button>
     </div>
   );
 }

@@ -76,7 +76,7 @@ function Dashboard() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showCheckin, setShowCheckin] = useState(false);
-  const [showAddTask, setShowAddTask] = useState(false);
+  
   const [detailTask, setDetailTask] = useState<any | null>(null);
   const [filterMode, setFilterMode] = useState<'ALL' | 'INTERVAL' | 'POST18'>('ALL');
 
@@ -104,15 +104,6 @@ function Dashboard() {
     treino_madrugada_realizado: false,
   });
 
-  const [newTask, setNewTask] = useState({
-    titulo: '',
-    projeto_id: '',
-    data_execucao: new Date().toISOString().split('T')[0],
-    repeticao: 'none',
-    tags: '',
-    lembrete_ead_48h: false,
-    lembrete: ''
-  });
 
   const { completeTask, deletePermanent, moveTask, updateTriagemStage, updateTask, addTask } = useTaskActions(() => {
     fetchData();
@@ -132,6 +123,13 @@ function Dashboard() {
     checkTodayCheckin();
     fetchData();
     setLoading(false);
+
+    const handleStorageChange = () => {
+      console.log('[Hardware:Sync] Storage change detected on Dashboard');
+      fetchData();
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const handleSaveAnxietyDump = () => {
@@ -158,7 +156,7 @@ function Dashboard() {
     const isValidDate = (d: any) => Boolean(safeParseDate(d));
 
     const allTasks = (loadFromLocal(TASKS_KEY) || []).filter((t: any) => isValidDate(t.created_at || t.data_execucao));
-    const todayTasks = allTasks.filter((t: any) => !t.status_concluido);
+    const todayTasks = allTasks.filter((t: any) => !t.status_concluido && t.status === 'Hoje');
     setTasks(todayTasks);
 
     const projectsData = loadFromLocal(PROJECTS_KEY) || [];
@@ -301,47 +299,6 @@ function Dashboard() {
     }
   };
 
-  const handleCreateTask = () => {
-    if (!newTask.titulo) return;
-
-    try {
-      const tagsString = String(newTask.tags || '');
-      const tagsArray = tagsString ? tagsString.split(',').map(t => t.trim()).filter(t => t !== '') : [];
-      const task = {
-        id: crypto.randomUUID(),
-        titulo: newTask.titulo,
-        projeto_id: newTask.projeto_id !== 'none' ? newTask.projeto_id : null,
-        data_execucao: newTask.data_execucao,
-        repeticao: newTask.repeticao,
-        tags: tagsArray,
-        lembrete_ead_48h: newTask.lembrete_ead_48h,
-        lembrete: null, // Initial support for manual tasks from main dashboard
-        hora_vencimento: newTask.data_execucao && newTask.lembrete ? `${newTask.data_execucao}T${newTask.lembrete}:00.000Z` : null,
-        status: 'Entrada',
-        status_concluido: false,
-        prioridade: 4,
-        created_at: new Date().toISOString()
-      };
-
-      const allTasks = loadFromLocal(TASKS_KEY) || [];
-      saveToLocal(TASKS_KEY, [task, ...allTasks]);
-
-      setShowAddTask(false);
-      setNewTask({
-        titulo: '',
-        projeto_id: 'none',
-        data_execucao: new Date().toISOString().split('T')[0],
-        repeticao: 'none',
-        tags: '',
-        lembrete_ead_48h: false,
-        lembrete: ''
-      });
-      toast.success('Tarefa enviada para Entrada');
-      fetchData();
-    } catch (error) {
-      toast.error('Erro ao salvar no hardware');
-    }
-  };
 
   const handleAddHydration = () => {
     try {
@@ -510,54 +467,6 @@ function Dashboard() {
       </section>
 
 
-      <section className="mt-8">
-        <div className="flex justify-center">
-           <Button onClick={() => setShowAddTask(true)} className="bg-zinc-100 text-black hover:bg-white rounded-full h-10 px-6 text-xs font-bold uppercase tracking-tight">
-             <Plus size={14} className="mr-2" /> Capturar
-           </Button>
-        </div>
-      </section>
-
-      <Dialog open={showAddTask} onOpenChange={setShowAddTask}>
-        <DialogContent className="bg-zinc-950 border-zinc-900 rounded-3xl p-8 sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-black uppercase tracking-tighter">Nova Missão</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 py-6">
-            <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">O que fazer?</Label>
-              <Input 
-                placeholder="Título da tarefa" 
-                value={newTask.titulo}
-                onChange={(e) => setNewTask({ ...newTask, titulo: e.target.value })}
-                className="bg-zinc-900 border-none h-14 rounded-2xl px-6 font-bold"
-              />
-            </div>
-            <Button onClick={handleCreateTask} className="w-full h-16 rounded-2xl bg-white text-black font-black uppercase tracking-widest">
-              Agendar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-      <AddTaskOverlay 
-        open={showAddTask}
-        onClose={() => setShowAddTask(false)}
-        onAddTask={(taskData) => {
-           addTask({
-            titulo: taskData.titulo,
-            descricao: taskData.descricao || '',
-            repeticao: taskData.recorrencia || 'none',
-            data_execucao: taskData.vencimento,
-            prioridade: taskData.prioridade || 4,
-            status: 'Entrada',
-            lembrete: taskData.lembrete,
-            reminders: taskData.reminders || [],
-            hora_vencimento: taskData.hora_vencimento
-          });
-          setShowAddTask(false);
-          fetchData();
-        }}
-      />
 
       {detailTask && (
         <TaskDetailModal 

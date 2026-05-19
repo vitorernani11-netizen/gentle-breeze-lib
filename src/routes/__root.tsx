@@ -13,6 +13,7 @@ import { Toaster } from "sonner";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "@/components/AppSidebar";
+import { GlobalAddTask } from "@/components/tasks/GlobalAddTask";
 
 import appCss from "../styles.css?url";
 
@@ -78,6 +79,7 @@ function RootComponent() {
       <div className="flex flex-col min-h-screen">
         <Outlet />
       </div>
+      <GlobalAddTask />
       <Toaster position="top-center" theme="dark" />
     </QueryClientProvider>
   );
