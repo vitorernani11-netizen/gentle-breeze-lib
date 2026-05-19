@@ -113,30 +113,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             <Trash2 size={12} />
           </Button>
         </div>
-      </div>
-
-        
-        <div className="flex items-center justify-start gap-2 pt-1">
-          <span className={cn(
-            "text-[9px] font-black uppercase flex items-center gap-1.5 px-2 py-1 rounded-sm border",
-            isOverdue ? "text-red-500 border-red-500/20 bg-red-500/5" : "text-zinc-300 border-zinc-800 bg-zinc-900/50"
-          )}>
-            <Calendar size={10} /> 
-            {formatDate(taskDate, "d MMM", { locale: ptBR }).toUpperCase()}
-            {displayTime && (
-              <span className="ml-1.5 text-[#00ff41] font-black">
-                {displayTime}
-              </span>
-            )}
-          </span>
-
-          {task.repeticao && task.repeticao !== 'none' && (
-            <span className="text-[8px] font-black uppercase text-zinc-500 flex items-center gap-1 border border-zinc-900/50 px-1.5 py-1 rounded-sm">
-              <Clock size={10} /> {task.repeticao === 'daily' ? 'DIÁRIO' : task.repeticao === 'weekly' ? 'SEMANAL' : 'MENSAL'}
-            </span>
-          )}
-        </div>
-      </div>
     </Card>
+
   );
 };
