@@ -269,11 +269,6 @@ function TasksPage() {
         onUpdate={updateTask}
       />
 
-      <AddTaskOverlay
-        open={isAddingTask}
-        onClose={() => setIsAddingTask(false)}
-        onAddTask={onSmartAddTask}
-      />
 
     </div>
   );
