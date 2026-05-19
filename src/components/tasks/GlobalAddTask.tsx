@@ -52,7 +52,7 @@ export const GlobalAddTask: React.FC = () => {
     hora_vencimento?: string | null;
   }) => {
     const today = new Date().toISOString().split('T')[0];
-    const status = taskData.vencimento === today ? 'Hoje' : 'Entrada';
+    const status = 'Entrada'; // Novas tarefas sempre fluem para a Entrada/Classificação conforme instrução de estabilização
 
     const task = addTask({
       titulo: taskData.titulo,
