@@ -23,6 +23,12 @@ function Projects() {
 
   useEffect(() => {
     fetchProjects();
+    
+    const handleStorageChange = () => {
+      fetchProjects();
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const fetchProjects = () => {
