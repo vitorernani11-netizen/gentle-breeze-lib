@@ -135,7 +135,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
     try {
       const allTasks = loadFromLocal(TASKS_KEY) || [];
       const updatedTasks = allTasks.map((t: any) => 
-        t.id === id ? { ...t, triagem_stage: stage } : t
+        t.id === id ? { ...t, triagem_stage: stage, prioridade: stage } : t
       );
       saveToLocal(TASKS_KEY, updatedTasks);
       toast.success(`Pipeline: Estágio ${stage} ativado`);
