@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Zap, Brain, X, ChevronRight, ClipboardList, Book, Lightbulb, Folder } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AddTaskOverlay } from './AddTaskOverlay';
 import { useTaskActions } from '@/hooks/useTaskActions';
+import { useVaultActions } from '@/hooks/useVaultActions';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { loadFromLocal } from '@/lib/storage';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+
+const PROJECTS_KEY = 'hardware_humano_projects';
 
 export const GlobalAddTask: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
