@@ -123,10 +123,10 @@ function TasksPage() {
   }
 
   const triagemStages = [
-    { num: 1, label: 'Classificação', desc: 'Onde/Quando', color: 'border-white' },
-    { num: 2, label: 'Fracionar', desc: 'Quebrar', color: 'border-white' },
-    { num: 3, label: 'Planejamento', desc: 'Agendar', color: 'border-white' },
-    { num: 4, label: 'Execução', desc: 'Foco atual', color: 'border-[#00ff41] text-[#00ff41]' },
+    { num: 1, label: 'CLASSIFICAÇÃO', desc: 'Onde/Quando', color: 'border-white' },
+    { num: 2, label: 'FRACIONAR', desc: 'Quebrar', color: 'border-white' },
+    { num: 3, label: 'PLANEJAMENTO', desc: 'Agendar', color: 'border-white' },
+    { num: 4, label: 'EXECUÇÃO', desc: 'Foco atual', color: 'border-[#00ff41] text-[#00ff41]' },
   ];
 
   const getPriorityColor = (p: number) => {

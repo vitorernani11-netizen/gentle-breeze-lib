@@ -105,7 +105,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           <button
             aria-label="Fechar"
             onClick={onClose}
-            className="text-zinc-500 hover:text-white transition-colors p-1 rounded-md hover:bg-zinc-900"
+            className="text-zinc-500 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-zinc-900"
           >
             <X size={20} />
           </button>
@@ -116,7 +116,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           {/* Main column */}
           <div className="p-6 space-y-4 md:border-r border-zinc-800">
             <div className="flex items-start gap-3">
-              <div className="mt-2 w-4 h-4 rounded-full border-2 border-zinc-600 shrink-0" />
               <Input
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
@@ -192,12 +191,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               <span className="text-zinc-700">Auto-save ativo</span>
             )}
           </div>
-          <Button
-            onClick={onClose}
-            className="bg-white text-black hover:bg-zinc-200 text-[10px] font-bold uppercase rounded-lg h-8 px-4"
-          >
-            Fechar
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
