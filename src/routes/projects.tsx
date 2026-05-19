@@ -87,9 +87,6 @@ function Projects() {
       <header className="mb-10 flex justify-between items-end">
         <div>
           <div className="flex items-center gap-4 mb-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/' })} className="transition-none -ml-3 text-zinc-500 hover:text-white">
-              <ArrowLeft size={24} />
-            </Button>
             <div className="flex items-center gap-2 text-purple-500">
               <Layers size={20} />
               <span className="text-[10px] font-black uppercase tracking-[0.2em]">Estrutura</span>
