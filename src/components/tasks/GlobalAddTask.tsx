@@ -11,7 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 
-const PROJECTS_KEY = 'hardware_humano_projects';
+const VAULT_KEY = 'hardware_humano_vault';
+
+const CORE_PROJECTS = [
+  { id: 'pessoal', nome: 'GESTÃO / PESSOAL' },
+  { id: 'faculdade', nome: 'FACULDADE' },
+  { id: 'riolax', nome: 'RIOLAX' },
+  { id: 'esfiharia', nome: 'ESFIHARIA' },
+  { id: 'youtube', nome: 'YOUTUBE DARK' }
+];
 
 export const GlobalAddTask: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,7 +28,7 @@ export const GlobalAddTask: React.FC = () => {
   const { addTask } = useTaskActions();
   const { addVaultItem } = useVaultActions();
   
-  const projects = loadFromLocal(PROJECTS_KEY) || [];
+  const projects = loadFromLocal('hardware_humano_projects') || [];
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -67,12 +75,15 @@ export const GlobalAddTask: React.FC = () => {
   };
 
   const handleAddMemory = () => {
-    if (!memoryData.titulo) return;
+    if (!memoryData.titulo || !memoryData.projeto_id) {
+      if (!memoryData.projeto_id) toast.error('Selecione uma pasta de destino');
+      return;
+    }
     
     const item = addVaultItem({
       titulo: memoryData.titulo,
       conteudo: memoryData.conteudo,
-      projeto_id: memoryData.projeto_id === 'none' ? null : memoryData.projeto_id,
+      projeto_id: memoryData.projeto_id,
       categoria: memoryData.categoria
     });
 
@@ -157,15 +168,17 @@ export const GlobalAddTask: React.FC = () => {
                 <div className="space-y-1">
                   <label className="text-[8px] font-black uppercase tracking-widest text-zinc-500 ml-1">Projeto</label>
                   <Select 
-                    value={memoryData.projeto_id || 'none'} 
+                    value={memoryData.projeto_id} 
                     onValueChange={(v) => setMemoryData({ ...memoryData, projeto_id: v })}
                   >
-                    <SelectTrigger className="bg-zinc-900 border-zinc-800 h-10 rounded-none font-bold text-[10px] uppercase">
-                      <SelectValue placeholder="Selecione o Projeto" />
+                    <SelectTrigger className={cn(
+                      "bg-zinc-900 border-zinc-800 h-10 rounded-none font-bold text-[10px] uppercase transition-colors",
+                      !memoryData.projeto_id && "text-zinc-600 border-dashed"
+                    )}>
+                      <SelectValue placeholder="Escolher Pasta de Destino" />
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-950 border-zinc-800 rounded-none">
-                      <SelectItem value="none">Nenhum</SelectItem>
-                      {projects.map((p: any) => (
+                      {CORE_PROJECTS.map((p) => (
                         <SelectItem key={p.id} value={p.id}>{p.nome}</SelectItem>
                       ))}
                     </SelectContent>
@@ -199,7 +212,7 @@ export const GlobalAddTask: React.FC = () => {
 
               <Button 
                 onClick={handleAddMemory}
-                disabled={!memoryData.titulo}
+                disabled={!memoryData.titulo || !memoryData.projeto_id}
                 className="w-full h-14 bg-white text-black hover:bg-zinc-200 font-black uppercase tracking-widest text-sm transition-all rounded-none disabled:opacity-20 mt-4"
               >
                 Arquivar no Cofre
