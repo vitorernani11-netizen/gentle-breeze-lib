@@ -159,8 +159,15 @@ function VaultPage() {
               <Archive size={40} className="mx-auto mb-4 text-zinc-900" />
               <p className="text-zinc-700 font-black uppercase tracking-widest text-xs">Esta pasta está vazia</p>
             </div>
-          )}
-        </div>
+      )}
+
+      <NoteModal 
+        note={selectedNote}
+        isOpen={!!selectedNote}
+        onClose={() => setSelectedNote(null)}
+        onDelete={deleteVaultItem}
+      />
+    </div>
       )}
     </div>
   );
