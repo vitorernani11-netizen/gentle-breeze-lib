@@ -11,7 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 
-const PROJECTS_KEY = 'hardware_humano_projects';
+const VAULT_KEY = 'hardware_humano_vault';
+
+const CORE_PROJECTS = [
+  { id: 'pessoal', nome: 'GESTÃO / PESSOAL' },
+  { id: 'faculdade', nome: 'FACULDADE' },
+  { id: 'riolax', nome: 'RIOLAX' },
+  { id: 'esfiharia', nome: 'ESFIHARIA' },
+  { id: 'youtube', nome: 'YOUTUBE DARK' }
+];
 
 export const GlobalAddTask: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,7 +28,7 @@ export const GlobalAddTask: React.FC = () => {
   const { addTask } = useTaskActions();
   const { addVaultItem } = useVaultActions();
   
-  const projects = loadFromLocal(PROJECTS_KEY) || [];
+  const projects = loadFromLocal('hardware_humano_projects') || [];
 
   const handleOpen = () => {
     setIsOpen(true);
