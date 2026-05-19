@@ -75,12 +75,15 @@ export const GlobalAddTask: React.FC = () => {
   };
 
   const handleAddMemory = () => {
-    if (!memoryData.titulo) return;
+    if (!memoryData.titulo || !memoryData.projeto_id) {
+      if (!memoryData.projeto_id) toast.error('Selecione uma pasta de destino');
+      return;
+    }
     
     const item = addVaultItem({
       titulo: memoryData.titulo,
       conteudo: memoryData.conteudo,
-      projeto_id: memoryData.projeto_id === 'none' ? null : memoryData.projeto_id,
+      projeto_id: memoryData.projeto_id,
       categoria: memoryData.categoria
     });
 
