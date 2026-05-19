@@ -39,10 +39,12 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLin
 import { cn } from '@/lib/utils';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { EisenhowerMatrix } from '@/components/dashboard/EisenhowerMatrix';
-import { EisenhowerGrid } from '@/components/classification/EisenhowerGrid';
+
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
 import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
+import { TodayContextGroup } from '@/components/tasks/TodayContextGroup';
+
 
 const TASKS_KEY = 'hardware_humano_data';
 const PROJECTS_KEY = 'hardware_humano_projects';
@@ -76,6 +78,8 @@ function Dashboard() {
   const [showCheckin, setShowCheckin] = useState(false);
   const [showAddTask, setShowAddTask] = useState(false);
   const [detailTask, setDetailTask] = useState<any | null>(null);
+  const [filterMode, setFilterMode] = useState<'ALL' | 'INTERVAL' | 'POST18'>('ALL');
+
   const [tasks, setTasks] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [academicUrgent, setAcademicUrgent] = useState<any[]>([]);
@@ -379,31 +383,132 @@ function Dashboard() {
         </div>
       )}
 
+      {/* Filtros de Janela de Tempo (Foco TDAH) */}
+      <section className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <Button
+          onClick={() => setFilterMode('INTERVAL')}
+          className={cn(
+            "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
+            filterMode === 'INTERVAL' 
+              ? "bg-[#00ff41] text-black border-[#00ff41]" 
+              : "bg-black text-[#00ff41] border-[#00ff41] hover:bg-[#00ff41]/10"
+          )}
+        >
+          Intervalo
+        </Button>
+        <Button
+          onClick={() => setFilterMode('POST18')}
+          className={cn(
+            "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
+            filterMode === 'POST18' 
+              ? "bg-[#ff00ff] text-black border-[#ff00ff]" 
+              : "bg-black text-[#ff00ff] border-[#ff00ff] hover:bg-[#ff00ff]/10"
+          )}
+        >
+          Pós-18h
+        </Button>
+        <Button
+          onClick={() => setFilterMode('ALL')}
+          className={cn(
+            "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
+            filterMode === 'ALL' 
+              ? "bg-white text-black border-white" 
+              : "bg-black text-white border-white hover:bg-white/10"
+          )}
+        >
+          Ver Tudo
+        </Button>
+      </section>
+
       <section className="mb-8">
-        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-4 px-2">Hardware: Classificação (Eisenhower)</h3>
-        <EisenhowerGrid tasks={tasks} onTaskClick={setDetailTask} />
-        
-        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mt-8 mb-4 px-2">Hardware: Execução</h3>
-        <div className="space-y-0 border-t border-white/10">
-          {tasks.length > 0 ? (
-            tasks.map((task) => (
-              <TaskCard 
-                key={task.id}
-                task={task}
+        {(() => {
+          // Grouping logic
+          const groupedTasks = {
+            academic: tasks.filter(t => {
+              const proj = projects.find(p => p.id === t.projeto_id);
+              return proj?.nome?.toLowerCase().includes('faculdade') || 
+                     proj?.nome?.toLowerCase().includes('curso') ||
+                     t.tags?.some((tag: string) => tag.toLowerCase().includes('faculdade') || tag.toLowerCase().includes('curso'));
+            }),
+            projects: tasks.filter(t => {
+              const proj = projects.find(p => p.id === t.projeto_id);
+              return proj?.nome?.toLowerCase().includes('nabih') || 
+                     proj?.nome?.toLowerCase().includes('projeto') ||
+                     t.tags?.some((tag: string) => tag.toLowerCase().includes('nabih'));
+            }),
+            management: tasks.filter(t => {
+              const proj = projects.find(p => p.id === t.projeto_id);
+              const isAcademic = proj?.nome?.toLowerCase().includes('faculdade') || 
+                                proj?.nome?.toLowerCase().includes('curso') ||
+                                t.tags?.some((tag: string) => tag.toLowerCase().includes('faculdade') || tag.toLowerCase().includes('curso'));
+              const isProject = proj?.nome?.toLowerCase().includes('nabih') || 
+                               proj?.nome?.toLowerCase().includes('projeto') ||
+                               t.tags?.some((tag: string) => tag.toLowerCase().includes('nabih'));
+              return !isAcademic && !isProject;
+            })
+          };
+
+          // Apply Filter Mode
+          let filteredTasks = { ...groupedTasks };
+          if (filterMode === 'INTERVAL') {
+            filteredTasks = {
+              academic: groupedTasks.academic,
+              projects: [],
+              management: groupedTasks.management.filter(t => t.tags?.some((tag: string) => tag.toLowerCase().includes('rápida') || tag.toLowerCase().includes('rapida')))
+            };
+          } else if (filterMode === 'POST18') {
+            filteredTasks = {
+              academic: [],
+              projects: groupedTasks.projects,
+              management: []
+            };
+          }
+
+          const hasTasks = filteredTasks.academic.length > 0 || 
+                          filteredTasks.projects.length > 0 || 
+                          filteredTasks.management.length > 0;
+
+          return hasTasks ? (
+            <div className="space-y-2">
+              <TodayContextGroup
+                title="#FACULDADE / CURSOS"
+                color="#00ff41"
+                tasks={filteredTasks.academic}
+                onTaskClick={setDetailTask}
                 onComplete={completeTask}
                 onMoveToToday={(id) => moveTask(id, 'Hoje')}
                 onDelete={deletePermanent}
-                onClick={setDetailTask}
                 onUpdateStage={updateTriagemStage}
               />
-            ))
-          ) : (
-            <div className="py-8 text-center border-2 border-dashed border-zinc-900 rounded-2xl">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-800">Pipeline Vazio</p>
+              <TodayContextGroup
+                title="#PROJETOS / NABIH"
+                color="#ff00ff"
+                tasks={filteredTasks.projects}
+                onTaskClick={setDetailTask}
+                onComplete={completeTask}
+                onMoveToToday={(id) => moveTask(id, 'Hoje')}
+                onDelete={deletePermanent}
+                onUpdateStage={updateTriagemStage}
+              />
+              <TodayContextGroup
+                title="#GESTÃO / PESSOAL"
+                color="#ffffff"
+                tasks={filteredTasks.management}
+                onTaskClick={setDetailTask}
+                onComplete={completeTask}
+                onMoveToToday={(id) => moveTask(id, 'Hoje')}
+                onDelete={deletePermanent}
+                onUpdateStage={updateTriagemStage}
+              />
             </div>
-          )}
-        </div>
+          ) : (
+            <div className="py-20 text-center border-4 border-dashed border-zinc-900">
+              <p className="text-[10px] font-black uppercase tracking-[0.5em] text-zinc-800">Pipeline Vazio para este filtro</p>
+            </div>
+          );
+        })()}
       </section>
+
 
       <section className="mt-8">
         <div className="flex justify-center">
