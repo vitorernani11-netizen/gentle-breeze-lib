@@ -498,6 +498,7 @@ function Dashboard() {
                   onMoveToToday={(id) => moveTask(id, 'Hoje')}
                   onDelete={deletePermanent}
                   onUpdateStage={updateTriagemStage}
+                  onUpdatePriority={(id, p) => updateTask(id, { prioridade: p })}
                 />
               ))}
             </div>
