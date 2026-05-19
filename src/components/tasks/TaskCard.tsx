@@ -40,90 +40,81 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
   return (
     <Card className={cn(
-      "bg-black border-0 border-b border-white/10 p-3 rounded-none flex flex-col group transition-all gap-3 relative",
-      isOverdue ? "bg-red-500/5" : "hover:bg-zinc-900/30"
+      "bg-black border-0 border-b border-white/20 p-2 rounded-none flex flex-col group transition-all gap-2 relative",
+      isOverdue ? "border-l-2 border-l-red-500" : ""
     )}>
-      <div className="absolute top-3 right-3 flex gap-2 z-10">
-        <Button 
-          aria-label="Concluir tarefa"
-          size="sm"
-          className="bg-white text-black hover:bg-zinc-200 font-black uppercase text-[10px] rounded-sm h-8 px-3 transition-all active:scale-95"
-          onClick={() => onComplete(task)}
+      <div className="flex items-start justify-between gap-2">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => onClick(task)}
+          onKeyDown={(e) => { if (e.key === 'Enter') onClick(task); }}
+          className="flex flex-col gap-1 flex-1 min-w-0 text-left cursor-pointer"
         >
-          Concluir
-        </Button>
-        <Button 
-          aria-label="Mover para Hoje"
-          size="sm"
-          className="bg-zinc-950 text-[#00ff41] hover:bg-[#00ff41] hover:text-black text-[10px] font-black uppercase rounded-sm border border-[#00ff41]/30 h-8 px-3 transition-all"
-          onClick={() => onMoveToToday(task.id)}
-        >
-          Hoje
-        </Button>
-        <Button 
-          aria-label="Deletar registro"
-          size="icon"
-          variant="ghost"
-          className="text-zinc-800 hover:text-red-500 hover:bg-red-500/10 h-8 w-8 border border-zinc-900 rounded-sm"
-          onClick={() => onDelete(task.id)}
-        >
-          <Trash2 size={14} />
-        </Button>
+          <div className="flex items-center gap-2">
+            <span className={cn("text-[8px] font-black uppercase px-1 py-0.5 border rounded-none", 
+              task.prioridade === 1 ? "text-red-500 border-red-500/40 bg-red-500/10" :
+              task.prioridade === 2 ? "text-orange-500 border-orange-500/40 bg-orange-500/10" :
+              task.prioridade === 3 ? "text-blue-500 border-blue-500/40 bg-blue-500/10" :
+              "text-zinc-600 border-zinc-800"
+            )}>
+              P{task.prioridade || 4}
+            </span>
+            
+            <h3 className="font-bold text-sm uppercase tracking-tight truncate leading-none">
+              {task.titulo}
+            </h3>
+
+            {isOverdue && (
+              <span className="text-[7px] font-black uppercase text-red-500 px-1 border border-red-500/30 bg-red-500/5">
+                Atrasada
+              </span>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {displayTime && (
+              <span className="text-[9px] font-black text-[#00ff41] flex items-center gap-1">
+                <Clock size={8} /> {displayTime}
+              </span>
+            )}
+            {task.descricao && (
+              <p className="text-zinc-500 text-[8px] font-medium uppercase truncate opacity-50">
+                {task.descricao}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex gap-1 shrink-0">
+          <Button 
+            aria-label="Concluir"
+            size="sm"
+            className="bg-white text-black hover:bg-zinc-200 font-black uppercase text-[9px] rounded-none h-7 px-3 transition-all active:scale-95"
+            onClick={() => onComplete(task)}
+          >
+            Concluir
+          </Button>
+          <Button 
+            aria-label="Hoje"
+            size="sm"
+            className="bg-zinc-950 text-[#00ff41] hover:bg-[#00ff41] hover:text-black text-[9px] font-black uppercase rounded-none border border-[#00ff41] h-7 px-2 transition-all"
+            onClick={() => onMoveToToday(task.id)}
+          >
+            Hoje
+          </Button>
+          <Button 
+            aria-label="Deletar"
+            size="icon"
+            variant="ghost"
+            className="text-zinc-700 hover:text-red-500 h-7 w-7 border border-zinc-900 rounded-none"
+            onClick={() => onDelete(task.id)}
+          >
+            <Trash2 size={12} />
+          </Button>
+        </div>
       </div>
 
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={() => onClick(task)}
-        onKeyDown={(e) => { if (e.key === 'Enter') onClick(task); }}
-        className="flex flex-col gap-1.5 flex-1 min-w-0 text-left cursor-pointer pr-2"
-      >
-        <div className="flex items-center gap-2">
-          <span className={cn("text-[8px] font-black uppercase px-1.5 py-0.5 border rounded-sm", 
-            task.prioridade === 1 ? "text-red-500 border-red-500/20 bg-red-500/5" :
-            task.prioridade === 2 ? "text-orange-500 border-orange-500/20 bg-orange-500/5" :
-            task.prioridade === 3 ? "text-blue-500 border-blue-500/20 bg-blue-500/5" :
-            "text-zinc-600 border-zinc-900"
-          )}>
-            P{task.prioridade || 4}
-          </span>
-          
-          <div className="flex border border-zinc-900/50 bg-black/40 p-0.5 rounded-sm">
-            {[1, 2, 3, 4].map((s) => (
-              <button
-                key={s}
-                aria-label={`Mover para estágio ${s}`}
-                onClick={(e) => { e.stopPropagation(); onUpdateStage(task.id, s); }}
-                className={cn(
-                  "w-4 h-4 text-[8px] font-black flex items-center justify-center rounded-sm transition-all",
-                  (task.triagem_stage || 1) === s 
-                    ? "bg-zinc-100 text-black" 
-                    : "text-zinc-700 hover:text-zinc-400"
-                )}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-
-          {isOverdue && (
-            <span className="text-[8px] font-black uppercase text-red-500 animate-pulse flex items-center gap-1 bg-red-500/10 px-1.5 py-0.5 border border-red-500/20">
-              Atrasada
-            </span>
-          )}
-        </div>
-        
-        <div>
-          <h3 className="font-bold text-lg uppercase tracking-tight truncate leading-none mb-1">
-            {task.titulo}
-          </h3>
-          
-          {task.descricao && (
-            <p className="text-zinc-600 text-[9px] font-medium uppercase leading-tight line-clamp-1 italic opacity-60">
-              {task.descricao}
-            </p>
-          )}
-        </div>
         
         <div className="flex items-center justify-start gap-2 pt-1">
           <span className={cn(
