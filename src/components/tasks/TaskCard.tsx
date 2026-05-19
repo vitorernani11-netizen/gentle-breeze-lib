@@ -57,9 +57,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               onClick={(e) => {
                 e.stopPropagation();
                 const priorities = ['P4', 'P1', 'P2', 'P3'];
-                const currentIndex = priorities.indexOf(task.prioridade || 'P4');
+                const currentP = typeof task.prioridade === 'number' ? `P${task.prioridade}` : (task.prioridade || 'P4');
+                const currentIndex = priorities.indexOf(currentP);
                 const nextPriority = priorities[(currentIndex + 1) % priorities.length];
-                onComplete({ ...task, prioridade: nextPriority, skipComplete: true }); // Hack to use a generic update if not provided
+                if (onUpdatePriority) {
+                  onUpdatePriority(task.id, nextPriority);
+                }
               }}
               className={cn("text-[8px] font-black uppercase px-1 py-0.5 border rounded-none transition-colors", 
                 (task.prioridade === 'P1' || task.prioridade === 1) ? "text-red-500 border-red-500/40 bg-red-500/10" :
@@ -81,7 +84,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                   }}
                   className={cn(
                     "w-4 h-4 text-[8px] font-black transition-colors",
-                    (task.prioridade || 4) === stage 
+                    (task.fase_pipeline || 1) === stage 
                       ? "bg-white text-black" 
                       : "bg-black text-zinc-500 hover:text-zinc-300"
                   )}
