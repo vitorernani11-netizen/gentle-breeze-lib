@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 
 const PROJECTS_KEY = 'hardware_humano_projects';
-const TASKS_KEY = 'hardware_humano_tasks';
+const TASKS_KEY = 'hardware_humano_data';
 
 export const Route = createFileRoute('/projects')({
   component: Projects,
