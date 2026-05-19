@@ -45,7 +45,7 @@ export const GlobalAddTask: React.FC = () => {
     titulo: string;
     vencimento: string;
     recorrencia: string;
-    prioridade: number;
+    prioridade: string;
     lembrete: string | null;
     reminders: any[];
     descricao?: string;
@@ -59,7 +59,7 @@ export const GlobalAddTask: React.FC = () => {
       descricao: taskData.descricao || '',
       repeticao: taskData.recorrencia || 'none',
       data_execucao: taskData.vencimento,
-      prioridade: taskData.prioridade || 4,
+      prioridade: taskData.prioridade || 'P4',
       status: status,
       lembrete: taskData.lembrete,
       reminders: taskData.reminders || [],

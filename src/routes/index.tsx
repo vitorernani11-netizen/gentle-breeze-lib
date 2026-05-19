@@ -155,7 +155,16 @@ function Dashboard() {
     // Helper para validação de data segura contra dados antigos/corrompidos
     const isValidDate = (d: any) => Boolean(safeParseDate(d));
 
-    const allTasks = (loadFromLocal(TASKS_KEY) || []).filter((t: any) => isValidDate(t.created_at || t.data_execucao));
+    const allTasks = (loadFromLocal(TASKS_KEY) || []).filter((t: any) => isValidDate(t.created_at || t.data_execucao)).map((t: any) => {
+      // Migration: ensure fase_pipeline and priority string
+      if (t.fase_pipeline === undefined) {
+        t.fase_pipeline = t.triagem_stage || (typeof t.prioridade === 'number' ? t.prioridade : 1);
+      }
+      if (typeof t.prioridade === 'number') {
+        t.prioridade = `P${t.prioridade}`;
+      }
+      return t;
+    });
     
     // Pegamos todas as tarefas não concluídas para que os filtros (especialmente o de Atrasadas) funcionem globalmente
     const activeTasks = allTasks.filter((t: any) => !t.status_concluido);
@@ -498,6 +507,7 @@ function Dashboard() {
                   onMoveToToday={(id) => moveTask(id, 'Hoje')}
                   onDelete={deletePermanent}
                   onUpdateStage={updateTriagemStage}
+                  onUpdatePriority={(id, p) => updateTask(id, { prioridade: p })}
                 />
               ))}
             </div>

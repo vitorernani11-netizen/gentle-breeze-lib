@@ -12,6 +12,7 @@ interface TaskCardProps {
   onDelete: (id: string) => void;
   onClick: (task: any) => void;
   onUpdateStage: (id: string, stage: number) => void;
+  onUpdatePriority?: (id: string, priority: string) => void;
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
@@ -20,7 +21,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onMoveToToday,
   onDelete,
   onClick,
-  onUpdateStage
+  onUpdateStage,
+  onUpdatePriority
 }) => {
   const taskDate = parseISO(task.data_execucao);
   const isOverdue = !task.status_concluido && (
@@ -51,14 +53,26 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           className="flex flex-col gap-1 flex-1 min-w-0 text-left cursor-pointer"
         >
           <div className="flex items-center gap-2">
-            <span className={cn("text-[8px] font-black uppercase px-1 py-0.5 border rounded-none", 
-              task.prioridade === 1 ? "text-red-500 border-red-500/40 bg-red-500/10" :
-              task.prioridade === 2 ? "text-orange-500 border-orange-500/40 bg-orange-500/10" :
-              task.prioridade === 3 ? "text-blue-500 border-blue-500/40 bg-blue-500/10" :
-              "text-zinc-600 border-zinc-800"
-            )}>
-              P{task.prioridade || 4}
-            </span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const priorities = ['P4', 'P1', 'P2', 'P3'];
+                const currentP = typeof task.prioridade === 'number' ? `P${task.prioridade}` : (task.prioridade || 'P4');
+                const currentIndex = priorities.indexOf(currentP);
+                const nextPriority = priorities[(currentIndex + 1) % priorities.length];
+                if (onUpdatePriority) {
+                  onUpdatePriority(task.id, nextPriority);
+                }
+              }}
+              className={cn("text-[8px] font-black uppercase px-1 py-0.5 border rounded-none transition-colors", 
+                (task.prioridade === 'P1' || task.prioridade === 1) ? "text-red-500 border-red-500/40 bg-red-500/10" :
+                (task.prioridade === 'P2' || task.prioridade === 2) ? "text-orange-500 border-orange-500/40 bg-orange-500/10" :
+                (task.prioridade === 'P3' || task.prioridade === 3) ? "text-blue-500 border-blue-500/40 bg-blue-500/10" :
+                "text-zinc-600 border-zinc-800"
+              )}
+            >
+              {typeof task.prioridade === 'number' ? `P${task.prioridade}` : (task.prioridade || 'P4')}
+            </button>
             
             <div className="flex items-center gap-0.5 border border-zinc-800 bg-zinc-950 p-0.5">
               {[1, 2, 3, 4].map((stage) => (
@@ -70,7 +84,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                   }}
                   className={cn(
                     "w-4 h-4 text-[8px] font-black transition-colors",
-                    (task.prioridade || 4) === stage 
+                    (task.fase_pipeline || 1) === stage 
                       ? "bg-white text-black" 
                       : "bg-black text-zinc-500 hover:text-zinc-300"
                   )}

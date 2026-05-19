@@ -21,16 +21,16 @@ interface TaskDetailModalProps {
 }
 
 const PRIORITIES = [
-  { value: 1, label: 'P1', color: 'text-red-500 border-red-500' },
-  { value: 2, label: 'P2', color: 'text-orange-500 border-orange-500' },
-  { value: 3, label: 'P3', color: 'text-blue-500 border-blue-500' },
-  { value: 4, label: 'P4', color: 'text-zinc-500 border-zinc-700' },
+  { value: 'P1', label: 'P1', color: 'text-red-500 border-red-500' },
+  { value: 'P2', label: 'P2', color: 'text-orange-500 border-orange-500' },
+  { value: 'P3', label: 'P3', color: 'text-blue-500 border-blue-500' },
+  { value: 'P4', label: 'P4', color: 'text-zinc-500 border-zinc-700' },
 ];
 
 export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailModalProps) {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
-  const [prioridade, setPrioridade] = useState<number>(4);
+  const [prioridade, setPrioridade] = useState<string>('P4');
   const [dataExecucao, setDataExecucao] = useState('');
   const [lembrete, setLembrete] = useState('');
   const [savedFlash, setSavedFlash] = useState(false);
@@ -42,7 +42,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
       initRef.current = false;
       setTitulo(task.titulo || '');
       setDescricao(task.descricao || '');
-      setPrioridade(task.prioridade || 4);
+      setPrioridade(task.prioridade || 'P4');
       setDataExecucao(task.data_execucao || '');
       setLembrete(task.lembrete || '');
       // mark as initialized after state apply
@@ -71,7 +71,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
   if (!task) return null;
 
-  const handlePriority = (p: number) => {
+  const handlePriority = (p: string) => {
     setPrioridade(p);
     triggerSave({ prioridade: p });
   };

@@ -135,7 +135,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
     try {
       const allTasks = loadFromLocal(TASKS_KEY) || [];
       const updatedTasks = allTasks.map((t: any) => 
-        t.id === id ? { ...t, triagem_stage: stage, prioridade: stage } : t
+        t.id === id ? { ...t, fase_pipeline: stage } : t
       );
       saveToLocal(TASKS_KEY, updatedTasks);
       toast.success(`Pipeline: Estágio ${stage} ativado`);
@@ -202,12 +202,12 @@ export const useTaskActions = (onSuccess?: () => void) => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         status_concluido: false,
-        triagem_stage: 1,
+        fase_pipeline: taskData.fase_pipeline || 1,
         user_id: 'local-user',
         tags: [],
         titulo: taskData.titulo,
         descricao: taskData.descricao || '',
-        prioridade: taskData.prioridade || 4,
+        prioridade: taskData.prioridade || 'P4',
         data_execucao: taskData.data_execucao,
         repeticao: taskData.repeticao || 'none',
         lembrete: taskData.lembrete || null,

@@ -84,7 +84,18 @@ function TasksPage() {
         return isDateValid;
       });
 
-      const active = validTasks.filter((t: any) => 
+      const mappedTasks = validTasks.map((t: any) => {
+        // Migration: ensure fase_pipeline and priority string
+        if (t.fase_pipeline === undefined) {
+          t.fase_pipeline = t.triagem_stage || (typeof t.prioridade === 'number' ? t.prioridade : 1);
+        }
+        if (typeof t.prioridade === 'number') {
+          t.prioridade = `P${t.prioridade}`;
+        }
+        return t;
+      });
+
+      const active = mappedTasks.filter((t: any) => 
         t && t.status === 'Entrada' && !t.status_concluido
       ).sort((a: any, b: any) => {
         const dateA = new Date(a.created_at || 0).getTime();
@@ -92,7 +103,7 @@ function TasksPage() {
         return dateB - dateA;
       });
 
-      const completed = validTasks.filter((t: any) => 
+      const completed = mappedTasks.filter((t: any) => 
         t && t.status === 'Entrada' && t.status_concluido
       ).sort((a: any, b: any) => {
         const dateA = new Date(a.created_at || 0).getTime();
@@ -129,10 +140,13 @@ function TasksPage() {
     { num: 4, label: 'EXECUÇÃO', desc: 'Foco atual', color: 'border-[#00ff41] text-[#00ff41]' },
   ];
 
-  const getPriorityColor = (p: number) => {
+  const getPriorityColor = (p: string | number) => {
     switch (p) {
+      case 'P1':
       case 1: return 'text-[#ff0055] border-[#ff0055]';
+      case 'P2':
       case 2: return 'text-[#ffaa00] border-[#ffaa00]';
+      case 'P3':
       case 3: return 'text-[#00ccff] border-[#00ccff]';
       default: return 'text-zinc-400 border-zinc-800';
     }
@@ -187,7 +201,7 @@ function TasksPage() {
       <div className="grid grid-cols-1 gap-0 border-t border-white/10">
         {activeTasks.length > 0 ? (
           activeTasks
-            .filter(task => !selectedStage || (task.triagem_stage || 1) === selectedStage)
+            .filter(task => !selectedStage || (task.fase_pipeline || 1) === selectedStage)
             .map((task) => (
               <TaskCard 
                 key={task.id}
@@ -200,6 +214,7 @@ function TasksPage() {
                 onDelete={deletePermanent}
                 onClick={setDetailTask}
                 onUpdateStage={updateTriagemStage}
+                onUpdatePriority={(id, p) => updateTask(id, { prioridade: p })}
               />
             ))
         ) : (

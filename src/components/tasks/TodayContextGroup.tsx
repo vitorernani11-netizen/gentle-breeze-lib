@@ -12,6 +12,7 @@ interface TodayContextGroupProps {
   onMoveToToday: (id: string) => void;
   onDelete: (id: string) => void;
   onUpdateStage: (id: string, stage: number) => void;
+  onUpdatePriority?: (id: string, priority: string) => void;
 }
 
 export const TodayContextGroup: React.FC<TodayContextGroupProps> = ({
@@ -22,7 +23,8 @@ export const TodayContextGroup: React.FC<TodayContextGroupProps> = ({
   onComplete,
   onMoveToToday,
   onDelete,
-  onUpdateStage
+  onUpdateStage,
+  onUpdatePriority
 }) => {
   const [isOpen, setIsOpen] = React.useState(true);
 
@@ -63,6 +65,7 @@ export const TodayContextGroup: React.FC<TodayContextGroupProps> = ({
               onDelete={onDelete}
               onClick={onTaskClick}
               onUpdateStage={onUpdateStage}
+              onUpdatePriority={onUpdatePriority}
             />
           ))}
         </div>
