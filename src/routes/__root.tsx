@@ -13,6 +13,7 @@ import { Toaster } from "sonner";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "@/components/AppSidebar";
+import { GlobalAddTask } from "@/components/tasks/GlobalAddTask";
 
 import appCss from "../styles.css?url";
 
