@@ -281,7 +281,7 @@ function Dashboard() {
   };
 
   const checkTodayCheckin = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayStr();
     const history = loadFromLocal(CHECKIN_KEY) || [];
     const done = history.find((h: any) => h.data === today);
     if (!done) setShowCheckin(true);
