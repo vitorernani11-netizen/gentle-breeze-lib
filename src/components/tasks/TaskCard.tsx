@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Trash2, RefreshCw, Bell, Calendar } from 'lucide-react';
+import { Clock, Trash2, RefreshCw, Bell, Calendar, Check } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
