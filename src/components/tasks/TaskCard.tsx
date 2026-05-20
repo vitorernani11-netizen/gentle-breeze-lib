@@ -20,37 +20,48 @@ export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) =>
   
   try {
     const agora = new Date();
-    const anoStr = String(agora.getFullYear());
-    const mesStr = String(agora.getMonth() + 1).padStart(2, '0');
-    const diaStr = String(agora.getDate()).padStart(2, '0');
-    const hojeNum = parseInt(`${anoStr}${mesStr}${diaStr}`, 10);
-
-    // Normaliza a data da tarefa para YYYYMMDD
-    let limpa = dueDateStr.split('T')[0].replace(/[-/]/g, '');
-    if (limpa.length === 8 && dueDateStr.includes('/')) {
-      limpa = `${limpa.substring(4, 8)}${limpa.substring(2, 4)}${limpa.substring(0, 2)}`;
-    }
-    const tarefaNum = parseInt(limpa, 10);
-
-    if (tarefaNum < hojeNum) return true;  // Passado histórico é sempre atrasado
-    if (tarefaNum > hojeNum) return false; // Futuro nunca está atrasado
-
-    // Se for EXATAMENTE o mesmo dia, valida o horário fixo
-    // SALVAGUARDA: Se o horário for nulo ou vazio, assume o fim do dia (23:59) para não dar erro
-    const horaValida = (dueTimeStr && dueTimeStr.trim() !== '') ? dueTimeStr : "23:59";
     
-    if (horaValida.includes(':')) {
-      const parts = horaValida.split(':');
-      const h = parseInt(parts[0], 10);
-      const m = parseInt(parts[1] || '0', 10);
-      const tempoTarefa = (isNaN(h) ? 23 : h) * 100 + (isNaN(m) ? 59 : m);
-      const tempoAtual = agora.getHours() * 100 + agora.getMinutes();
-      return tempoAtual > tempoTarefa;
+    // 1. Limpa e isola a string da data (YYYY-MM-DD ou DD/MM/YYYY)
+    let dataLimpa = dueDateStr.split('T')[0].trim();
+    let ano = agora.getFullYear();
+    let mes = agora.getMonth(); // 0-11
+    let dia = agora.getDate();
+
+    if (dataLimpa.includes('/')) {
+      const parts = dataLimpa.split('/');
+      dia = parseInt(parts[0], 10);
+      mes = parseInt(parts[1], 10) - 1;
+      ano = parseInt(parts[2], 10);
+    } else if (dataLimpa.includes('-')) {
+      const parts = dataLimpa.split('-');
+      // Se começar com 4 dígitos é YYYY-MM-DD, senão é DD-MM-YYYY
+      if (parts[0].length === 4) {
+        ano = parseInt(parts[0], 10);
+        mes = parseInt(parts[1], 10) - 1;
+        dia = parseInt(parts[2], 10);
+      } else {
+        dia = parseInt(parts[0], 10);
+        mes = parseInt(parts[1], 10) - 1;
+        ano = parseInt(parts[2], 10);
+      }
     }
-    
-    return false;
+
+    // 2. Extrai hora e minuto. Se não houver, joga para o fim do dia (23:59)
+    let hora = 23;
+    let minuto = 59;
+    if (dueTimeStr && dueTimeStr.trim() !== '' && dueTimeStr.includes(':')) {
+      const timeParts = dueTimeStr.split(':');
+      hora = parseInt(timeParts[0], 10);
+      minuto = parseInt(timeParts[1], 10);
+    }
+
+    // 3. Monta o objeto de comparação no fuso horário do aparelho
+    const dataTarefa = new Date(ano, mes, dia, hora, minuto, 0, 0);
+
+    // Se o timestamp atual for maior que o da tarefa, ela está ATRASADA (true)
+    return agora.getTime() > dataTarefa.getTime();
   } catch (error) {
-    console.error("Erro na validação de atraso:", error);
+    console.error("Erro crítico no cálculo de atraso:", error);
     return false;
   }
 };
