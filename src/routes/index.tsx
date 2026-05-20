@@ -228,7 +228,7 @@ function Dashboard() {
     });
     const positiveTasks = completedLast7.filter((t: any) => {
       const proj = projectsData.find((p: any) => p.id === t.projeto_id);
-      return proj?.nome === 'Nabih' || proj?.nome === 'Faculdade' || t.tags?.includes('Nabih') || t.tags?.includes('Faculdade');
+      return proj?.nome === 'Vitor Ernani' || proj?.nome === 'Faculdade' || t.tags?.includes('Vitor Ernani') || t.tags?.includes('Faculdade');
     }).length;
     
     const trainingCount = sortedCheckins.filter((s: any) => s.treino_madrugada_realizado).length;
@@ -446,7 +446,7 @@ function Dashboard() {
             'esfiha': { title: '#ESFIHA', color: '#ffaa00', tasks: [] },
             'riolax': { title: '#RIOLAX', color: '#00ccff', tasks: [] },
             'youtube': { title: '#YOUTUBE DARK', color: '#ff0055', tasks: [] },
-            'gestao': { title: '#GESTÃO PESSOAL', color: '#ffffff', tasks: [] },
+            'gestao': { title: '#VITOR ERNANI', color: '#ff00ff', tasks: [] },
             'outros': { title: '#OUTROS PROJETOS', color: '#a1a1aa', tasks: [] }
           };
 
@@ -463,7 +463,7 @@ function Dashboard() {
               groupedTasks.riolax.tasks.push(t);
             } else if (projName.includes('youtube')) {
               groupedTasks.youtube.tasks.push(t);
-            } else if (projName.includes('gestão') || projName.includes('pessoal') || projName.includes('casa')) {
+            } else if (projName.includes('gestão') || projName.includes('pessoal') || projName.includes('casa') || projName.includes('vitor') || projName.includes('ernani')) {
               groupedTasks.gestao.tasks.push(t);
             } else {
               groupedTasks.outros.tasks.push(t);

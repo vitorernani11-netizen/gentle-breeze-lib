@@ -26,7 +26,7 @@ function FinancePage() {
     setRecords(data);
   };
 
-  const calculateBalance = (conta: 'Pessoal' | 'Nabih') => {
+  const calculateBalance = (conta: 'Pessoal' | 'Vitor Ernani') => {
     return records
       .filter(r => r.conta === conta)
       .reduce((acc, curr) => {
@@ -36,7 +36,7 @@ function FinancePage() {
   };
 
   const personalBalance = calculateBalance('Pessoal');
-  const nabihBalance = calculateBalance('Nabih');
+  const nabihBalance = calculateBalance('Vitor Ernani');
 
   const getChartData = () => {
     const data = [];
@@ -47,7 +47,7 @@ function FinancePage() {
       const dateStr = d.toISOString().split('T')[0];
       
       const dayRecords = records.filter(r => 
-        r.conta === 'Nabih' && r.data === dateStr
+        r.conta === 'Vitor Ernani' && r.data === dateStr
       );
 
       const profit = dayRecords.reduce((acc, curr) => {
@@ -90,7 +90,7 @@ function FinancePage() {
 
         <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] flex flex-col gap-1 border-l-4 border-l-white">
           <div className="flex justify-between items-start mb-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Caixa Nabih</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Caixa Vitor Ernani</span>
             <Building2 className="text-zinc-700" size={16} />
           </div>
           <p className={`text-4xl font-black tracking-tighter ${nabihBalance >= 0 ? 'text-white' : 'text-red-500'}`}>
@@ -101,7 +101,7 @@ function FinancePage() {
 
       <section className="mb-12">
         <div className="flex justify-between items-end mb-4 px-1">
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Performance Semanal (Nabih)</h2>
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Performance Semanal (Vitor Ernani)</h2>
         </div>
         <Card className="p-6 bg-zinc-950 border-zinc-900 rounded-[2rem] h-56 flex items-center justify-center">
           <ResponsiveContainer width="100%" height="100%">
@@ -136,7 +136,7 @@ function FinancePage() {
                 </div>
                 <div className="flex flex-col overflow-hidden">
                   <span className="font-bold truncate text-sm">{record.descricao || 'Transação'}</span>
-                  <span className={`text-[9px] font-black uppercase tracking-widest ${record.conta === 'Nabih' ? 'text-zinc-500' : 'text-zinc-600'}`}>
+                  <span className={`text-[9px] font-black uppercase tracking-widest ${record.conta === 'Vitor Ernani' ? 'text-zinc-500' : 'text-zinc-600'}`}>
                     {record.conta} • {record.data && typeof record.data === 'string' && record.data.includes('-') ? new Date(record.data).toLocaleDateString('pt-BR') : 'Sem data'}
                   </span>
                 </div>
