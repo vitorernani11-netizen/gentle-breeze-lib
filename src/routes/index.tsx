@@ -40,7 +40,7 @@ import { cn } from '@/lib/utils';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { EisenhowerMatrix } from '@/components/dashboard/EisenhowerMatrix';
 
-import { TaskCard, isTaskOverdue } from '@/components/tasks/TaskCard';
+import { TaskCard } from '@/components/tasks/TaskCard';
 import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
 import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
 import { TodayContextGroup } from '@/components/tasks/TodayContextGroup';
