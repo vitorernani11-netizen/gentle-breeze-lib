@@ -64,6 +64,7 @@ export const GlobalAddTask: React.FC = () => {
       prioridade: taskData.prioridade || 'P4',
       status: status,
       lembrete: taskData.lembrete,
+      lembretes: taskData.lembretes || [],
       reminders: taskData.reminders || [],
       hora_vencimento: taskData.hora_vencimento
     });
