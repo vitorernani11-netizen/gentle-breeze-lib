@@ -122,27 +122,27 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         </div>
 
         {/* Body: 2 cols on desktop, stack on mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] max-h-[80vh] overflow-y-auto">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] overflow-y-auto">
           {/* Main column */}
-          <div className="p-6 space-y-4 md:border-r border-zinc-800">
+          <div className="p-8 space-y-6 md:border-r border-zinc-900">
             <div>
               <Input
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Título da tarefa"
-                className="border-0 bg-transparent text-xl font-bold uppercase tracking-tight text-white p-0 h-auto shadow-none focus-visible:ring-0"
+                className="border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900"
               />
             </div>
             <Textarea
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
-              placeholder="Descrição"
-              className="border-0 bg-transparent text-sm text-zinc-400 p-0 min-h-[100px] shadow-none focus-visible:ring-0 resize-none"
+              placeholder="Descrição da tarefa..."
+              className="border-0 bg-transparent text-base text-zinc-400 p-0 min-h-[150px] shadow-none focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-900"
             />
           </div>
 
           {/* Sidebar */}
-          <div className="p-4 space-y-4 bg-zinc-950/50">
+          <div className="p-6 space-y-6 bg-zinc-950/50">
             {/* Data */}
             <SidebarRow icon={<Calendar size={14} />} label="Data">
               <input
