@@ -141,7 +141,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               {task.prioridade || 'P4'}
             </button>
             
-            <div className="flex items-center gap-1 border border-zinc-800 bg-zinc-950 p-1 rounded-md">
+            <div className="grid grid-cols-2 gap-1 border border-zinc-800 bg-zinc-950 p-1 rounded-md w-fit">
               {[1, 2, 3, 4].map((stage) => (
                 <button
                   key={stage}
@@ -150,9 +150,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                     onUpdateStage(task.id, stage);
                   }}
                   className={cn(
-                    "w-6 h-6 flex items-center justify-center text-[10px] font-black transition-all rounded-sm",
+                    "w-8 h-6 flex items-center justify-center text-[10px] font-black transition-all rounded-sm",
                     (task.fase_pipeline || 1) === stage 
-                      ? "bg-white text-black scale-110 shadow-lg" 
+                      ? "bg-white text-black scale-105 shadow-lg" 
                       : "bg-black text-zinc-600 hover:text-zinc-400"
                   )}
                 >
