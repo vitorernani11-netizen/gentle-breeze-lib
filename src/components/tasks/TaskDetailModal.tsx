@@ -104,7 +104,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
   const handleLembrete = (v: string) => {
     setLembrete(v);
-    triggerSave({ lembrete: v || null, hora_vencimento: v || null });
+    triggerSave({ hora_vencimento: v || null });
   };
 
   const currentPriority = PRIORITIES.find((p) => p.value === prioridade) || PRIORITIES[3];

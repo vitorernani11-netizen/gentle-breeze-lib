@@ -99,7 +99,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       lembretes: reminders,
       reminders: reminders,
       descricao,
-      hora_vencimento: horaVencISO
+      hora_vencimento: lembrete || format(vencimento, 'HH:mm')
     });
     
     onClose();
@@ -160,10 +160,20 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               <Button variant="ghost" className={cn("h-12 px-4 rounded-2xl border border-zinc-900 bg-zinc-900/50 transition-all", vencimento && "text-[#00ff41] border-[#00ff41]/30 bg-[#00ff41]/5")}>
                 <CalendarIcon size={20} />
                 <span className="ml-2 text-xs font-bold uppercase whitespace-nowrap">
-                  {format(vencimento, "dd MMM", { locale: ptBR })} • {format(vencimento, 'HH:mm')}
+                  {format(vencimento, "dd MMM", { locale: ptBR })}
                 </span>
               </Button>
             </CalendarPopover>
+
+            <div className="flex items-center gap-2 h-12 px-4 rounded-2xl border border-zinc-900 bg-zinc-900/50">
+              <Clock size={20} className="text-zinc-500" />
+              <input
+                type="time"
+                value={lembrete || ''}
+                onChange={(e) => setLembrete(e.target.value)}
+                className="bg-transparent border-none text-xs font-bold text-white uppercase focus:ring-0 p-0 w-16"
+              />
+            </div>
 
             <Popover>
               <PopoverTrigger asChild>
