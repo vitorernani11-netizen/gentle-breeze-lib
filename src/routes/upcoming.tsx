@@ -44,14 +44,22 @@ function UpcomingPage() {
       const upcoming = allTasks
         .filter((t: any) => {
           if (t.status_concluido || t.deletado_por_inercia) return false;
-          if (!t.data_execucao) return false;
+          const dataVenc = t.data_execucao || t.data_vencimento;
+          if (!dataVenc) return false;
           
-          try {
-            const taskDate = parseISO(t.data_execucao);
-            return isAfter(taskDate, today);
-          } catch (e) {
-            return false;
+          const agora = new Date();
+          const anoStr = String(agora.getFullYear());
+          const mesStr = String(agora.getMonth() + 1).padStart(2, '0');
+          const diaStr = String(agora.getDate()).padStart(2, '0');
+          const hojeNum = parseInt(`${anoStr}${mesStr}${diaStr}`, 10);
+
+          let dataLimpa = dataVenc.split('T')[0].replace(/[-/]/g, '');
+          if (dataLimpa.length === 8 && dataVenc.includes('/')) {
+            dataLimpa = `${dataLimpa.substring(4, 8)}${dataLimpa.substring(2, 4)}${dataLimpa.substring(0, 2)}`;
           }
+          const tarefaNum = parseInt(dataLimpa, 10);
+
+          return tarefaNum > hojeNum;
         })
         .sort((a: any, b: any) => {
           const dateA = new Date(a.data_execucao).getTime();
