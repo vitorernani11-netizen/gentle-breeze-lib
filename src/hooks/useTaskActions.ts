@@ -1,6 +1,6 @@
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { toast } from 'sonner';
-import { getWeekdayString, getNextWeekdayDate } from '@/utils/dateHelpers';
+import { getWeekdayString, getNextWeekdayDate, getTodayStr } from '@/utils/dateHelpers';
 import { format } from 'date-fns';
 
 const TASKS_KEY = 'hardware_humano_data'; // Unificando conforme instrução de persistência local
