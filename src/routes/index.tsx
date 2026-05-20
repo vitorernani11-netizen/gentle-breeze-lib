@@ -502,16 +502,12 @@ function Dashboard() {
             
             const atrasada = isTaskOverdue(dataVenc, t.hora_vencimento || t.lembrete);
             
-            // Checa se a data é hoje
-            const now = new Date();
-            const hojeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-            let taskStr = dataVenc.split('T')[0].replace(/\//g, '-');
-            if (taskStr.includes('-') && taskStr.split('-')[0].length !== 4) {
-              const p = taskStr.split('-');
-              taskStr = `${p[2]}-${p[1]}-${p[0]}`;
-            }
+            // Verifica se a string diz "HOJE" ou se o parser bate com a data atual
+            const strTarefa = dataVenc.toUpperCase().trim();
+            const ehHoje = strTarefa === 'HOJE';
             
-            return taskStr === hojeStr || atrasada;
+            // A tela "Hoje" aceita a tarefa se for programada para hoje OU se estiver atrasada
+            return ehHoje || atrasada;
           });
 
           // 2. Separação Absoluta de Abas
