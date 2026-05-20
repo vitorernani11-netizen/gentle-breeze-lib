@@ -406,51 +406,53 @@ function Dashboard() {
       )}
 
       {/* Filtros de Janela de Tempo (Foco TDAH) */}
-      <section className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-        <Button
-          onClick={() => setFilterMode('DELAYED')}
-          className={cn(
-            "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
-            filterMode === 'DELAYED' 
-              ? "bg-[#ff0055] text-black border-[#ff0055]" 
-              : "bg-black text-[#ff0055] border-[#ff0055] hover:bg-[#ff0055]/10"
-          )}
-        >
-          🔥 Atrasadas
-        </Button>
-        <Button
-          onClick={() => setFilterMode('INTERVAL')}
-          className={cn(
-            "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
-            filterMode === 'INTERVAL' 
-              ? "bg-[#00ff41] text-black border-[#00ff41]" 
-              : "bg-black text-[#00ff41] border-[#00ff41] hover:bg-[#00ff41]/10"
-          )}
-        >
-          ⏱️ Intervalo
-        </Button>
-        <Button
-          onClick={() => setFilterMode('POST18')}
-          className={cn(
-            "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
-            filterMode === 'POST18' 
-              ? "bg-[#ff00ff] text-black border-[#ff00ff]" 
-              : "bg-black text-[#ff00ff] border-[#ff00ff] hover:bg-[#ff00ff]/10"
-          )}
-        >
-          🌙 Pós-18h
-        </Button>
-        <Button
-          onClick={() => setFilterMode('ALL')}
-          className={cn(
-            "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
-            filterMode === 'ALL' 
-              ? "bg-white text-black border-white" 
-              : "bg-black text-white border-white hover:bg-white/10"
-          )}
-        >
-          Ver Tudo
-        </Button>
+      <section className="mb-8 sticky top-0 z-40 bg-black/80 backdrop-blur-md pt-2 pb-4 border-b border-zinc-900/50">
+        <div className="flex gap-2 overflow-x-auto pb-2 px-1 scrollbar-none no-scrollbar">
+          <Button
+            onClick={() => setFilterMode('DELAYED')}
+            className={cn(
+              "h-12 px-6 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all shrink-0 shadow-lg active:scale-95",
+              filterMode === 'DELAYED' 
+                ? "bg-[#ff0055] text-white border-none" 
+                : "bg-zinc-900 text-[#ff0055] border border-[#ff0055]/20"
+            )}
+          >
+            🔥 Atrasadas
+          </Button>
+          <Button
+            onClick={() => setFilterMode('INTERVAL')}
+            className={cn(
+              "h-12 px-6 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all shrink-0 shadow-lg active:scale-95",
+              filterMode === 'INTERVAL' 
+                ? "bg-[#00ff41] text-black border-none" 
+                : "bg-zinc-900 text-[#00ff41] border border-[#00ff41]/20"
+            )}
+          >
+            ⏱️ Intervalo
+          </Button>
+          <Button
+            onClick={() => setFilterMode('POST18')}
+            className={cn(
+              "h-12 px-6 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all shrink-0 shadow-lg active:scale-95",
+              filterMode === 'POST18' 
+                ? "bg-[#ff00ff] text-white border-none" 
+                : "bg-zinc-900 text-[#ff00ff] border border-[#ff00ff]/20"
+            )}
+          >
+            🌙 Pós-18h
+          </Button>
+          <Button
+            onClick={() => setFilterMode('ALL')}
+            className={cn(
+              "h-12 px-6 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all shrink-0 shadow-lg active:scale-95",
+              filterMode === 'ALL' 
+                ? "bg-white text-black border-none" 
+                : "bg-zinc-900 text-white border border-white/20"
+            )}
+          >
+            Ver Tudo
+          </Button>
+        </div>
       </section>
 
       <section className="mb-8">
