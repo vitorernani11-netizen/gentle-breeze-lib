@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Trash2 } from 'lucide-react';
+import { Clock, Trash2, RefreshCw } from 'lucide-react';
 import { format as formatDate, parseISO, isBefore, startOfToday, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 
