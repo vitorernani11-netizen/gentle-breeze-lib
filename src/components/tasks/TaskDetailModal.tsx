@@ -103,6 +103,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   };
 
   const handleLembrete = (v: string) => {
+    // Blindagem: salva apenas o texto HH:mm do input type="time"
     setLembrete(v);
     triggerSave({ hora_vencimento: v || null });
   };
