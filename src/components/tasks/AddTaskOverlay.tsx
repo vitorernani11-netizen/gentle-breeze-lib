@@ -207,21 +207,21 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               </PopoverContent>
             </Popover>
 
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl border border-zinc-900 text-zinc-700">
-              <Tag size={18} />
+            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border border-zinc-900 bg-zinc-900/50 text-zinc-700">
+              <Tag size={20} />
             </Button>
             
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl border border-zinc-900 text-zinc-700">
-              <Target size={18} />
+            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border border-zinc-900 bg-zinc-900/50 text-zinc-700">
+              <Target size={20} />
             </Button>
           </div>
 
           <Button 
             onClick={handleSubmit}
             disabled={!titulo.trim()}
-            className="bg-white text-black hover:bg-zinc-200 rounded-full w-12 h-12 p-0 shrink-0 shadow-[0_0_15px_rgba(255,255,255,0.2)] disabled:opacity-20 transition-all"
+            className="bg-white text-black hover:bg-zinc-200 rounded-2xl w-14 h-14 p-0 shrink-0 shadow-[0_0_25px_rgba(255,255,255,0.2)] disabled:opacity-20 transition-all active:scale-90"
           >
-            <Send size={20} className="ml-1" />
+            <Send size={24} className="ml-1" />
           </Button>
         </div>
       </div>
