@@ -123,72 +123,48 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     )}>
       <div className="flex flex-col gap-3">
         {/* Top Unified Line (Ultra-Slim UX) */}
-        <div className="flex flex-row items-center flex-wrap gap-1.5 w-full mb-2">
-          <div className="flex items-center flex-wrap gap-1.5">
-            {/* Priority Selector */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                const priorities = ['P4', 'P1', 'P2', 'P3'];
-                const currentP = task.prioridade || 'P4';
-                const currentIndex = priorities.indexOf(currentP);
-                const nextPriority = priorities[(currentIndex + 1) % priorities.length];
-                if (onUpdatePriority) {
-                  onUpdatePriority(task.id, nextPriority);
-                }
-              }}
-              className={cn(
-                "text-[9px] sm:text-[10px] font-black uppercase px-1.5 py-0.5 border rounded-md transition-all active:scale-95",
-                (task.prioridade === 'P1' || task.prioridade === 1) ? "text-red-500 border-red-500/40 bg-red-500/10" :
-                (task.prioridade === 'P2' || task.prioridade === 2) ? "text-orange-500 border-orange-500/40 bg-orange-500/10" :
-                (task.prioridade === 'P3' || task.prioridade === 3) ? "text-blue-500 border-blue-500/40 bg-blue-500/10" :
-                "text-zinc-500 border-zinc-800 bg-zinc-900/50"
-              )}
-            >
-              {task.prioridade || 'P4'}
-            </button>
-
-            {/* Fixed Time Indicator (Inline) */}
-            {horaExibicao && (
-              <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black text-[#00ff41] bg-[#00ff41]/5 px-1.5 py-0.5 rounded-md border border-[#00ff41]/20">
-                <Clock size={10} strokeWidth={3} />
-                <span>{horaExibicao}</span>
-              </div>
+        <div className="flex flex-row items-center gap-2 w-full mb-2">
+          {/* 1. Prioridade */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const priorities = ['P4', 'P1', 'P2', 'P3'];
+              const currentP = task.prioridade || 'P4';
+              const currentIndex = priorities.indexOf(currentP);
+              const nextPriority = priorities[(currentIndex + 1) % priorities.length];
+              if (onUpdatePriority) {
+                onUpdatePriority(task.id, nextPriority);
+              }
+            }}
+            className={cn(
+              "text-[10px] font-black uppercase px-2 py-0.5 border rounded-md transition-all active:scale-95",
+              (task.prioridade === 'P1' || task.prioridade === 1) ? "text-red-500 border-red-500/40 bg-red-500/10" :
+              (task.prioridade === 'P2' || task.prioridade === 2) ? "text-orange-500 border-orange-500/40 bg-orange-500/10" :
+              (task.prioridade === 'P3' || task.prioridade === 3) ? "text-blue-500 border-blue-500/40 bg-blue-500/10" :
+              "text-zinc-500 border-zinc-800 bg-zinc-900/50"
             )}
+          >
+            {task.prioridade || 'P4'}
+          </button>
+          
+          {/* 2. Horário Fixo Limpo (Sem classe hidden!) */}
+          {horaExibicao && (
+            <div className="flex items-center gap-1 text-[10px] font-black text-[#00ff41] bg-[#00ff41]/5 px-2 py-0.5 rounded-md border border-[#00ff41]/20">
+              <Clock size={10} strokeWidth={3} />
+              <span>{horaExibicao}</span>
+            </div>
+          )}
 
-            {displayDate && (
-              <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black text-zinc-500 bg-zinc-900/50 px-1.5 py-0.5 rounded-md border border-zinc-800">
-                <Calendar size={10} />
-                <span>{displayDate}</span>
-              </div>
-            )}
-          </div>
+          {/* 3. Data */}
+          {displayDate && (
+            <div className="flex items-center gap-1 text-[10px] font-black text-zinc-500 bg-zinc-900/50 px-2 py-0.5 rounded-md border border-zinc-800">
+              <Calendar size={10} />
+              <span>{displayDate}</span>
+            </div>
+          )}
 
-          {/* Minimalist Pipeline 1 | 2 | 3 | 4 */}
-          <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-700 ml-auto">
-            {[1, 2, 3, 4].map((stage, idx) => (
-              <React.Fragment key={stage}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onUpdateStage(task.id, stage);
-                  }}
-                  className={cn(
-                    "transition-all px-0.5",
-                    (task.fase_pipeline || 1) === stage 
-                      ? "text-[#00ff41] font-black" 
-                      : "hover:text-zinc-400"
-                  )}
-                >
-                  {stage}
-                </button>
-                {idx < 3 && <span className="text-zinc-900/50 font-light mx-px">|</span>}
-              </React.Fragment>
-            ))}
-          </div>
-
-          {/* Minimalist Pipeline 1 | 2 | 3 | 4 */}
-          <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-700 ml-auto">
+          {/* 4. Pipeline Restaurada (Alinhada à direita com ml-auto) */}
+          <div className="ml-auto flex items-center gap-1 text-[10px] font-bold text-zinc-700">
             {[1, 2, 3, 4].map((stage, idx) => (
               <React.Fragment key={stage}>
                 <button
