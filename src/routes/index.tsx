@@ -228,7 +228,7 @@ function Dashboard() {
     });
     const positiveTasks = completedLast7.filter((t: any) => {
       const proj = projectsData.find((p: any) => p.id === t.projeto_id);
-      return proj?.nome === 'Nabih' || proj?.nome === 'Faculdade' || t.tags?.includes('Nabih') || t.tags?.includes('Faculdade');
+      return proj?.nome === 'Vitor Ernani' || proj?.nome === 'Faculdade' || t.tags?.includes('Vitor Ernani') || t.tags?.includes('Faculdade');
     }).length;
     
     const trainingCount = sortedCheckins.filter((s: any) => s.treino_madrugada_realizado).length;

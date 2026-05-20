@@ -36,9 +36,7 @@ export function AppSidebar() {
 
   const systemItems = [
     { label: 'Acadêmico', icon: GraduationCap, href: '/academic', color: 'text-purple-400' },
-    { label: 'Purgatório', icon: Skull, href: '/purgatory', color: 'text-red-400' },
     { label: 'Cardápio', icon: Menu, href: '/menu', color: 'text-orange-400' },
-    { label: 'Fracasso', icon: AlertTriangle, href: '/failure-report', color: 'text-red-600' },
   ];
 
   const closeSidebar = () => setOpen(false);
@@ -106,7 +104,7 @@ export function AppSidebar() {
             <div className="flex items-center gap-3 px-2">
               <div className="h-8 w-8 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-900 border border-zinc-800" />
               <div className="flex flex-col">
-                <span className="text-xs font-bold text-white uppercase tracking-tight">Nabih</span>
+                <span className="text-xs font-bold text-white uppercase tracking-tight">Vitor Ernani</span>
                 <span className="text-[10px] text-zinc-500 uppercase font-medium">Hardware Ativo</span>
               </div>
             </div>
