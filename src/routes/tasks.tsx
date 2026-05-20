@@ -280,8 +280,9 @@ function TasksPage() {
 
       <TaskDetailModal
         task={detailTask}
-        open={!!detailTask}
+        open={isDetailOpen}
         onClose={() => {
+          setIsDetailOpen(false);
           setDetailTask(null);
           fetchTasks();
         }}
