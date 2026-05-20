@@ -109,16 +109,16 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-2xl bg-zinc-950 border-t-2 border-x-2 border-white rounded-t-3xl p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-full duration-300"
+        className="w-full max-w-2xl bg-zinc-950 border-t border-x border-white/10 rounded-t-[2.5rem] p-8 pb-12 shadow-[0_-20px_60px_rgba(0,0,0,0.9)] animate-in slide-in-from-bottom-full duration-500 ease-out"
         onKeyDown={(e) => {
           if (e.key === 'Escape') onClose();
           if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit();
         }}
       >
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Nova Captura</span>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
-            <X size={20} />
+        <div className="flex justify-between items-center mb-6">
+          <span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-600">Nova Captura</span>
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center bg-zinc-900 rounded-full text-zinc-500 hover:text-white transition-all active:scale-90">
+            <X size={24} />
           </button>
         </div>
 
@@ -128,7 +128,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
             placeholder="Nome da tarefa"
-            className="bg-transparent border-none text-xl font-bold placeholder:text-zinc-800 focus-visible:ring-0 p-0 h-auto mb-2 relative z-10"
+            className="bg-transparent border-none text-2xl md:text-3xl font-black placeholder:text-zinc-800 focus-visible:ring-0 p-0 h-auto mb-4 relative z-10 uppercase tracking-tighter"
           />
           {nlpData && nlpData.detectedPatterns.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-2">
@@ -149,16 +149,16 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
         />
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
             <CalendarPopover 
               selectedDate={vencimento} 
               onSelect={setVencimento}
               recurrence={recurrence}
               onRecurrenceSelect={setRecurrence}
             >
-              <Button variant="ghost" className={cn("h-9 px-3 rounded-xl border border-zinc-900", vencimento && "text-[#00ff41] border-[#00ff41]/20")}>
-                <CalendarIcon size={18} />
-                <span className="ml-2 text-[10px] font-bold uppercase whitespace-nowrap">
+              <Button variant="ghost" className={cn("h-12 px-4 rounded-2xl border border-zinc-900 bg-zinc-900/50 transition-all", vencimento && "text-[#00ff41] border-[#00ff41]/30 bg-[#00ff41]/5")}>
+                <CalendarIcon size={20} />
+                <span className="ml-2 text-xs font-bold uppercase whitespace-nowrap">
                   {format(vencimento, "dd MMM", { locale: ptBR })} • {format(vencimento, 'HH:mm')}
                 </span>
               </Button>
@@ -168,22 +168,22 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               <Button 
                 variant="ghost" 
                 className={cn(
-                  "h-9 px-3 rounded-xl border border-zinc-900 transition-all", 
-                  reminders.length > 0 && "text-[#00ff41] border-[#00ff41] shadow-[0_0_10px_rgba(0,255,65,0.2)]"
+                  "h-12 px-4 rounded-2xl border border-zinc-900 bg-zinc-900/50 transition-all", 
+                  reminders.length > 0 && "text-[#00ff41] border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.2)] bg-[#00ff41]/5"
                 )}
               >
-                <Clock size={18} />
-                {reminders.length > 0 && <span className="ml-2 text-[10px] font-black tracking-tighter">{reminders.length}</span>}
+                <Clock size={20} />
+                {reminders.length > 0 && <span className="ml-2 text-xs font-black tracking-tighter">{reminders.length}</span>}
               </Button>
             </ReminderManager>
 
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className={cn(
-                  "h-9 w-9 rounded-xl border border-zinc-900",
-                  prioridade === 'P1' && "text-red-500 border-red-500/20",
-                  prioridade === 'P2' && "text-orange-500 border-orange-500/20",
-                  prioridade === 'P3' && "text-blue-500 border-blue-500/20"
+                  "h-12 w-12 rounded-2xl border border-zinc-900 bg-zinc-900/50",
+                  prioridade === 'P1' && "text-red-500 border-red-500/20 bg-red-500/5",
+                  prioridade === 'P2' && "text-orange-500 border-orange-500/20 bg-orange-500/5",
+                  prioridade === 'P3' && "text-blue-500 border-blue-500/20 bg-blue-500/5"
                 )}>
                   <Flag size={18} />
                 </Button>
@@ -207,21 +207,21 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               </PopoverContent>
             </Popover>
 
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl border border-zinc-900 text-zinc-700">
-              <Tag size={18} />
+            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border border-zinc-900 bg-zinc-900/50 text-zinc-700">
+              <Tag size={20} />
             </Button>
             
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl border border-zinc-900 text-zinc-700">
-              <Target size={18} />
+            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border border-zinc-900 bg-zinc-900/50 text-zinc-700">
+              <Target size={20} />
             </Button>
           </div>
 
           <Button 
             onClick={handleSubmit}
             disabled={!titulo.trim()}
-            className="bg-white text-black hover:bg-zinc-200 rounded-full w-12 h-12 p-0 shrink-0 shadow-[0_0_15px_rgba(255,255,255,0.2)] disabled:opacity-20 transition-all"
+            className="bg-white text-black hover:bg-zinc-200 rounded-2xl w-14 h-14 p-0 shrink-0 shadow-[0_0_25px_rgba(255,255,255,0.2)] disabled:opacity-20 transition-all active:scale-90"
           >
-            <Send size={20} className="ml-1" />
+            <Send size={24} className="ml-1" />
           </Button>
         </div>
       </div>

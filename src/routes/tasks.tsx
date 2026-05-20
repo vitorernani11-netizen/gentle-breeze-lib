@@ -154,14 +154,14 @@ function TasksPage() {
 
   return (
     <div className="min-h-screen bg-black text-zinc-100 p-4 sm:p-6 pt-12 pb-20 font-sans">
-      <div className="fixed top-4 right-4 flex items-center gap-2 bg-zinc-900/30 px-3 py-1 rounded-full border border-zinc-800/50 z-50">
-        <WifiOff size={10} className="text-zinc-600" />
-        <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-600">Hardware Local</span>
+      <div className="fixed top-4 right-4 flex items-center gap-2 bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800/50 z-50 backdrop-blur-md">
+        <WifiOff size={12} className="text-zinc-500" />
+        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Offline Local</span>
       </div>
 
       <header className="mb-8 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-black uppercase tracking-tight italic">Entrada</h1>
+          <h1 className="text-3xl font-black uppercase tracking-tighter italic">Entrada</h1>
         </div>
       </header>
 
@@ -170,19 +170,19 @@ function TasksPage() {
 
       {/* Triagem Section */}
       <section className="mb-4">
-        <div className="border border-zinc-900/50 p-2 bg-zinc-950/30 rounded-xl">
-          <div className="flex flex-row overflow-x-auto gap-1.5 pb-0.5 scrollbar-none">
+        <div className="border border-zinc-900 p-3 bg-zinc-950/30 rounded-2xl">
+          <div className="flex flex-row overflow-x-auto gap-2 pb-1 scrollbar-none no-scrollbar">
             {triagemStages.map((stage) => (
               <button 
                 key={stage.num} 
                 onClick={() => setSelectedStage(selectedStage === stage.num ? null : stage.num)}
                 className={cn(
-                  "border border-zinc-900/50 px-3 py-1.5 flex items-center gap-1.5 transition-all rounded-lg shrink-0", 
-                  selectedStage === stage.num ? "bg-zinc-100 text-black border-white" : "hover:bg-zinc-900/30"
+                  "border border-zinc-800 px-5 py-3 flex items-center gap-3 transition-all rounded-xl shrink-0 active:scale-95 shadow-lg", 
+                  selectedStage === stage.num ? "bg-white text-black border-white" : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"
                 )}
               >
-                <span className={cn("text-[8px] font-black italic", selectedStage === stage.num ? "opacity-100" : "opacity-30")}>#{stage.num}</span>
-                <span className="font-bold uppercase tracking-tight text-[8px] whitespace-nowrap">{stage.label}</span>
+                <span className={cn("text-xs font-black italic", selectedStage === stage.num ? "opacity-100" : "opacity-30")}>#{stage.num}</span>
+                <span className="font-black uppercase tracking-tight text-[11px] whitespace-nowrap">{stage.label}</span>
               </button>
             ))}
           </div>

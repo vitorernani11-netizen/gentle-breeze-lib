@@ -390,67 +390,69 @@ function Dashboard() {
       "min-h-screen p-4 pt-12 pb-16 max-w-xl mx-auto transition-colors duration-1000",
       isRecoveryMode ? "bg-zinc-950 text-zinc-400 grayscale-[0.8]" : "bg-black text-zinc-100"
     )}>
-      <div className="fixed top-4 right-4 flex items-center gap-2 bg-zinc-900/30 px-3 py-1 rounded-full border border-zinc-800/50 z-50">
-        <WifiOff size={10} className="text-zinc-600" />
-        <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-600">Local</span>
+      <div className="fixed top-4 right-4 flex items-center gap-2 bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800/50 z-50 backdrop-blur-md">
+        <WifiOff size={12} className="text-zinc-500" />
+        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Offline Local</span>
       </div>
 
       {isLocked && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
           <PowerOff size={48} className="text-zinc-900 mb-6 animate-pulse" />
-          <h2 className="text-xl font-black tracking-tighter uppercase mb-2">Hardware exausto</h2>
-          <p className="text-zinc-600 font-bold uppercase tracking-widest text-[10px] max-w-xs">
-            PROJETO X: DESLIGAMENTO OBRIGATÓRIO.
+          <h2 className="text-2xl font-black tracking-tighter uppercase mb-2">Hardware exausto</h2>
+          <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs max-w-xs leading-relaxed">
+            PROJETO X: DESLIGAMENTO OBRIGATÓRIO PARA PRESERVAÇÃO.
           </p>
         </div>
       )}
 
       {/* Filtros de Janela de Tempo (Foco TDAH) */}
-      <section className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-        <Button
-          onClick={() => setFilterMode('DELAYED')}
-          className={cn(
-            "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
-            filterMode === 'DELAYED' 
-              ? "bg-[#ff0055] text-black border-[#ff0055]" 
-              : "bg-black text-[#ff0055] border-[#ff0055] hover:bg-[#ff0055]/10"
-          )}
-        >
-          🔥 Atrasadas
-        </Button>
-        <Button
-          onClick={() => setFilterMode('INTERVAL')}
-          className={cn(
-            "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
-            filterMode === 'INTERVAL' 
-              ? "bg-[#00ff41] text-black border-[#00ff41]" 
-              : "bg-black text-[#00ff41] border-[#00ff41] hover:bg-[#00ff41]/10"
-          )}
-        >
-          ⏱️ Intervalo
-        </Button>
-        <Button
-          onClick={() => setFilterMode('POST18')}
-          className={cn(
-            "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
-            filterMode === 'POST18' 
-              ? "bg-[#ff00ff] text-black border-[#ff00ff]" 
-              : "bg-black text-[#ff00ff] border-[#ff00ff] hover:bg-[#ff00ff]/10"
-          )}
-        >
-          🌙 Pós-18h
-        </Button>
-        <Button
-          onClick={() => setFilterMode('ALL')}
-          className={cn(
-            "h-10 px-4 rounded-none border-2 font-black uppercase text-[10px] tracking-widest transition-all",
-            filterMode === 'ALL' 
-              ? "bg-white text-black border-white" 
-              : "bg-black text-white border-white hover:bg-white/10"
-          )}
-        >
-          Ver Tudo
-        </Button>
+      <section className="mb-8 sticky top-0 z-40 bg-black/80 backdrop-blur-md pt-2 pb-4 border-b border-zinc-900/50">
+        <div className="flex gap-2 overflow-x-auto pb-2 px-1 scrollbar-none no-scrollbar">
+          <Button
+            onClick={() => setFilterMode('DELAYED')}
+            className={cn(
+              "h-12 px-6 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all shrink-0 shadow-lg active:scale-95",
+              filterMode === 'DELAYED' 
+                ? "bg-[#ff0055] text-white border-none" 
+                : "bg-zinc-900 text-[#ff0055] border border-[#ff0055]/20"
+            )}
+          >
+            🔥 Atrasadas
+          </Button>
+          <Button
+            onClick={() => setFilterMode('INTERVAL')}
+            className={cn(
+              "h-12 px-6 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all shrink-0 shadow-lg active:scale-95",
+              filterMode === 'INTERVAL' 
+                ? "bg-[#00ff41] text-black border-none" 
+                : "bg-zinc-900 text-[#00ff41] border border-[#00ff41]/20"
+            )}
+          >
+            ⏱️ Intervalo
+          </Button>
+          <Button
+            onClick={() => setFilterMode('POST18')}
+            className={cn(
+              "h-12 px-6 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all shrink-0 shadow-lg active:scale-95",
+              filterMode === 'POST18' 
+                ? "bg-[#ff00ff] text-white border-none" 
+                : "bg-zinc-900 text-[#ff00ff] border border-[#ff00ff]/20"
+            )}
+          >
+            🌙 Pós-18h
+          </Button>
+          <Button
+            onClick={() => setFilterMode('ALL')}
+            className={cn(
+              "h-12 px-6 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all shrink-0 shadow-lg active:scale-95",
+              filterMode === 'ALL' 
+                ? "bg-white text-black border-none" 
+                : "bg-zinc-900 text-white border border-white/20"
+            )}
+          >
+            Ver Tudo
+          </Button>
+        </div>
       </section>
 
       <section className="mb-8">

@@ -42,7 +42,7 @@ export function AppSidebar() {
   const closeSidebar = () => setOpen(false);
 
   return (
-    <div className="fixed top-4 left-4 z-50">
+    <div className="fixed top-4 left-4 z-50 hidden md:block">
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 rounded-full h-12 w-12 hover:bg-zinc-800 transition-none">

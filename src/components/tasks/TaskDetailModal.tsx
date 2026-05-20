@@ -9,7 +9,8 @@ import {
   Flag,
   Tag,
   Bell,
-    Save
+  Save,
+  X
   } from 'lucide-react';
 import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
 import { cn } from '@/lib/utils';
@@ -107,96 +108,98 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
-        className="max-w-4xl w-[95vw] p-0 bg-black border-2 border-white rounded-2xl overflow-hidden gap-0"
+        className="max-w-4xl w-full sm:w-[95vw] h-full sm:h-auto sm:max-h-[85vh] p-0 bg-black border-0 sm:border-2 border-white rounded-none sm:rounded-3xl overflow-hidden gap-0"
         onInteractOutside={onClose}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-2">
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-            <span>Entrada</span>
+        <div className="flex items-center justify-between border-b border-zinc-900 px-6 py-4">
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-zinc-600">
+            <span>Entrada / Detalhes</span>
           </div>
+          <button onClick={onClose} className="sm:hidden text-zinc-500">
+            <X size={24} />
+          </button>
         </div>
 
         {/* Body: 2 cols on desktop, stack on mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] max-h-[80vh] overflow-y-auto">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] overflow-y-auto">
           {/* Main column */}
-          <div className="p-6 space-y-4 md:border-r border-zinc-800">
+          <div className="p-8 space-y-6 md:border-r border-zinc-900">
             <div>
               <Input
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Título da tarefa"
-                className="border-0 bg-transparent text-xl font-bold uppercase tracking-tight text-white p-0 h-auto shadow-none focus-visible:ring-0"
+                className="border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900"
               />
             </div>
             <Textarea
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
-              placeholder="Descrição"
-              className="border-0 bg-transparent text-sm text-zinc-400 p-0 min-h-[100px] shadow-none focus-visible:ring-0 resize-none"
+              placeholder="Descrição da tarefa..."
+              className="border-0 bg-transparent text-base text-zinc-400 p-0 min-h-[150px] shadow-none focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-900"
             />
           </div>
 
           {/* Sidebar */}
-          <div className="p-4 space-y-4 bg-zinc-950/50">
+          <div className="p-6 space-y-6 bg-zinc-950/50">
             {/* Data */}
-            <SidebarRow icon={<Calendar size={14} />} label="Data">
+            <SidebarRow icon={<Calendar size={18} />} label="Vencimento">
               <input
                 type="date"
                 value={dataExecucao}
                 onChange={(e) => handleDate(e.target.value)}
-                className="bg-transparent border border-zinc-800 rounded-md px-2 py-1 text-xs text-white w-full focus:outline-none focus:border-white"
+                className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg"
               />
             </SidebarRow>
 
             {/* Prioridade */}
-            <SidebarRow icon={<Flag size={14} className={currentPriority.color.split(' ')[0]} />} label="Prioridade">
-              <div className="flex gap-1">
+            <SidebarRow icon={<Flag size={18} className={currentPriority.color.split(' ')[0]} />} label="Prioridade">
+              <div className="grid grid-cols-4 gap-2">
                 {PRIORITIES.map((p) => (
                   <button
                     key={p.value}
                     onClick={() => handlePriority(p.value)}
                     className={cn(
-                      'flex-1 text-[10px] font-bold py-1 border rounded-md transition-all',
+                      'flex flex-col items-center justify-center gap-1 h-14 border rounded-xl transition-all active:scale-90',
                       prioridade === p.value
-                        ? `${p.color} bg-white/5`
-                        : 'border-zinc-800 text-zinc-600 hover:text-zinc-300'
+                        ? `${p.color} bg-white/5 border-white/20`
+                        : 'border-zinc-900 bg-zinc-900/30 text-zinc-600 hover:text-zinc-300'
                     )}
                   >
-                    {p.label}
+                    <span className="text-xs font-black">{p.label}</span>
                   </button>
                 ))}
               </div>
             </SidebarRow>
 
             {/* Lembrete */}
-            <SidebarRow icon={<Bell size={14} />} label="Lembrete">
+            <SidebarRow icon={<Bell size={18} />} label="Horário">
               <input
                 type="time"
                 value={lembrete || ''}
                 onChange={(e) => handleLembrete(e.target.value)}
-                className="bg-transparent border border-zinc-800 rounded-md px-2 py-1 text-xs text-white w-full focus:outline-none focus:border-white"
+                className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg"
               />
             </SidebarRow>
 
             {/* Etiquetas (placeholder) */}
-            <SidebarRow icon={<Tag size={14} />} label="Etiquetas">
-              <span className="text-[10px] text-zinc-600 italic">em breve</span>
+            <SidebarRow icon={<Tag size={18} />} label="Tags">
+              <div className="bg-zinc-900/30 border border-dashed border-zinc-800 rounded-xl p-4 text-center">
+                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-700">Adicionar tags</span>
+              </div>
             </SidebarRow>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="border-t border-zinc-800 px-4 py-3 flex items-center justify-end bg-zinc-950/30">
+        <div className="border-t border-zinc-900 px-6 py-6 flex items-center justify-end bg-black">
           {isDirty && (
             <button
               onClick={() => {
                 persistToHardware();
                 setIsDirty(false);
-                // Força o React a remontar a árvore de dados passando o novo array reativo
                 if (typeof onUpdate === 'function') {
-                  // Fallback para o comportamento anterior se precisar de id e objeto, 
-                  // mas seguindo a instrução de tentar chamar onUpdate() puro primeiro
                   try {
                     (onUpdate as any)();
                   } catch (e) {
@@ -205,14 +208,13 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 } else if (typeof (window as any).onRefresh === 'function') {
                   (window as any).onRefresh();
                 } else {
-                  // Fallback: se o componente pai passar um gerenciador de estado direto
-                  window.location.reload(); // Último caso de salvaguarda caso o hook não esteja exposto
+                  window.location.reload();
                 }
               }}
-              className="bg-[#00ff41] text-black font-black px-4 py-1.5 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2 uppercase tracking-tighter text-[10px] italic animate-in fade-in slide-in-from-right-4 duration-300"
+              className="w-full sm:w-auto bg-[#00ff41] text-black font-black px-8 py-4 rounded-2xl border-b-4 border-black shadow-2xl active:translate-y-1 active:border-b-0 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm italic"
             >
-              <Save size={12} strokeWidth={3} />
-              Salvar
+              <Save size={20} strokeWidth={3} />
+              Confirmar Alterações
             </button>
           )}
         </div>
@@ -231,8 +233,8 @@ function SidebarRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-zinc-500">
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-zinc-600 ml-1">
         {icon}
         <span>{label}</span>
       </div>
