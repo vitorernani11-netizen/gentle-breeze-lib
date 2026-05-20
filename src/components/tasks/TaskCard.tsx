@@ -135,8 +135,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             </h3>
             
             <div className="flex items-center flex-wrap gap-2">
+              {displayDate && (
+                <span className="text-[11px] font-black text-white/70 flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
+                  <Calendar size={10} /> {displayDate}
+                </span>
+              )}
               {displayTime && (
-                <span className="text-[11px] font-black text-[#00ff41] flex items-center gap-1 bg-[#00ff41]/5 px-2 py-0.5 rounded-md">
+                <span className="text-[11px] font-black text-[#00ff41] flex items-center gap-1 bg-[#00ff41]/5 px-2 py-0.5 rounded-md border border-[#00ff41]/20">
                   <Clock size={10} /> {displayTime}
                 </span>
               )}
