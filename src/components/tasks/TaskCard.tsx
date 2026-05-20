@@ -209,15 +209,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           >
             Concluir
           </Button>
-          <div className="flex gap-2">
-            <Button 
-              aria-label="Hoje"
-              size="sm"
-              className="flex-1 bg-zinc-950 text-[#00ff41] hover:bg-[#00ff41] hover:text-black text-[10px] font-black uppercase rounded-lg border border-[#00ff41]/30 h-10 px-3 transition-all active:scale-95"
-              onClick={() => onMoveToToday(task.id)}
-            >
-              Hoje
-            </Button>
+          <div className="flex justify-end">
             <Button 
               aria-label="Deletar"
               size="icon"
