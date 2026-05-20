@@ -233,8 +233,8 @@ function SidebarRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-zinc-500">
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-zinc-600 ml-1">
         {icon}
         <span>{label}</span>
       </div>
