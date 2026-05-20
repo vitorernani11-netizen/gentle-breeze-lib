@@ -112,7 +112,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
-        className="max-w-4xl w-full sm:w-[95vw] h-[100dvh] sm:h-auto sm:max-h-[85vh] p-0 bg-black border-0 sm:border-2 border-white rounded-none sm:rounded-3xl overflow-hidden gap-0 flex flex-col"
+        className=\"max-w-4xl w-full sm:w-[95vw] h-[100dvh] sm:h-auto sm:max-h-[90vh] p-0 bg-black border-0 sm:border-2 border-white rounded-none sm:rounded-3xl overflow-hidden gap-0 flex flex-col\"
         onInteractOutside={onClose}
       >
         {/* Header */}
