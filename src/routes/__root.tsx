@@ -64,12 +64,11 @@ function RootComponent() {
   const { checkAndRouteRecurringTasks } = useTaskActions();
 
   useEffect(() => {
-    checkAndRouteRecurringTasks();
-  }, []);
     const checkAuth = async () => {
       // Forçamos a sessão como true para o único usuário do app
       setHasSession(true);
       setIsAuthChecking(false);
+      checkAndRouteRecurringTasks();
     };
 
     checkAuth();
