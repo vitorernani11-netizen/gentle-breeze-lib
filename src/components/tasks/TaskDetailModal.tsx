@@ -9,7 +9,8 @@ import {
   Flag,
   Tag,
   Bell,
-    Save
+  Save,
+  X
   } from 'lucide-react';
 import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
 import { cn } from '@/lib/utils';
