@@ -21,36 +21,45 @@ export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) =>
   try {
     const agora = new Date();
     
-    // 1. Isola apenas a parte da data (remove T00:00:00... se houver)
-    const apenasData = dueDateStr.split('T')[0].trim();
+    // Se a string contiver a palavra "HOJE" de forma literal, tratamos como o dia atual
+    const strLimpa = dueDateStr.toUpperCase().trim();
     
     let ano = agora.getFullYear();
     let mes = agora.getMonth(); // 0-11
     let dia = agora.getDate();
 
-    // 2. Extrai ano, mês e dia tratando padrões de barra ou hífen
-    if (apenasData.includes('/')) {
-      const parts = apenasData.split('/');
-      dia = parseInt(parts[0], 10);
-      mes = parseInt(parts[1], 10) - 1;
-      ano = parseInt(parts[2], 10);
-    } else if (apenasData.includes('-')) {
-      const parts = apenasData.split('-');
-      if (parts[0].length === 4) {
-        ano = parseInt(parts[0], 10);
-        mes = parseInt(parts[1], 10) - 1;
-        dia = parseInt(parts[2], 10);
-      } else {
+    if (strLimpa !== 'HOJE' && strLimpa !== '') {
+      // Isola a parte da data caso venha no formato ISO completo (remove o "T00:00...")
+      const apenasData = dueDateStr.split('T')[0].trim();
+      
+      if (apenasData.includes('/')) {
+        // Formato BR: DD/MM ou DD/MM/YYYY
+        const parts = apenasData.split('/');
         dia = parseInt(parts[0], 10);
         mes = parseInt(parts[1], 10) - 1;
-        ano = parseInt(parts[2], 10);
+        if (parts[2]) {
+          ano = parseInt(parts[2], 10);
+        }
+      } else if (apenasData.includes('-')) {
+        const parts = apenasData.split('-');
+        if (parts[0].length === 4) {
+          // Formato ISO: YYYY-MM-DD
+          ano = parseInt(parts[0], 10);
+          mes = parseInt(parts[1], 10) - 1;
+          dia = parseInt(parts[2], 10);
+        } else {
+          // Formato alternativo: DD-MM-YYYY
+          dia = parseInt(parts[0], 10);
+          mes = parseInt(parts[1], 10) - 1;
+          ano = parseInt(parts[2], 10);
+        }
       }
     }
 
-    // Validação de segurança para evitar NaN
+    // Validação final de segurança para evitar corrupção de dados (NaN)
     if (isNaN(ano) || isNaN(mes) || isNaN(dia)) return false;
 
-    // 3. Extrai hora e minuto. Padrão 23:59 se não houver horário fixo
+    // Processamento do Horário Fixo. Se nulo ou vazio, assume o último minuto do dia (23:59)
     let hora = 23;
     let minuto = 59;
     if (dueTimeStr && dueTimeStr.trim() !== '' && dueTimeStr.includes(':')) {
@@ -61,14 +70,13 @@ export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) =>
       if (!isNaN(mParsed)) minuto = mParsed;
     }
 
-    // 4. Monta os dois objetos de tempo usando o fuso horário LOCAL do aparelho
+    // Monta o timestamp de comparação baseado estritamente no hardware do usuário
     const tempoTarefa = new Date(ano, mes, dia, hora, minuto, 0, 0).getTime();
     const tempoAtual = agora.getTime();
 
-    // Se o relógio do aparelho passou do tempo da tarefa, ela está ATRASADA
     return tempoAtual > tempoTarefa;
   } catch (error) {
-    console.error("Erro no cálculo de atraso:", error);
+    console.error("Erro crítico no parser de data:", error);
     return false;
   }
 };
