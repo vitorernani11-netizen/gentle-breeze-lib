@@ -149,8 +149,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 <RefreshCw className="w-4 h-4 text-[#00ff41] animate-none" />
               )}
               {isOverdue && (
-                <span className="text-[9px] font-black uppercase text-red-500 px-2 py-0.5 border border-red-500/30 bg-red-500/5 rounded-full">
-                  Atrasada
+                <span className="bg-red-900/80 text-red-200 text-[9px] px-2 py-0.5 rounded font-black border border-red-600 animate-pulse uppercase">
+                  ATRASADA
                 </span>
               )}
             </h3>
