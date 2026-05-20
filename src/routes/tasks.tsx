@@ -135,8 +135,12 @@ function TasksPage() {
 
       // Validação extra de datas
       const validTasks = allTasks.filter((t: any) => {
-        const dateString = String(t.data_execucao || '');
-        const isDateValid = dateString ? /^\d{4}-\d{2}-\d{2}$/.test(dateString) || !isNaN(new Date(dateString).getTime()) : true;
+        const dataVenc = t.data_execucao || t.data_vencimento;
+        if (!dataVenc) return true;
+        
+        const obj = normalizarParaObjetoDate(dataVenc, t.hora_vencimento || t.lembrete);
+        const isDateValid = !!obj || dataVenc.toUpperCase().trim() === 'HOJE';
+        
         if (!isDateValid) {
           console.warn('[Hardware:Tasks] Tarefa ignorada por data inválida:', t);
         }
