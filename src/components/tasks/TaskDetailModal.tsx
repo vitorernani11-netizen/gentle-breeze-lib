@@ -176,41 +176,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               </button>
             </SidebarRow>
 
-            {/* Etapa da Metodologia */}
-            <SidebarRow icon={<Plus size={18} />} label="Etapa Atual">
-              <div className="grid grid-cols-2 gap-3 p-4 border border-zinc-800 bg-black/40 w-full rounded-2xl">
-                {[
-                  { id: 1, label: '01. CLASSIFICAÇÃO', desc: 'Identificação bruta do tipo de demanda.' },
-                  { id: 2, label: '02. FRACIONAR', desc: 'Quebra em micro-ações acionáveis.' },
-                  { id: 3, label: '03. PLANEJAMENTO', desc: 'Timeboxing e prioridade P1-P4.' },
-                  { id: 4, label: '04. EXECUÇÃO', desc: 'Foco absoluto no Agora.' }
-                ].map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => triggerSave({ fase_pipeline: s.id })}
-                    className={cn(
-                      "p-3 flex flex-col gap-1 rounded-none transition-all text-left border",
-                      (task.fase_pipeline || 1) === s.id
-                        ? "border-[#00ff41] bg-[#00ff41]/5 text-[#00ff41]"
-                        : "border-zinc-800 bg-zinc-900/20 opacity-60 text-zinc-500"
-                    )}
-                  >
-                    <h3 className={cn(
-                      "font-bold text-[10px] uppercase tracking-wider",
-                      (task.fase_pipeline || 1) === s.id ? "text-[#00ff41]" : "text-zinc-400"
-                    )}>
-                      {s.label}
-                    </h3>
-                    <p className={cn(
-                      "text-[9px] leading-tight",
-                      (task.fase_pipeline || 1) === s.id ? "text-zinc-400" : "text-zinc-500"
-                    )}>
-                      {s.desc}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            </SidebarRow>
 
             {/* Horário Fixo da Atividade */}
             <div className="pb-4 border-b border-zinc-900/50">
