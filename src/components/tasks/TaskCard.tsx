@@ -1,8 +1,8 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Trash2, RefreshCw, Bell } from 'lucide-react';
-import { format as formatDate, parseISO } from 'date-fns';
+import { Clock, Trash2, RefreshCw, Bell, Calendar } from 'lucide-react';
+import { format as formatDate, parseISO, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface TaskCardProps {
