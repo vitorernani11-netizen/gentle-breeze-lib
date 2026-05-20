@@ -2,14 +2,13 @@ import { useEffect, useState, useRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
+
 import {
   Calendar,
   Clock,
   Flag,
   Tag,
   Bell,
-    Check,
     Save
   } from 'lucide-react';
 import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
@@ -35,7 +34,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const [prioridade, setPrioridade] = useState<string>('P4');
   const [dataExecucao, setDataExecucao] = useState('');
   const [lembrete, setLembrete] = useState('');
-  const [savedFlash, setSavedFlash] = useState(false);
+  
   const [isDirty, setIsDirty] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const initRef = useRef(false);
@@ -69,8 +68,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const triggerSave = (updates: Record<string, any>) => {
     if (!task?.id) return;
     onUpdate(task.id, updates);
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 1200);
   };
 
   // Debounced save for text fields
@@ -186,17 +183,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         </div>
 
         {/* Footer */}
-        <div className="border-t border-zinc-800 px-4 py-3 flex items-center justify-between bg-zinc-950/30">
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
-            {savedFlash ? (
-              <span className="text-[#00ff41] flex items-center gap-1 animate-in fade-in">
-                <Check size={12} /> Sincronizado
-              </span>
-            ) : (
-              <span className="text-zinc-700">Cache em memória</span>
-            )}
-          </div>
-
+        <div className="border-t border-zinc-800 px-4 py-3 flex items-center justify-end bg-zinc-950/30">
           {isDirty && (
             <button
               onClick={() => {
