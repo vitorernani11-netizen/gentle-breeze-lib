@@ -144,48 +144,50 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           {/* Sidebar */}
           <div className="p-6 space-y-6 bg-zinc-950/50">
             {/* Data */}
-            <SidebarRow icon={<Calendar size={14} />} label="Data">
+            <SidebarRow icon={<Calendar size={18} />} label="Vencimento">
               <input
                 type="date"
                 value={dataExecucao}
                 onChange={(e) => handleDate(e.target.value)}
-                className="bg-transparent border border-zinc-800 rounded-md px-2 py-1 text-xs text-white w-full focus:outline-none focus:border-white"
+                className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg"
               />
             </SidebarRow>
 
             {/* Prioridade */}
-            <SidebarRow icon={<Flag size={14} className={currentPriority.color.split(' ')[0]} />} label="Prioridade">
-              <div className="flex gap-1">
+            <SidebarRow icon={<Flag size={18} className={currentPriority.color.split(' ')[0]} />} label="Prioridade">
+              <div className="grid grid-cols-4 gap-2">
                 {PRIORITIES.map((p) => (
                   <button
                     key={p.value}
                     onClick={() => handlePriority(p.value)}
                     className={cn(
-                      'flex-1 text-[10px] font-bold py-1 border rounded-md transition-all',
+                      'flex flex-col items-center justify-center gap-1 h-14 border rounded-xl transition-all active:scale-90',
                       prioridade === p.value
-                        ? `${p.color} bg-white/5`
-                        : 'border-zinc-800 text-zinc-600 hover:text-zinc-300'
+                        ? `${p.color} bg-white/5 border-white/20`
+                        : 'border-zinc-900 bg-zinc-900/30 text-zinc-600 hover:text-zinc-300'
                     )}
                   >
-                    {p.label}
+                    <span className="text-xs font-black">{p.label}</span>
                   </button>
                 ))}
               </div>
             </SidebarRow>
 
             {/* Lembrete */}
-            <SidebarRow icon={<Bell size={14} />} label="Lembrete">
+            <SidebarRow icon={<Bell size={18} />} label="Horário">
               <input
                 type="time"
                 value={lembrete || ''}
                 onChange={(e) => handleLembrete(e.target.value)}
-                className="bg-transparent border border-zinc-800 rounded-md px-2 py-1 text-xs text-white w-full focus:outline-none focus:border-white"
+                className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg"
               />
             </SidebarRow>
 
             {/* Etiquetas (placeholder) */}
-            <SidebarRow icon={<Tag size={14} />} label="Etiquetas">
-              <span className="text-[10px] text-zinc-600 italic">em breve</span>
+            <SidebarRow icon={<Tag size={18} />} label="Tags">
+              <div className="bg-zinc-900/30 border border-dashed border-zinc-800 rounded-xl p-4 text-center">
+                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-700">Adicionar tags</span>
+              </div>
             </SidebarRow>
           </div>
         </div>
