@@ -12,7 +12,7 @@ const VAULT_KEY = 'hardware_humano_vault';
 
 // Definindo os 5 Projetos Core
 const CORE_PROJECTS = [
-  { id: 'pessoal', nome: 'GESTÃO / PESSOAL', cor: '#00ff41' }, // Verde Neon
+  { id: 'pessoal', nome: 'VITOR ERNANI', cor: '#ff00ff' }, // Magenta (como solicitado para ident. pessoal)
   { id: 'faculdade', nome: 'FACULDADE', cor: '#3b82f6' },      // Azul
   { id: 'riolax', nome: 'RIOLAX', cor: '#ff00ff' },           // Magenta
   { id: 'esfiharia', nome: 'ESFIHARIA', cor: '#f97316' },     // Laranja
