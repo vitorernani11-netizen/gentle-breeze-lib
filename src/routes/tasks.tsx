@@ -37,7 +37,7 @@ export const Route = createFileRoute('/tasks')({
 function TasksPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTasks, setActiveTasks] = useState<any[]>([]);
+  const [tarefasOrdenadasDaEntrada, setTarefasOrdenadasDaEntrada] = useState<any[]>([]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
   const [showCompleted, setShowCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -96,7 +96,7 @@ function TasksPage() {
         return t;
       });
 
-      const active = mappedTasks.filter((t: any) => 
+      const tarefasOrdenadasDaEntrada = mappedTasks.filter((t: any) => 
         t && !t.status_concluido
       ).sort((a: any, b: any) => {
         const dataA = a.data_execucao || a.data_vencimento;
@@ -132,7 +132,7 @@ function TasksPage() {
         return dateB - dateA;
       });
       
-      setActiveTasks(active);
+      setTarefasOrdenadasDaEntrada(tarefasOrdenadasDaEntrada);
       setCompletedTasks(completed);
       setErrorState(null);
     } catch (error: any) {
@@ -143,7 +143,6 @@ function TasksPage() {
       setLoading(false);
     }
   };
-
 
 
   if (loading) {
@@ -211,16 +210,16 @@ function TasksPage() {
       </section>
 
       <div className="grid grid-cols-1 gap-0 border-t border-white/10">
-        {activeTasks.length > 0 ? (
-          activeTasks
-            .filter(task => {
+        {tarefasOrdenadasDaEntrada.length > 0 ? (
+          tarefasOrdenadasDaEntrada
+            .filter((task: any) => {
               if (!selectedStage) return true;
               if (selectedStage === 1) {
                 return task.fase_pipeline === 1 || task.fase_pipeline === null || task.fase_pipeline === undefined;
               }
               return task.fase_pipeline === selectedStage;
             })
-            .map((task) => (
+            .map((task: any) => (
               <TaskCard 
                 key={task.id}
                 task={task}
