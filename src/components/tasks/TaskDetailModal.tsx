@@ -38,6 +38,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const [prioridade, setPrioridade] = useState<string>('P4');
   const [dataExecucao, setDataExecucao] = useState('');
   const [lembrete, setLembrete] = useState('');
+  const [lembretesState, setLembretesState] = useState<Reminder[]>([]);
   
   const [isDirty, setIsDirty] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -51,6 +52,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
       setPrioridade(task.prioridade || 'P4');
       setDataExecucao(task.data_execucao || '');
       setLembrete(task.lembrete || '');
+      setLembretesState(task.lembretes || []);
       // mark as initialized after state apply
       setTimeout(() => { initRef.current = true; }, 0);
     }
@@ -191,11 +193,12 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             {/* Lembretes Push Inline */}
             <div className="pt-2" id="lembretes-section">
               <ReminderManager 
-                reminders={task.lembretes || []} 
+                reminders={lembretesState} 
                 onUpdate={(newReminders) => {
+                  setLembretesState(newReminders);
                   triggerSave({ lembretes: newReminders });
                   // Solicita permissão ao adicionar lembrete se necessário
-                  if (newReminders.length > (task.lembretes?.length || 0)) {
+                  if (newReminders.length > (lembretesState.length || 0)) {
                     if ('Notification' in window && Notification.permission === 'default') {
                       Notification.requestPermission();
                     }
