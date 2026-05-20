@@ -96,7 +96,7 @@ function TasksPage() {
         return t;
       });
 
-      const active = mappedTasks.filter((t: any) => 
+      const tarefasOrdenadasDaEntrada = mappedTasks.filter((t: any) => 
         t && !t.status_concluido
       ).sort((a: any, b: any) => {
         const dataA = a.data_execucao || a.data_vencimento;
@@ -132,7 +132,7 @@ function TasksPage() {
         return dateB - dateA;
       });
       
-      setActiveTasks(active);
+      setTarefasOrdenadasDaEntrada(tarefasOrdenadasDaEntrada);
       setCompletedTasks(completed);
       setErrorState(null);
     } catch (error: any) {
@@ -143,7 +143,6 @@ function TasksPage() {
       setLoading(false);
     }
   };
-
 
 
   if (loading) {
