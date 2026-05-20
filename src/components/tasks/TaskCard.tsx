@@ -15,6 +15,53 @@ interface TaskCardProps {
   onUpdatePriority?: (id: string, priority: string) => void;
 }
 
+export const isTaskOverdue = (dueDate: string, dueTime?: string | null) => {
+  if (!dueDate) return false;
+  
+  let dateOnly = dueDate.split('T')[0];
+  let ano, mes, dia;
+
+  if (dateOnly.includes('/')) {
+    const parts = dateOnly.split('/');
+    if (parts[2].length === 4) { dia = parts[0]; mes = parts[1]; ano = parts[2]; }
+    else { ano = parts[0]; mes = parts[1]; dia = parts[2]; }
+  } else if (dateOnly.includes('-')) {
+    const parts = dateOnly.split('-');
+    ano = parts[0]; mes = parts[1]; dia = parts[2];
+  } else {
+    return false;
+  }
+
+  const dataTarefa = new Date(Number(ano), Number(mes) - 1, Number(dia));
+  const hoje = new Date();
+  
+  dataTarefa.setHours(0, 0, 0, 0);
+  const dataHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  dataHoje.setHours(0, 0, 0, 0);
+
+  // Se a data é no passado literal
+  if (dataTarefa.getTime() < dataHoje.getTime()) return true;
+  // Se a data é no futuro literal
+  if (dataTarefa.getTime() > dataHoje.getTime()) return false;
+
+  // Se é exatamente HOJE, valida a hora e minuto locais do dispositivo
+  if (dataTarefa.getTime() === dataHoje.getTime() && dueTime) {
+    const [horaStr, minStr] = dueTime.split(':');
+    const horaTarefa = parseInt(horaStr, 10);
+    const minTarefa = parseInt(minStr, 10);
+
+    const horaAtual = hoje.getHours();
+    const minAtual = hoje.getMinutes();
+
+    const tempoAtual = horaAtual * 100 + minAtual;
+    const tempoTarefa = horaTarefa * 100 + minTarefa;
+
+    return tempoAtual > tempoTarefa; // Retorna TRUE se o horário atual já passou do horário da tarefa
+  }
+
+  return false;
+};
+
 export const TaskCard: React.FC<TaskCardProps> = ({
   task,
   onComplete,
@@ -24,62 +71,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onUpdateStage,
   onUpdatePriority
 }) => {
-  const checkIsOverdue = (dueDate: string, dueTime?: string | null) => {
-    if (!dueDate) return false;
-
-    try {
-      // 1. Normalização profunda: Aceita tanto YYYY-MM-DD quanto DD/MM/YYYY, removendo tempos ISO
-      let dateOnly = dueDate.split('T')[0];
-      let ano, mes, dia;
-
-      if (dateOnly.includes('/')) {
-        const parts = dateOnly.split('/');
-        if (parts[2].length === 4) { // Formato DD/MM/YYYY
-          dia = parts[0]; mes = parts[1]; ano = parts[2];
-        } else { // Formato YYYY/MM/DD
-          ano = parts[0]; mes = parts[1]; dia = parts[2];
-        }
-      } else if (dateOnly.includes('-')) {
-        const parts = dateOnly.split('-');
-        ano = parts[0]; mes = parts[1]; dia = parts[2];
-      } else {
-        return false; // Fallback seguro
-      }
-
-      // Cria as datas de hoje e da tarefa
-      const dataTarefa = new Date(Number(ano), Number(mes) - 1, Number(dia));
-      const hoje = new Date();
-      
-      // Zera os relógios para comparar apenas o calendário
-      dataTarefa.setHours(0, 0, 0, 0);
-      const dataHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-      dataHoje.setHours(0, 0, 0, 0);
-
-      // Comparação de Calendário (Dias)
-      if (dataTarefa.getTime() < dataHoje.getTime()) return true;
-      if (dataTarefa.getTime() > dataHoje.getTime()) return false;
-
-      // 2. Se for HOJE, verifica a hora estrita do aparelho
-      if (dataTarefa.getTime() === dataHoje.getTime() && dueTime) {
-        const [horaStr, minStr] = dueTime.split(':');
-        const horaTarefa = parseInt(horaStr, 10);
-        const minTarefa = parseInt(minStr, 10);
-
-        const horaAtual = hoje.getHours();
-        const minAtual = hoje.getMinutes();
-
-        if (horaAtual > horaTarefa) return true;
-        if (horaAtual === horaTarefa && minAtual > minTarefa) return true;
-      }
-
-      return false;
-    } catch (error) {
-      console.error("Erro na validação temporal:", error);
-      return false;
-    }
-  };
-
-  const isOverdue = !task.status_concluido && checkIsOverdue(
+  const isOverdue = !task.status_concluido && isTaskOverdue(
     task.data_execucao || task.data_vencimento, 
     task.hora_vencimento || task.lembrete
   );
