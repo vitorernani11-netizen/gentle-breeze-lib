@@ -89,7 +89,16 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     task.hora_vencimento || task.lembrete
   );
 
-  const displayTime = task.lembrete || (task.hora_vencimento ? task.hora_vencimento : null);
+  const formatarHoraLimpa = (horaStr?: string | null) => {
+    if (!horaStr) return null;
+    if (horaStr.includes('T')) {
+      const tempo = horaStr.split('T')[1];
+      return tempo.substring(0, 5);
+    }
+    return horaStr.substring(0, 5);
+  };
+
+  const horaExibicao = formatarHoraLimpa(task.hora_vencimento || task.lembrete);
   const dataVenc = task.data_execucao || task.data_vencimento;
   
   const objData = dataVenc ? normalizarParaObjetoDate(dataVenc, task.hora_vencimento || task.lembrete) : null;
@@ -140,10 +149,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             </button>
 
             {/* Fixed Time Indicator (Inline) */}
-            {task.hora_vencimento && (
+            {horaExibicao && (
               <div className="flex items-center gap-1 text-[9px] sm:text-[10px] font-black text-[#00ff41] bg-[#00ff41]/5 px-1.5 py-0.5 rounded-md border border-[#00ff41]/20">
                 <Clock size={10} strokeWidth={3} />
-                <span>{task.hora_vencimento}</span>
+                <span>{horaExibicao}</span>
               </div>
             )}
 
@@ -153,6 +162,29 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 <span>{displayDate}</span>
               </div>
             )}
+          </div>
+
+          {/* Minimalist Pipeline 1 | 2 | 3 | 4 */}
+          <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-700 ml-auto">
+            {[1, 2, 3, 4].map((stage, idx) => (
+              <React.Fragment key={stage}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUpdateStage(task.id, stage);
+                  }}
+                  className={cn(
+                    "transition-all px-0.5",
+                    (task.fase_pipeline || 1) === stage 
+                      ? "text-[#00ff41] font-black" 
+                      : "hover:text-zinc-400"
+                  )}
+                >
+                  {stage}
+                </button>
+                {idx < 3 && <span className="text-zinc-900/50 font-light mx-px">|</span>}
+              </React.Fragment>
+            ))}
           </div>
 
           {/* Minimalist Pipeline 1 | 2 | 3 | 4 */}
