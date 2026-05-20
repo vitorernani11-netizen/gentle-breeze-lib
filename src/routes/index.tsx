@@ -72,31 +72,41 @@ const safeParseDate = (value: unknown) => {
 const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
   if (!dueDateStr) return false;
   
-  const agora = new Date();
-  const anoStr = String(agora.getFullYear());
-  const mesStr = String(agora.getMonth() + 1).padStart(2, '0');
-  const diaStr = String(agora.getDate()).padStart(2, '0');
-  const hojeNum = parseInt(`${anoStr}${mesStr}${diaStr}`, 10); // Ex: 20260519
+  try {
+    const agora = new Date();
+    const anoStr = String(agora.getFullYear());
+    const mesStr = String(agora.getMonth() + 1).padStart(2, '0');
+    const diaStr = String(agora.getDate()).padStart(2, '0');
+    const hojeNum = parseInt(`${anoStr}${mesStr}${diaStr}`, 10);
 
-  // Normaliza a data da tarefa para YYYYMMDD
-  let limpa = dueDateStr.split('T')[0].replace(/[-/]/g, '');
-  if (limpa.length === 8 && dueDateStr.includes('/')) {
-    // Se veio como DDMMYYYY, inverte para YYYYMMDD
-    limpa = `${limpa.substring(4, 8)}${limpa.substring(2, 4)}${limpa.substring(0, 2)}`;
+    // Normaliza a data da tarefa para YYYYMMDD
+    let limpa = dueDateStr.split('T')[0].replace(/[-/]/g, '');
+    if (limpa.length === 8 && dueDateStr.includes('/')) {
+      limpa = `${limpa.substring(4, 8)}${limpa.substring(2, 4)}${limpa.substring(0, 2)}`;
+    }
+    const tarefaNum = parseInt(limpa, 10);
+
+    if (tarefaNum < hojeNum) return true;  // Passado histórico é sempre atrasado
+    if (tarefaNum > hojeNum) return false; // Futuro nunca está atrasado
+
+    // Se for EXATAMENTE o mesmo dia, valida o horário fixo
+    // SALVAGUARDA: Se o horário for nulo ou vazio, assume o fim do dia (23:59) para não dar erro
+    const horaValida = (dueTimeStr && dueTimeStr.trim() !== '') ? dueTimeStr : "23:59";
+    
+    if (horaValida.includes(':')) {
+      const parts = horaValida.split(':');
+      const h = parseInt(parts[0], 10);
+      const m = parseInt(parts[1] || '0', 10);
+      const tempoTarefa = (isNaN(h) ? 23 : h) * 100 + (isNaN(m) ? 59 : m);
+      const tempoAtual = agora.getHours() * 100 + agora.getMinutes();
+      return tempoAtual > tempoTarefa;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error("Erro na validação de atraso:", error);
+    return false;
   }
-  const tarefaNum = parseInt(limpa, 10);
-
-  if (tarefaNum < hojeNum) return true;  // Passado histórico
-  if (tarefaNum > hojeNum) return false; // Futuro
-
-  // Se for exatamente o mesmo dia (hojeNum === tarefaNum)
-  if (dueTimeStr) {
-    const [h, m] = dueTimeStr.split(':').map(Number);
-    const tempoTarefa = h * 100 + m;
-    const tempoAtual = agora.getHours() * 100 + agora.getMinutes();
-    return tempoAtual > tempoTarefa;
-  }
-  return false;
 };
 
 const isTaskFromToday = (dueDateStr: string) => {
