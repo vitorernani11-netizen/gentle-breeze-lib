@@ -480,23 +480,48 @@ function Dashboard() {
 
           // 2. Separação Absoluta de Abas
           const executionTasks = poolHoje.filter(t => {
+            // 1. Calcula se a tarefa está atrasada pelo relógio local do celular
             const dataVenc = t.data_execucao || t.data_vencimento;
             const atrasada = isTaskOverdue(dataVenc, t.hora_vencimento || t.lembrete);
             
-            let hora = -1;
+            // 2. Extrai e isola a hora e os minutos numéricos da tarefa
+            let horaTarefa = -1;
+            let minutoTarefa = 0;
             const dueTime = t.hora_vencimento || t.lembrete;
-            if (dueTime) {
-              hora = parseInt(dueTime.split(':')[0], 10);
+            if (dueTime && typeof dueTime === 'string') {
+              const parts = dueTime.split(':');
+              horaTarefa = parseInt(parts[0], 10);
+              if (parts[1]) minutoTarefa = parseInt(parts[1], 10);
             }
 
-            if (filterMode === 'DELAYED') return atrasada === true;
-            if (atrasada) return false; // Se está atrasada, some das abas de tempo real
+            // REGRA 1: Se o usuário selecionou a aba "ATRASADAS", mostra apenas o que venceu
+            if (filterMode === 'DELAYED') {
+              return atrasada === true;
+            }
 
-            if (filterMode === 'INTERVAL') return hora >= 12 && hora < 14;
-            if (filterMode === 'POST18') return hora >= 18;
+            // REGRA 2: Se a tarefa já está atrasada, ela DEVE SUMIR das outras abas e ir para a aba ATRASADAS
+            if (atrasada) {
+              return false;
+            }
+
+            // REGRA 3: Roteamento cirúrgico de faixas de tempo (Para tarefas que NÃO estão atrasadas)
             
-            // VER TUDO
-            return true;
+            // ABA INTERVALO: Exclusivamente das 12:00 até as 13:59
+            if (filterMode === 'INTERVAL') {
+              return horaTarefa >= 12 && horaTarefa < 14;
+            }
+
+            // ABA PÓS-18H: Exclusivamente das 18:00 até as 23:59
+            if (filterMode === 'POST18') {
+              return horaTarefa >= 18 && horaTarefa <= 23;
+            }
+            
+            // ABA VER TUDO: Janela global do dia. Mostra tudo o que está planejado para hoje
+            if (filterMode === 'ALL') {
+              return true;
+            }
+
+            return false;
           });
 
           // Grouping logic based on Projects
