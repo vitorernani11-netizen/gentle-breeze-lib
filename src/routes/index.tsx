@@ -65,12 +65,13 @@ const safeParseDate = (value: unknown) => {
 };
 
 const normalizarParaObjetoDate = (dataStr: string, horaStr?: string | null): Date | null => {
+  // Parser Universal forçado para 2026
   if (!dataStr) return null;
   try {
     const agora = new Date();
-    const anoAtual = 2026; // Força o ano corrente do sistema
+    const anoAtual = 2026; 
     let dia = agora.getDate();
-    let mes = agora.getMonth(); // 0-11
+    let mes = agora.getMonth(); 
     let ano = anoAtual;
 
     const str = dataStr.toUpperCase().trim();
