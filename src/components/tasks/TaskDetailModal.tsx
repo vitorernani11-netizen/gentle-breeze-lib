@@ -9,7 +9,6 @@ import {
   Flag,
   Tag,
   Bell,
-    Check,
     Save
   } from 'lucide-react';
 import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
@@ -35,7 +34,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const [prioridade, setPrioridade] = useState<string>('P4');
   const [dataExecucao, setDataExecucao] = useState('');
   const [lembrete, setLembrete] = useState('');
-  const [savedFlash, setSavedFlash] = useState(false);
+  
   const [isDirty, setIsDirty] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const initRef = useRef(false);
@@ -69,8 +68,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const triggerSave = (updates: Record<string, any>) => {
     if (!task?.id) return;
     onUpdate(task.id, updates);
-    setSavedFlash(true);
-    setTimeout(() => setSavedFlash(false), 1200);
   };
 
   // Debounced save for text fields
