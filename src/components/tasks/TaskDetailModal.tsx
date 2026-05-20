@@ -186,8 +186,8 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               />
             </SidebarRow>
 
-            {/* Notificações Push */}
-            <SidebarRow icon={<Bell size={18} />} label="Notificações">
+            {/* Notificações Push Inline */}
+            <div className="pt-2">
               <ReminderManager 
                 reminders={task.lembretes || []} 
                 onUpdate={(newReminders) => {
@@ -199,24 +199,8 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                     }
                   }
                 }}
-              >
-                <Button 
-                  variant="ghost" 
-                  className={cn(
-                    "w-full h-14 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-between px-4 transition-all hover:bg-zinc-800",
-                    (task.lembretes?.length > 0) && "border-[#00ff41]/30 bg-[#00ff41]/5"
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <Bell size={16} className={cn((task.lembretes?.length > 0) ? "text-[#00ff41]" : "text-zinc-600")} />
-                    <span className="text-xs font-black uppercase tracking-widest text-white">
-                      {task.lembretes?.length || 0} Ativos
-                    </span>
-                  </div>
-                  <Plus size={16} className="text-zinc-600" />
-                </Button>
-              </ReminderManager>
-            </SidebarRow>
+              />
+            </div>
           </div>
         </div>
 
