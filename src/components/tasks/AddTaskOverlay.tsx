@@ -166,18 +166,23 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               </Button>
             </CalendarPopover>
 
-            <ReminderManager reminders={reminders} onUpdate={setReminders}>
-              <Button 
-                variant="ghost" 
-                className={cn(
-                  "h-12 px-4 rounded-2xl border border-zinc-900 bg-zinc-900/50 transition-all", 
-                  reminders.length > 0 && "text-[#00ff41] border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.2)] bg-[#00ff41]/5"
-                )}
-              >
-                <Clock size={20} />
-                {reminders.length > 0 && <span className="ml-2 text-xs font-black tracking-tighter">{reminders.length}</span>}
-              </Button>
-            </ReminderManager>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className={cn(
+                    "h-12 px-4 rounded-2xl border border-zinc-900 bg-zinc-900/50 transition-all", 
+                    reminders.length > 0 && "text-[#00ff41] border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.2)] bg-[#00ff41]/5"
+                  )}
+                >
+                  <Clock size={20} />
+                  {reminders.length > 0 && <span className="ml-2 text-xs font-black tracking-tighter">{reminders.length}</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 bg-black border-2 border-white p-6 z-[150] shadow-[0_20px_50px_rgba(0,0,0,1)] rounded-3xl" align="start">
+                <ReminderManager reminders={reminders} onUpdate={setReminders} />
+              </PopoverContent>
+            </Popover>
 
             <Popover>
               <PopoverTrigger asChild>
