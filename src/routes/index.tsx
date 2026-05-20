@@ -475,31 +475,46 @@ function Dashboard() {
             return isToday;
           });
 
-          const executionTasks = tarefasDeHoje.filter((t) => {
-            const atrasada = isTaskOverdue(t.data_execucao || t.data_vencimento, t.hora_vencimento || t.lembrete);
+          const executionTasks = tarefasDeHoje.filter((tarefa) => {
+            // 1. Calcula se a tarefa está estritamente atrasada (passou do horário atual)
+            const atrasada = isTaskOverdue(tarefa.data_execucao || tarefa.data_vencimento, tarefa.hora_vencimento || tarefa.lembrete);
             
+            // 2. Extrai a hora numérica de forma isolada e segura
             let horaTarefa = -1;
-            const dueTime = t.hora_vencimento || t.lembrete;
-            if (dueTime) {
-              horaTarefa = parseInt(dueTime.split(':')[0], 10);
+            const dueTime = tarefa.hora_vencimento || tarefa.lembrete;
+            if (dueTime && typeof dueTime === 'string') {
+              const [horaStr] = dueTime.split(':');
+              horaTarefa = parseInt(horaStr, 10);
             }
 
-            // Regra 1: Se a tarefa está atrasada (passou do dia ou passou da hora de hoje), vai estritamente para ATRASADAS
+            // REGRA DE OURO 1: Se o usuário clicou na aba "ATRASADAS", só entram tarefas vencidas
             if (filterMode === 'DELAYED') {
               return atrasada === true;
             }
-            
-            // Regra 2: Se não estiver atrasada, filtra as caixas de tempo normais de hoje
+
+            // REGRA DE OURO 2: Para as abas normais (INTERVALO, PÓS-18H), tarefas já atrasadas DEVEM SUMIR 
+            // (elas migram automaticamente para a aba ATRASADAS para limpar o fluxo)
+            if (atrasada) {
+              return false;
+            }
+
+            // REGRA DE OURO 3: Roteamento por faixa de horário estrita (Tarefas no prazo)
             if (filterMode === 'INTERVAL') {
-              return horaTarefa >= 12 && horaTarefa < 14 && !atrasada;
+              // Entra estritamente se for 12:00 até 13:59 e NÃO estiver atrasada
+              return horaTarefa >= 12 && horaTarefa < 14;
             }
-            
+
             if (filterMode === 'POST18') {
-              return horaTarefa >= 18 && horaTarefa <= 23 && !atrasada;
+              // Entra estritamente se for de 18:00 até 23:59 e NÃO estiver atrasada
+              return horaTarefa >= 18 && horaTarefa <= 23;
             }
-            
-            // filterMode === 'ALL' mostra tudo (inclusive as atrasadas do dia)
-            return true; 
+
+            if (filterMode === 'ALL') {
+              // A aba global mostra todas as tarefas ativas do dia atual (no prazo ou atrasadas de hoje)
+              return true;
+            }
+
+            return true;
           });
 
           // Grouping logic based on Projects
@@ -532,12 +547,8 @@ function Dashboard() {
             }
           });
 
-          // Apply Filter Mode (already filtered executionTasks, but some modes have specific grouping)
-          let finalGroups = { ...groupedTasks };
-
-          if (filterMode === 'INTERVAL' || filterMode === 'POST18' || filterMode === 'DELAYED') {
-            finalGroups = groupedTasks;
-          }
+          // Apply Filter Mode (already filtered executionTasks)
+          const finalGroups = groupedTasks;
 
           const hasAnyTasks = Object.values(finalGroups).some(g => g.tasks.length > 0);
 
