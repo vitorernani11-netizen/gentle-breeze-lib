@@ -182,7 +182,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               <SidebarRow icon={<Clock size={18} />} label="Horário Fixo">
                 <input
                   type="time"
-                  value={lembrete || ''}
+                  value={task.hora_vencimento || lembrete || ''}
                   onChange={(e) => handleLembrete(e.target.value)}
                   className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg pointer-events-auto"
                 />
