@@ -67,7 +67,11 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
   const triggerSave = (updates: Record<string, any>) => {
     if (!task?.id) return;
-    onUpdate(task.id, updates);
+    const tarefaAtualizada = {
+      ...task,
+      ...updates
+    };
+    onUpdate(task.id, tarefaAtualizada);
   };
 
   // Debounced save for text fields

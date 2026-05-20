@@ -24,27 +24,20 @@ export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) =>
 
     if (dateOnly.includes('/')) {
       const parts = dateOnly.split('/');
-      if (parts[2].length === 4) {
-        dia = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); ano = parseInt(parts[2], 10);
-      } else {
-        ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10);
-      }
+      if (parts[2].length === 4) { dia = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); ano = parseInt(parts[2], 10); } 
+      else { ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10); }
     } else if (dateOnly.includes('-')) {
       const parts = dateOnly.split('-');
       ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10);
     }
 
-    // Padrão para tarefas SEM horário: fim do dia (23:59:59) para não atrasar antes do tempo
-    let hora = 23; let minuto = 59; let segundo = 59;
-
+    let hora = 23; let minuto = 59;
     if (dueTimeStr && dueTimeStr.trim() !== '') {
       const timeParts = dueTimeStr.split(':');
-      hora = parseInt(timeParts[0], 10);
-      minuto = parseInt(timeParts[1], 10);
-      segundo = 0;
+      hora = parseInt(timeParts[0], 10); minuto = parseInt(timeParts[1], 10);
     }
 
-    const targetDateTime = new Date(ano, mes - 1, dia, hora, minuto, segundo);
+    const targetDateTime = new Date(ano, mes - 1, dia, hora, minuto, 0);
     return targetDateTime.getTime() < now.getTime();
   } catch (e) {
     return false;

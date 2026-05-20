@@ -78,27 +78,20 @@ const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
 
     if (dateOnly.includes('/')) {
       const parts = dateOnly.split('/');
-      if (parts[2].length === 4) {
-        dia = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); ano = parseInt(parts[2], 10);
-      } else {
-        ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10);
-      }
+      if (parts[2].length === 4) { dia = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); ano = parseInt(parts[2], 10); } 
+      else { ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10); }
     } else if (dateOnly.includes('-')) {
       const parts = dateOnly.split('-');
       ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10);
     }
 
-    // Padrão para tarefas SEM horário: fim do dia (23:59:59) para não atrasar antes do tempo
-    let hora = 23; let minuto = 59; let segundo = 59;
-
+    let hora = 23; let minuto = 59;
     if (dueTimeStr && dueTimeStr.trim() !== '') {
       const timeParts = dueTimeStr.split(':');
-      hora = parseInt(timeParts[0], 10);
-      minuto = parseInt(timeParts[1], 10);
-      segundo = 0;
+      hora = parseInt(timeParts[0], 10); minuto = parseInt(timeParts[1], 10);
     }
 
-    const targetDateTime = new Date(ano, mes - 1, dia, hora, minuto, segundo);
+    const targetDateTime = new Date(ano, mes - 1, dia, hora, minuto, 0);
     return targetDateTime.getTime() < now.getTime();
   } catch (e) {
     return false;
@@ -484,8 +477,7 @@ function Dashboard() {
 
           // 2. Distribui as tarefas pelas abas de forma excludente
           const executionTasks = tarefasDoPool.filter((tarefa) => {
-            const dueDate = tarefa.data_execucao || tarefa.data_vencimento;
-            const atrasada = isTaskOverdue(dueDate, tarefa.hora_vencimento || tarefa.lembrete);
+            const atrasada = isTaskOverdue(tarefa.data_execucao || tarefa.data_vencimento, tarefa.hora_vencimento || tarefa.lembrete);
             
             let horaTarefa = -1;
             const dueTime = tarefa.hora_vencimento || tarefa.lembrete;
@@ -493,25 +485,30 @@ function Dashboard() {
               horaTarefa = parseInt(dueTime.split(':')[0], 10);
             }
 
-            // Se o usuário está na aba ATRASADAS, mostra tudo o que venceu (passado histórico ou horas de hoje)
+            // 1. Aba ATRASADAS: Mostra tudo o que passou do prazo (do passado ou de horas anteriores de hoje)
             if (filterMode === 'DELAYED') {
               return atrasada === true;
             }
 
-            // Para as outras abas, esconde o que já atrasou
-            if (atrasada) return false;
+            // 2. Para as outras abas, se a tarefa já está atrasada, ela some daqui e vai para a aba ATRASADAS
+            if (atrasada) {
+              return false;
+            }
 
-            // Filtro de blocos de tempo limpos
+            // 3. Filtro por faixas de horário (Apenas tarefas no prazo)
             if (filterMode === 'INTERVAL') {
               return horaTarefa >= 12 && horaTarefa < 14;
             }
 
             if (filterMode === 'POST18') {
-              return horaTarefa >= 18;
+              return horaTarefa >= 18 && horaTarefa <= 23;
             }
 
-            // VER TUDO mostra todas as tarefas ativas planejadas para o dia corrente
-            return true;
+            if (filterMode === 'ALL') {
+              return true; // Exibe todas as tarefas pendentes do dia que estão no prazo
+            }
+
+            return false;
           });
 
           // Grouping logic based on Projects
