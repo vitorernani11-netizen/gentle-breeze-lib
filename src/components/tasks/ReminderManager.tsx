@@ -44,7 +44,7 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
   };
 
   return (
-    <div className="space-y-6 pt-4 border-t border-zinc-900 mt-4">
+    <div className="space-y-6">
       <div className="flex items-center gap-2 border-b border-zinc-900 pb-3">
         <Bell size={16} className="text-[#00ff41]" />
         <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500">🔔 NOTIFICAÇÕES</span>
