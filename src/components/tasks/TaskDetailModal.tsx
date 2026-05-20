@@ -9,7 +9,6 @@ import {
   Calendar,
   Clock,
   Flag,
-  Tag,
   Bell,
   Save,
   X,

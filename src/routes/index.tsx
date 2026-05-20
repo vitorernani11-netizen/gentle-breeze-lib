@@ -281,7 +281,7 @@ function Dashboard() {
     });
     const positiveTasks = completedLast7.filter((t: any) => {
       const proj = projectsData.find((p: any) => p.id === t.projeto_id);
-      return proj?.nome === 'Vitor Ernani' || proj?.nome === 'Faculdade' || t.tags?.includes('Vitor Ernani') || t.tags?.includes('Faculdade');
+      return proj?.nome === 'Vitor Ernani' || proj?.nome === 'Faculdade' || (t.tags || []).some((tag: any) => String(tag).includes('Vitor Ernani')) || (t.tags || []).some((tag: any) => String(tag).includes('Faculdade'));
     }).length;
     
     const trainingCount = sortedCheckins.filter((s: any) => s.treino_madrugada_realizado).length;
@@ -512,7 +512,7 @@ function Dashboard() {
           executionTasks.forEach(t => {
             const proj = projects.find(p => p.id === t.projeto_id);
             const projName = proj?.nome?.toLowerCase() || '';
-            const tags = t.tags?.map((tag: string) => tag.toLowerCase()) || [];
+            const tags = (t.tags || []).map((tag: any) => String(tag).toLowerCase());
 
             if (projName.includes('faculdade') || projName.includes('curso') || tags.includes('faculdade')) {
               groupedTasks.faculdade.tasks.push(t);
