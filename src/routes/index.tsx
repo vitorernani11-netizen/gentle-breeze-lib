@@ -315,7 +315,7 @@ function Dashboard() {
 
   const handleAddHydration = () => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayStr();
       const hydrationData = loadFromLocal(HYDRATION_KEY) || [];
       const index = hydrationData.findIndex((h: any) => h.data === today);
       
