@@ -90,8 +90,21 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
   const displayTime = task.lembrete || (task.hora_vencimento ? task.hora_vencimento : null);
   const dataVenc = task.data_execucao || task.data_vencimento;
-  const isScheduledToday = dataVenc ? isToday(parseISO(dataVenc)) : false;
-  const displayDate = dataVenc ? (isScheduledToday ? "HOJE" : formatDate(parseISO(dataVenc), 'dd/MM')) : null;
+  
+  const objData = dataVenc ? normalizarParaObjetoDate(dataVenc, task.hora_vencimento || task.lembrete) : null;
+  const agora = new Date();
+  const isScheduledToday = objData && 
+                           objData.getDate() === agora.getDate() && 
+                           objData.getMonth() === agora.getMonth() && 
+                           objData.getFullYear() === agora.getFullYear();
+                           
+  const displayDate = dataVenc ? (
+    isScheduledToday || dataVenc.toUpperCase().trim() === 'HOJE' 
+      ? "HOJE" 
+      : (objData 
+          ? `${String(objData.getDate()).padStart(2, '0')}/${String(objData.getMonth() + 1).padStart(2, '0')}` 
+          : dataVenc)
+  ) : null;
 
   return (
     <Card className={cn(
