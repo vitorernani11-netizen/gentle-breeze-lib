@@ -178,24 +178,35 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
             {/* Etapa da Metodologia */}
             <SidebarRow icon={<Plus size={18} />} label="Etapa Atual">
-              <div className="grid grid-cols-2 gap-1 w-full max-w-[240px]">
+              <div className="grid grid-cols-2 gap-3 p-4 border border-zinc-800 bg-black/40 w-full rounded-2xl">
                 {[
-                  { id: 1, label: '1. Classificar' },
-                  { id: 2, label: '2. Fracionar' },
-                  { id: 3, label: '3. Planejar' },
-                  { id: 4, label: '4. Executar' }
+                  { id: 1, label: '01. CLASSIFICAÇÃO', desc: 'Identificação bruta do tipo de demanda.' },
+                  { id: 2, label: '02. FRACIONAR', desc: 'Quebra em micro-ações acionáveis.' },
+                  { id: 3, label: '03. PLANEJAMENTO', desc: 'Timeboxing e prioridade P1-P4.' },
+                  { id: 4, label: '04. EXECUÇÃO', desc: 'Foco absoluto no Agora.' }
                 ].map((s) => (
                   <button
                     key={s.id}
                     onClick={() => triggerSave({ fase_pipeline: s.id })}
                     className={cn(
-                      "h-8 px-2 flex items-center justify-center text-[10px] font-black uppercase transition-all rounded-sm border",
+                      "p-3 flex flex-col gap-1 rounded-none transition-all text-left border",
                       (task.fase_pipeline || 1) === s.id
-                        ? "bg-white text-black border-white"
-                        : "bg-black text-zinc-600 border-zinc-900 hover:text-zinc-400"
+                        ? "border-[#00ff41] bg-zinc-900/60"
+                        : "border-zinc-800 bg-zinc-900/20 opacity-60"
                     )}
                   >
-                    {s.label}
+                    <h3 className={cn(
+                      "font-bold text-[10px] uppercase tracking-wider",
+                      (task.fase_pipeline || 1) === s.id ? "text-[#00ff41]" : "text-zinc-400"
+                    )}>
+                      {s.label}
+                    </h3>
+                    <p className={cn(
+                      "text-[9px] leading-tight",
+                      (task.fase_pipeline || 1) === s.id ? "text-zinc-400" : "text-zinc-500"
+                    )}>
+                      {s.desc}
+                    </p>
                   </button>
                 ))}
               </div>
