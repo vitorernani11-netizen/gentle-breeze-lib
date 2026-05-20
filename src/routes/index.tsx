@@ -40,7 +40,7 @@ import { cn } from '@/lib/utils';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { EisenhowerMatrix } from '@/components/dashboard/EisenhowerMatrix';
 
-import { TaskCard } from '@/components/tasks/TaskCard';
+import { TaskCard, isTaskOverdue } from '@/components/tasks/TaskCard';
 import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
 import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
 import { TodayContextGroup } from '@/components/tasks/TodayContextGroup';
@@ -72,53 +72,6 @@ const safeParseDate = (value: unknown) => {
 export const Route = createFileRoute('/')({
   component: Dashboard,
 });
-
-const isTaskOverdue = (dueDate: string, dueTime?: string | null) => {
-  if (!dueDate) return false;
-  
-  let dateOnly = dueDate.split('T')[0];
-  let ano, mes, dia;
-
-  if (dateOnly.includes('/')) {
-    const parts = dateOnly.split('/');
-    if (parts[2].length === 4) { dia = parts[0]; mes = parts[1]; ano = parts[2]; }
-    else { ano = parts[0]; mes = parts[1]; dia = parts[2]; }
-  } else if (dateOnly.includes('-')) {
-    const parts = dateOnly.split('-');
-    ano = parts[0]; mes = parts[1]; dia = parts[2];
-  } else {
-    return false;
-  }
-
-  const dataTarefa = new Date(Number(ano), Number(mes) - 1, Number(dia));
-  const hoje = new Date();
-  
-  dataTarefa.setHours(0, 0, 0, 0);
-  const dataHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-  dataHoje.setHours(0, 0, 0, 0);
-
-  // Se a data é no passado literal
-  if (dataTarefa.getTime() < dataHoje.getTime()) return true;
-  // Se a data é no futuro literal
-  if (dataTarefa.getTime() > dataHoje.getTime()) return false;
-
-  // Se é exatamente HOJE, valida a hora e minuto locais do dispositivo
-  if (dataTarefa.getTime() === dataHoje.getTime() && dueTime) {
-    const [horaStr, minStr] = dueTime.split(':');
-    const horaTarefa = parseInt(horaStr, 10);
-    const minTarefa = parseInt(minStr, 10);
-
-    const horaAtual = hoje.getHours();
-    const minAtual = hoje.getMinutes();
-
-    const tempoAtual = horaAtual * 100 + minAtual;
-    const tempoTarefa = horaTarefa * 100 + minTarefa;
-
-    return tempoAtual > tempoTarefa; // Retorna TRUE se o horário atual já passou do horário da tarefa
-  }
-
-  return false;
-};
 
 function Dashboard() {
   const navigate = useNavigate();
