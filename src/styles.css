@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Esconde o FAB quando um modal (dialog) está aberto */
+body:has([role="dialog"]) #global-add-task-button {
+  display: none !important;
+}
+
 
 
 @custom-variant dark (&:is(.dark *));
