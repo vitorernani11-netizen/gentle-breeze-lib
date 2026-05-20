@@ -176,6 +176,31 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               </button>
             </SidebarRow>
 
+            {/* Etapa da Metodologia */}
+            <SidebarRow icon={<Plus size={18} />} label="Etapa Atual">
+              <div className="grid grid-cols-2 gap-1 w-full max-w-[240px]">
+                {[
+                  { id: 1, label: '1. Classificar' },
+                  { id: 2, label: '2. Fracionar' },
+                  { id: 3, label: '3. Planejar' },
+                  { id: 4, label: '4. Executar' }
+                ].map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => triggerSave({ fase_pipeline: s.id })}
+                    className={cn(
+                      "h-8 px-2 flex items-center justify-center text-[10px] font-black uppercase transition-all rounded-sm border",
+                      (task.fase_pipeline || 1) === s.id
+                        ? "bg-white text-black border-white"
+                        : "bg-black text-zinc-600 border-zinc-900 hover:text-zinc-400"
+                    )}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </SidebarRow>
+
             {/* Horário Fixo da Atividade */}
             <div className="pb-4 border-b border-zinc-900/50">
               <SidebarRow icon={<Clock size={18} />} label="Horário Fixo">
