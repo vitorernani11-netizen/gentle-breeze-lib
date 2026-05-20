@@ -24,6 +24,7 @@ interface SmartInputProps {
     titulo: string;
     vencimento: string;
     recorrencia: string;
+    recorrencia_semanal: string | null;
     prioridade: number;
     lembrete: string | null;
   }) => void;
@@ -59,6 +60,7 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
       titulo: result.text,
       vencimento: format(finalDueDate, 'yyyy-MM-dd'),
       recorrencia: recorrencia !== 'none' ? recorrencia : result.recurrence,
+      recorrencia_semanal: result.recorrencia_semanal,
       prioridade: priority,
       lembrete: reminder || result.reminderTime
     });

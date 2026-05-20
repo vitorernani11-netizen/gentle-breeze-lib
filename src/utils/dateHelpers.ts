@@ -1,4 +1,4 @@
-import { format, isTomorrow, isAfter, addDays, startOfToday, parseISO } from 'date-fns';
+import { format, isTomorrow, isAfter, addDays, startOfToday, parseISO, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export interface DateGroup {
@@ -8,6 +8,35 @@ export interface DateGroup {
   tasks: any[];
   isTomorrow: boolean;
 }
+
+export const weekdaysMap: Record<string, number> = {
+  'domingo': 0,
+  'segunda': 1,
+  'terça': 2,
+  'quarta': 3,
+  'quinta': 4,
+  'sexta': 5,
+  'sábado': 6
+};
+
+export const getWeekdayString = (date: Date): string => {
+  const days = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+  return days[date.getDay()];
+};
+
+export const getNextWeekdayDate = (weekday: string): string => {
+  const targetDay = weekdaysMap[weekday.toLowerCase()];
+  if (targetDay === undefined) return format(new Date(), 'yyyy-MM-dd');
+
+  const today = new Date();
+  let nextDate = addDays(today, 1);
+  
+  while (nextDate.getDay() !== targetDay) {
+    nextDate = addDays(nextDate, 1);
+  }
+  
+  return format(nextDate, 'yyyy-MM-dd');
+};
 
 export const groupTasksByDate = (tasks: any[]): DateGroup[] => {
   const groups: Record<string, DateGroup> = {};

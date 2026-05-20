@@ -1,5 +1,7 @@
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { toast } from 'sonner';
+import { getWeekdayString, getNextWeekdayDate } from '@/utils/dateHelpers';
+import { format } from 'date-fns';
 
 const TASKS_KEY = 'hardware_humano_data'; // Unificando conforme instrução de persistência local
 
@@ -12,9 +14,24 @@ export const useTaskActions = (onSuccess?: () => void) => {
 
     try {
       const allTasks = loadFromLocal(TASKS_KEY) || [];
+      const todayStr = format(new Date(), 'yyyy-MM-dd');
+      
       const updatedTasks = allTasks.map((t: any) => {
         if (t.id === task.id) {
-          if (task.repeticao && task.repeticao !== 'none') {
+          // Lógica de Recorrência (Nova Fase)
+          if (t.recorrencia_semanal) {
+            const nextDate = getNextWeekdayDate(t.recorrencia_semanal);
+            toast.success(`Rotina agendada para: ${nextDate}`);
+            return { 
+              ...t, 
+              data_execucao: nextDate, 
+              ultimo_processamento: todayStr,
+              status_concluido: false 
+            };
+          }
+          
+          // Lógica de Repetição Antiga (Mantendo por compatibilidade)
+          if (t.repeticao && t.repeticao !== 'none') {
             try {
               if (!t.data_execucao || typeof t.data_execucao !== 'string') {
                 throw new Error('Data de execução ausente ou inválida');
@@ -26,9 +43,9 @@ export const useTaskActions = (onSuccess?: () => void) => {
               if (isNaN(currentDate.getTime())) throw new Error('Data inválida');
 
               let nextDate = new Date(currentDate);
-              if (task.repeticao === 'daily') nextDate.setDate(currentDate.getDate() + 1);
-              if (task.repeticao === 'weekly') nextDate.setDate(currentDate.getDate() + 7);
-              if (task.repeticao === 'monthly') nextDate.setMonth(currentDate.getMonth() + 1);
+              if (t.repeticao === 'daily') nextDate.setDate(currentDate.getDate() + 1);
+              if (t.repeticao === 'weekly') nextDate.setDate(currentDate.getDate() + 7);
+              if (t.repeticao === 'monthly') nextDate.setMonth(currentDate.getMonth() + 1);
 
               const nextDateStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
               
@@ -37,7 +54,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
             } catch (dateError) {
               console.error('Erro no cálculo de recorrência:', dateError);
               toast.error('Erro ao calcular próxima data. Resetando para hoje.');
-              return { ...t, data_execucao: new Date().toISOString().split('T')[0], status: 'Hoje' };
+              return { ...t, data_execucao: todayStr, status: 'Hoje' };
             }
           } else {
             toast.success('Tarefa concluída!');
@@ -216,6 +233,8 @@ export const useTaskActions = (onSuccess?: () => void) => {
         prioridade: taskData.prioridade || 'P4',
         data_execucao: taskData.data_execucao,
         repeticao: taskData.repeticao || 'none',
+        recorrencia_semanal: taskData.recorrencia_semanal || null,
+        ultimo_processamento: null,
         lembrete: taskData.lembrete || null,
         reminders: taskData.reminders || [],
         hora_vencimento: taskData.hora_vencimento || null,
@@ -235,5 +254,48 @@ export const useTaskActions = (onSuccess?: () => void) => {
     }
   };
 
-  return { completeTask, rescheduleTask, moveTask, updateTriagemStage, restoreTask, deletePermanent, updateTask, addTask };
+  const checkAndRouteRecurringTasks = () => {
+    try {
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
+      const today = new Date();
+      const todayStr = format(today, 'yyyy-MM-dd');
+      const currentWeekday = getWeekdayString(today);
+      let changed = false;
+
+      const updatedTasks = allTasks.map((task: any) => {
+        if (task.recorrencia_semanal === currentWeekday && task.ultimo_processamento !== todayStr) {
+          console.log('[Task:RecurringInit]', { taskId: task.id, title: task.titulo });
+          changed = true;
+          return {
+            ...task,
+            data_execucao: todayStr,
+            fase_pipeline: 1, // Volta para Entrada
+            ultimo_processamento: todayStr,
+            status_concluido: false
+          };
+        }
+        return task;
+      });
+
+      if (changed) {
+        saveToLocal(TASKS_KEY, updatedTasks);
+        window.dispatchEvent(new Event('storage'));
+        if (onSuccess) onSuccess();
+      }
+    } catch (error) {
+      console.error('Erro no processamento de rotinas:', error);
+    }
+  };
+
+  return { 
+    completeTask, 
+    rescheduleTask, 
+    moveTask, 
+    updateTriagemStage, 
+    restoreTask, 
+    deletePermanent, 
+    updateTask, 
+    addTask,
+    checkAndRouteRecurringTasks
+  };
 };

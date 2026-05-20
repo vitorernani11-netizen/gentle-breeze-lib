@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "@/components/AppSidebar";
 import { GlobalAddTask } from "@/components/tasks/GlobalAddTask";
+import { useTaskActions } from "@/hooks/useTaskActions";
 
 import appCss from "../styles.css?url";
 
@@ -60,12 +61,14 @@ function RootComponent() {
   const navigate = useNavigate();
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [hasSession, setHasSession] = useState(true);
+  const { checkAndRouteRecurringTasks } = useTaskActions();
 
   useEffect(() => {
     const checkAuth = async () => {
       // Forçamos a sessão como true para o único usuário do app
       setHasSession(true);
       setIsAuthChecking(false);
+      checkAndRouteRecurringTasks();
     };
 
     checkAuth();
