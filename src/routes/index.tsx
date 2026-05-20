@@ -132,6 +132,7 @@ function Dashboard() {
   const [showCheckin, setShowCheckin] = useState(false);
   
   const [detailTask, setDetailTask] = useState<any | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [filterMode, setFilterMode] = useState<'ALL' | 'INTERVAL' | 'POST18' | 'DELAYED'>('ALL');
 
   const [tasks, setTasks] = useState<any[]>([]);
