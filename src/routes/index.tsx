@@ -484,20 +484,21 @@ function Dashboard() {
               horaTarefa = parseInt(dueTime.split(':')[0], 10);
             }
 
-            // Roteamento Estrito
+            // Regra 1: Se a tarefa está atrasada (passou do dia ou passou da hora de hoje), vai estritamente para ATRASADAS
             if (filterMode === 'DELAYED') {
               return atrasada === true;
             }
             
+            // Regra 2: Se não estiver atrasada, filtra as caixas de tempo normais de hoje
             if (filterMode === 'INTERVAL') {
-              return horaTarefa >= 12 && horaTarefa < 14;
+              return horaTarefa >= 12 && horaTarefa < 14 && !atrasada;
             }
             
             if (filterMode === 'POST18') {
-              return horaTarefa >= 18;
+              return horaTarefa >= 18 && horaTarefa <= 23 && !atrasada;
             }
             
-            // filterMode === 'ALL'
+            // filterMode === 'ALL' mostra tudo (inclusive as atrasadas do dia)
             return true; 
           });
 
