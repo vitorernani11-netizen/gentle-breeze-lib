@@ -97,7 +97,7 @@ function TasksPage() {
       });
 
       const active = mappedTasks.filter((t: any) => 
-        t && !t.status_concluido && (t.status === 'Entrada' || t.fase_pipeline === null || t.fase_pipeline === undefined)
+        t && !t.status_concluido
       ).sort((a: any, b: any) => {
         const dateA = new Date(a.created_at || 0).getTime();
         const dateB = new Date(b.created_at || 0).getTime();
@@ -105,7 +105,7 @@ function TasksPage() {
       });
 
       const completed = mappedTasks.filter((t: any) => 
-        t && t.status === 'Entrada' && t.status_concluido
+        t && t.status_concluido
       ).sort((a: any, b: any) => {
         const dateA = new Date(a.created_at || 0).getTime();
         const dateB = new Date(b.created_at || 0).getTime();
