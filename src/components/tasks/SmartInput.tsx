@@ -24,6 +24,7 @@ interface SmartInputProps {
     titulo: string;
     vencimento: string;
     recorrencia: string;
+    recorrencia_semanal: string | null;
     prioridade: number;
     lembrete: string | null;
   }) => void;
