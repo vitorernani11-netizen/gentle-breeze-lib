@@ -180,10 +180,10 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className={cn(
-                  "h-9 w-9 rounded-xl border border-zinc-900",
-                  prioridade === 'P1' && "text-red-500 border-red-500/20",
-                  prioridade === 'P2' && "text-orange-500 border-orange-500/20",
-                  prioridade === 'P3' && "text-blue-500 border-blue-500/20"
+                  "h-12 w-12 rounded-2xl border border-zinc-900 bg-zinc-900/50",
+                  prioridade === 'P1' && "text-red-500 border-red-500/20 bg-red-500/5",
+                  prioridade === 'P2' && "text-orange-500 border-orange-500/20 bg-orange-500/5",
+                  prioridade === 'P3' && "text-blue-500 border-blue-500/20 bg-blue-500/5"
                 )}>
                   <Flag size={18} />
                 </Button>
