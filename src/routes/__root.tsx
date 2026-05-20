@@ -99,7 +99,7 @@ function RootComponent() {
       </div>
       <GlobalAddTask />
       
-      {isDirty && (
+      {isDirty && location.pathname !== '/tasks' && !window.location.hash.includes('modal') && (
         <button
           onClick={() => {
             persistToHardware();
