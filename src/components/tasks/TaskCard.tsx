@@ -108,7 +108,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
   return (
     <Card className={cn(
-      "bg-black border-0 border-b border-white/10 p-4 rounded-none flex flex-col group transition-all gap-4 relative active:bg-zinc-900/50",
+      "bg-black border-0 border-b border-white/10 p-4 rounded-none flex flex-col group transition-all gap-2 relative active:bg-zinc-900/50",
       isOverdue ? "border-l-4 border-l-red-500" : ""
     )}>
       <div className="flex flex-col gap-3">
@@ -184,9 +184,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             tabIndex={0}
             onClick={() => onClick(task)}
             onKeyDown={(e) => { if (e.key === 'Enter') onClick(task); }}
-            className="flex flex-col gap-1.5 flex-1 min-w-0 text-left cursor-pointer"
+            className="flex flex-col gap-1 flex-1 min-w-0 text-left cursor-pointer"
           >
-            <h3 className="font-black text-base md:text-lg uppercase tracking-tight leading-tight flex items-center flex-wrap gap-2">
+            <h3 className="font-black text-lg md:text-xl uppercase tracking-tight leading-tight flex items-center flex-wrap gap-2 text-white">
               {task.titulo}
               {(task.recorrencia_semanal || (task.repeticao && task.repeticao !== 'none')) && (
                 <RefreshCw className="w-4 h-4 text-[#00ff41] animate-none" />
@@ -199,7 +199,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             </h3>
             
             {task.descricao && (
-              <p className="text-zinc-500 text-[11px] font-medium uppercase truncate opacity-70 leading-relaxed">
+              <p className="text-zinc-400 text-xs font-medium uppercase truncate opacity-80 leading-relaxed">
                 {task.descricao}
               </p>
             )}
