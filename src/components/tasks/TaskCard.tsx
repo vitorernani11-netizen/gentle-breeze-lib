@@ -60,7 +60,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     task.hora_vencimento || task.lembrete
   );
 
-  const displayTime = task.lembrete || (task.hora_vencimento ? formatDate(parseISO(task.hora_vencimento), 'HH:mm') : null);
+  const displayTime = task.lembrete || (task.hora_vencimento ? task.hora_vencimento : null);
+  const dataVenc = task.data_execucao || task.data_vencimento;
+  const isScheduledToday = dataVenc ? isToday(parseISO(dataVenc)) : false;
+  const displayDate = dataVenc && !isScheduledToday ? formatDate(parseISO(dataVenc), 'dd/MM') : null;
 
   return (
     <Card className={cn(
