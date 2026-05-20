@@ -159,20 +159,25 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
             {/* Prioridade */}
             <SidebarRow icon={<Flag size={18} className={currentPriority.color.split(' ')[0]} />} label="Prioridade">
-              <div className="grid grid-cols-2 gap-1.5 max-w-[120px]">
-                {PRIORITIES.map((p) => (
-                  <button
-                    key={p.value}
-                    onClick={() => handlePriority(p.value)}
-                    className={cn(
-                      'flex items-center justify-center h-8 border rounded-lg transition-all active:scale-90',
-                      prioridade === p.value
-                        ? `${p.color} bg-white/5 border-white/20`
-                        : 'border-zinc-900 bg-zinc-900/30 text-zinc-600 hover:text-zinc-300'
-                    )}
-                  >
-                    <span className="text-[10px] font-black">{p.label}</span>
-                  </button>
+              <div className="flex items-center gap-2 py-2 px-4 border border-zinc-900 bg-zinc-950 rounded-xl w-fit">
+                {['P1', 'P2', 'P3', 'P4'].map((pVal) => (
+                  <React.Fragment key={pVal}>
+                    <button
+                      onClick={() => handlePriority(pVal)}
+                      className={cn(
+                        'text-sm font-black transition-all px-2',
+                        prioridade === pVal
+                          ? (pVal === 'P1' ? "text-red-500 scale-125" :
+                             pVal === 'P2' ? "text-orange-500 scale-125" :
+                             pVal === 'P3' ? "text-blue-500 scale-125" :
+                             "text-white scale-125")
+                          : 'text-zinc-700 hover:text-zinc-500'
+                      )}
+                    >
+                      {pVal.replace('P', '')}
+                    </button>
+                    {pVal !== 'P4' && <span className="text-zinc-800 text-xs">|</span>}
+                  </React.Fragment>
                 ))}
               </div>
             </SidebarRow>
