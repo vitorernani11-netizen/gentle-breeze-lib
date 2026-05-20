@@ -97,42 +97,46 @@ export const GlobalAddTask: React.FC = () => {
     <>
       <Button
         onClick={handleOpen}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-black border-2 shadow-[0_0_20px_rgba(255,0,255,0.4)] hover:scale-110 hover:bg-[#ff00ff] transition-all z-[90] flex items-center justify-center p-0 text-gray-50 border-slate-700"
+        className="fixed bottom-24 right-6 w-16 h-16 rounded-full bg-white text-black border-4 border-black shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-110 active:scale-90 transition-all z-[90] flex items-center justify-center p-0"
         aria-label="Adicionar nova tarefa ou memória"
       >
-        <Plus size={32} strokeWidth={3} />
+        <Plus size={40} strokeWidth={4} />
       </Button>
 
       {isOpen && mode === 'choice' && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 backdrop-blur-2xl animate-in fade-in duration-300">
+          <div className="w-full max-w-lg flex flex-col gap-6">
             <button 
               onClick={() => setMode('action')}
-              className="group relative h-64 border-4 border-white bg-black p-8 flex flex-col items-center justify-center gap-6 hover:bg-[#00ff41] hover:text-black transition-all active:scale-95"
+              className="group relative h-48 rounded-3xl border-2 border-white/10 bg-zinc-900/50 p-8 flex items-center gap-6 hover:bg-[#00ff41] hover:text-black transition-all active:scale-95 shadow-2xl"
             >
-              <Zap size={64} className="group-hover:animate-bounce" />
-              <div className="text-center">
-                <span className="block text-2xl font-black uppercase tracking-tighter">⚡ Ação</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Tarefa / Rotina</span>
+              <div className="w-20 h-20 rounded-2xl bg-[#00ff41]/10 flex items-center justify-center group-hover:bg-black/10">
+                <Zap size={48} className="text-[#00ff41] group-hover:text-black" />
+              </div>
+              <div className="text-left">
+                <span className="block text-3xl font-black uppercase tracking-tighter">⚡ Ação</span>
+                <span className="text-xs font-bold uppercase tracking-widest opacity-60">Tarefa / Rotina</span>
               </div>
             </button>
 
             <button 
               onClick={() => setMode('memory')}
-              className="group relative h-64 border-4 border-white bg-black p-8 flex flex-col items-center justify-center gap-6 hover:bg-[#ff00ff] hover:text-black transition-all active:scale-95"
+              className="group relative h-48 rounded-3xl border-2 border-white/10 bg-zinc-900/50 p-8 flex items-center gap-6 hover:bg-[#ff00ff] hover:text-black transition-all active:scale-95 shadow-2xl"
             >
-              <Brain size={64} className="group-hover:animate-pulse" />
-              <div className="text-center">
-                <span className="block text-2xl font-black uppercase tracking-tighter">🧠 Memória</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Anotação / Lista</span>
+              <div className="w-20 h-20 rounded-2xl bg-[#ff00ff]/10 flex items-center justify-center group-hover:bg-black/10">
+                <Brain size={48} className="text-[#ff00ff] group-hover:text-black" />
+              </div>
+              <div className="text-left">
+                <span className="block text-3xl font-black uppercase tracking-tighter">🧠 Memória</span>
+                <span className="text-xs font-bold uppercase tracking-widest opacity-60">Anotação / Lista</span>
               </div>
             </button>
 
             <button 
               onClick={handleClose}
-              className="sm:col-span-2 mt-4 text-[10px] font-black uppercase tracking-[0.5em] text-zinc-500 hover:text-white flex items-center justify-center gap-2"
+              className="mt-4 text-xs font-black uppercase tracking-[0.4em] text-zinc-500 hover:text-white flex items-center justify-center gap-3 py-4"
             >
-              <X size={14} /> Cancelar
+              <X size={18} /> Cancelar
             </button>
           </div>
         </div>
