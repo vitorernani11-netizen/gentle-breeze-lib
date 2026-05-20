@@ -420,9 +420,10 @@ function Dashboard() {
 
             // Filtro para Atrasadas (Global: busca em todos os status)
             if (filterMode === 'DELAYED') {
-              const taskDate = t.data_execucao;
-              if (taskDate < today) return true;
-              if (taskDate === today && t.hora_vencimento) {
+              const taskDateStr = t.data_execucao?.split('T')[0];
+              if (taskDateStr && taskDateStr < today) return true;
+              
+              if (taskDateStr === today && t.hora_vencimento) {
                 // Se a data é hoje, checamos se o horário já passou
                 return isBefore(new Date(t.hora_vencimento), now);
               }
@@ -430,10 +431,11 @@ function Dashboard() {
             }
 
             // Filtro rigoroso para "Hoje" quando no modo padrão ou específicos de horário
-            // Nota: Só mostramos tarefas que explicitamente estão para Hoje ou que o usuário quer ver no dashboard
             if (filterMode === 'ALL' || filterMode === 'INTERVAL' || filterMode === 'POST18') {
-              return t.data_execucao === today;
+              const taskDateStr = t.data_execucao?.split('T')[0];
+              return taskDateStr === today;
             }
+
 
             return true;
           });
