@@ -186,17 +186,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         </div>
 
         {/* Footer */}
-        <div className="border-t border-zinc-800 px-4 py-3 flex items-center justify-between bg-zinc-950/30">
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
-            {savedFlash ? (
-              <span className="text-[#00ff41] flex items-center gap-1 animate-in fade-in">
-                <Check size={12} /> Sincronizado
-              </span>
-            ) : (
-              <span className="text-zinc-700">Cache em memória</span>
-            )}
-          </div>
-
+        <div className="border-t border-zinc-800 px-4 py-3 flex items-center justify-end bg-zinc-950/30">
           {isDirty && (
             <button
               onClick={() => {

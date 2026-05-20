@@ -99,18 +99,6 @@ function RootComponent() {
       </div>
       <GlobalAddTask />
       
-      {isDirty && location.pathname !== '/tasks' && !window.location.hash.includes('modal') && (
-        <button
-          onClick={() => {
-            persistToHardware();
-            setIsDirty(false);
-          }}
-          className="fixed bottom-6 right-6 z-[100] bg-[#00ff41] text-black font-black px-6 py-3 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2 uppercase tracking-tighter text-sm italic animate-in fade-in slide-in-from-bottom-4 duration-300"
-        >
-          <Save size={18} strokeWidth={3} />
-          Salvar Alterações
-        </button>
-      )}
 
       <Toaster position="top-center" theme="dark" />
     </QueryClientProvider>
