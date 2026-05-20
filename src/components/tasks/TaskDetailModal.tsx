@@ -10,7 +10,9 @@ import {
   Tag,
   Bell,
     Check,
+    Save
   } from 'lucide-react';
+import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
 import { cn } from '@/lib/utils';
 
 interface TaskDetailModalProps {
@@ -34,6 +36,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const [dataExecucao, setDataExecucao] = useState('');
   const [lembrete, setLembrete] = useState('');
   const [savedFlash, setSavedFlash] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const initRef = useRef(false);
 
@@ -49,6 +52,18 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
       setTimeout(() => { initRef.current = true; }, 0);
     }
     if (!open) initRef.current = false;
+
+    const handleStorageUpdate = () => {
+      setIsDirty(hasUnsavedChanges());
+    };
+
+    window.addEventListener('storage_update', handleStorageUpdate);
+    window.addEventListener('storage', handleStorageUpdate);
+
+    return () => {
+      window.removeEventListener('storage_update', handleStorageUpdate);
+      window.removeEventListener('storage', handleStorageUpdate);
+    };
   }, [task, open]);
 
   const triggerSave = (updates: Record<string, any>) => {
@@ -171,16 +186,29 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         </div>
 
         {/* Footer */}
-        <div className="border-t border-zinc-800 px-4 py-2 flex items-center justify-between">
+        <div className="border-t border-zinc-800 px-4 py-3 flex items-center justify-between bg-zinc-950/30">
           <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
             {savedFlash ? (
               <span className="text-[#00ff41] flex items-center gap-1 animate-in fade-in">
-                <Check size={12} /> Salvo
+                <Check size={12} /> Sincronizado
               </span>
             ) : (
-              <span className="text-zinc-700">Auto-save ativo</span>
+              <span className="text-zinc-700">Cache em memória</span>
             )}
           </div>
+
+          {isDirty && (
+            <button
+              onClick={() => {
+                persistToHardware();
+                setIsDirty(false);
+              }}
+              className="bg-[#00ff41] text-black font-black px-4 py-1.5 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2 uppercase tracking-tighter text-[10px] italic animate-in fade-in slide-in-from-right-4 duration-300"
+            >
+              <Save size={12} strokeWidth={3} />
+              Salvar
+            </button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
