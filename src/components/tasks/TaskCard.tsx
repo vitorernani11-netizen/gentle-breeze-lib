@@ -24,17 +24,41 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onUpdateStage,
   onUpdatePriority
 }) => {
-  const taskDate = parseISO(task.data_execucao);
-  const isOverdue = !task.status_concluido && (
-    isBefore(taskDate, startOfToday()) || 
-    (task.hora_vencimento ? isBefore(parseISO(task.hora_vencimento), new Date()) : 
-     (isToday(taskDate) && task.lembrete && (() => {
-        const [hours, minutes] = task.lembrete.split(':').map(Number);
-        const taskTime = new Date();
-        taskTime.setHours(hours, minutes, 0, 0);
-        return isBefore(taskTime, new Date());
-      })())
-    )
+  const checkIsOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
+    if (!dueDateStr) return false;
+
+    const agora = new Date();
+    // Comparação estrita de data YYYY-MM-DD em horário local
+    const hojeStr = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+    const tarefaStr = dueDateStr.split('T')[0];
+
+    // Se a data é no passado
+    if (tarefaStr < hojeStr) return true;
+
+    // Se a data é hoje, verifica o horário
+    if (tarefaStr === hojeStr && dueTimeStr) {
+      try {
+        const timeToParse = dueTimeStr.includes('T') 
+          ? formatDate(parseISO(dueTimeStr), 'HH:mm') 
+          : dueTimeStr;
+          
+        const [horaTarefa, minTarefa] = timeToParse.split(':').map(Number);
+        const horaAtual = agora.getHours();
+        const minAtual = agora.getMinutes();
+
+        if (horaAtual > horaTarefa) return true;
+        if (horaAtual === horaTarefa && minAtual > minTarefa) return true;
+      } catch (e) {
+        console.error("Erro ao processar horário de vencimento:", e);
+      }
+    }
+
+    return false;
+  };
+
+  const isOverdue = !task.status_concluido && checkIsOverdue(
+    task.data_execucao, 
+    task.hora_vencimento || task.lembrete
   );
 
   const displayTime = task.lembrete || (task.hora_vencimento ? formatDate(parseISO(task.hora_vencimento), 'HH:mm') : null);
