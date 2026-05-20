@@ -107,14 +107,17 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
-        className="max-w-4xl w-[95vw] p-0 bg-black border-2 border-white rounded-2xl overflow-hidden gap-0"
+        className="max-w-4xl w-full sm:w-[95vw] h-full sm:h-auto sm:max-h-[85vh] p-0 bg-black border-0 sm:border-2 border-white rounded-none sm:rounded-3xl overflow-hidden gap-0"
         onInteractOutside={onClose}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-2">
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-            <span>Entrada</span>
+        <div className="flex items-center justify-between border-b border-zinc-900 px-6 py-4">
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-zinc-600">
+            <span>Entrada / Detalhes</span>
           </div>
+          <button onClick={onClose} className="sm:hidden text-zinc-500">
+            <X size={24} />
+          </button>
         </div>
 
         {/* Body: 2 cols on desktop, stack on mobile */}
