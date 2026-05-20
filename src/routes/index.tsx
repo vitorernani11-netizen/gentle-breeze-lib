@@ -132,6 +132,7 @@ function Dashboard() {
   const [showCheckin, setShowCheckin] = useState(false);
   
   const [detailTask, setDetailTask] = useState<any | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [filterMode, setFilterMode] = useState<'ALL' | 'INTERVAL' | 'POST18' | 'DELAYED'>('ALL');
 
   const [tasks, setTasks] = useState<any[]>([]);
@@ -541,7 +542,10 @@ function Dashboard() {
                   title={group.title}
                   color={group.color}
                   tasks={group.tasks}
-                  onTaskClick={setDetailTask}
+                  onTaskClick={(t) => {
+                    setDetailTask(t);
+                    setIsDetailOpen(true);
+                  }}
                   onComplete={completeTask}
                   onMoveToToday={(id) => moveTask(id, 'Hoje')}
                   onDelete={deletePermanent}
@@ -563,8 +567,9 @@ function Dashboard() {
       {detailTask && (
         <TaskDetailModal 
           task={detailTask}
-          open={!!detailTask}
+          open={isDetailOpen}
           onClose={() => {
+            setIsDetailOpen(false);
             setDetailTask(null);
             fetchData();
           }}

@@ -44,6 +44,7 @@ function TasksPage() {
   const [errorState, setErrorState] = useState<string | null>(null);
   const [selectedStage, setSelectedStage] = useState<number | null>(null);
   const [detailTask, setDetailTask] = useState<any | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   
   
 
@@ -209,7 +210,10 @@ function TasksPage() {
                   navigate({ to: '/' });
                 }}
                 onDelete={deletePermanent}
-                onClick={setDetailTask}
+                onClick={(t) => {
+                  setDetailTask(t);
+                  setIsDetailOpen(true);
+                }}
                 onUpdateStage={updateTriagemStage}
                 onUpdatePriority={(id, p) => updateTask(id, { prioridade: p })}
               />
@@ -276,8 +280,9 @@ function TasksPage() {
 
       <TaskDetailModal
         task={detailTask}
-        open={!!detailTask}
+        open={isDetailOpen}
         onClose={() => {
+          setIsDetailOpen(false);
           setDetailTask(null);
           fetchTasks();
         }}

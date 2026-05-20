@@ -99,8 +99,12 @@ export const GlobalAddTask: React.FC = () => {
   return (
     <>
       <Button
+        id="global-add-task-button"
         onClick={handleOpen}
-        className="fixed bottom-24 right-6 w-16 h-16 rounded-full bg-white text-black border-4 border-black shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-110 active:scale-90 transition-all z-[90] flex items-center justify-center p-0"
+        className={cn(
+          "fixed bottom-24 right-6 w-16 h-16 rounded-full bg-white text-black border-4 border-black shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-110 active:scale-90 transition-all z-[90] flex items-center justify-center p-0",
+          isOpen && "hidden"
+        )}
         aria-label="Adicionar nova tarefa ou memória"
       >
         <Plus size={40} strokeWidth={4} />

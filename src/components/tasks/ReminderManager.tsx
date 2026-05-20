@@ -28,26 +28,46 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
     { label: '1 hora antes', tipo: '1h', minutos: 60 },
   ];
 
-  const addReminder = (tipo: Reminder['tipo'], minutos: number) => {
-    if (reminders.some(r => r.minutosAntecendia === minutos)) return;
-    const newReminder: Reminder = {
-      id: crypto.randomUUID(),
-      tipo,
-      minutosAntecendia: minutos,
-      disparado: false
-    };
-    onUpdate([...reminders, newReminder]);
+  const toggleReminder = (tipo: Reminder['tipo'], minutos: number) => {
+    const exists = reminders.find(r => r.minutosAntecendia === minutos);
+    if (exists) {
+      onUpdate(reminders.filter(r => r.id !== exists.id));
+    } else {
+      const newReminder: Reminder = {
+        id: crypto.randomUUID(),
+        tipo,
+        minutosAntecendia: minutos,
+        disparado: false
+      };
+      onUpdate([...reminders, newReminder]);
+    }
   };
 
   const removeReminder = (id: string) => {
     onUpdate(reminders.filter(r => r.id !== id));
   };
 
+  const handleAddCustom = () => {
+    const mins = parseInt(customValue);
+    if (!isNaN(mins)) {
+      if (!reminders.some(r => r.minutosAntecendia === mins)) {
+        const newReminder: Reminder = {
+          id: crypto.randomUUID(),
+          tipo: 'personalizado',
+          minutosAntecendia: mins,
+          disparado: false
+        };
+        onUpdate([...reminders, newReminder]);
+      }
+      setCustomValue('');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 border-b border-zinc-900 pb-3">
         <Bell size={16} className="text-[#00ff41]" />
-        <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500">🔔 NOTIFICAÇÕES</span>
+        <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500">🔔 LEMBRETES</span>
         <span className="ml-auto text-[10px] font-black text-zinc-700 bg-zinc-900 px-2 py-0.5 rounded-full">{reminders.length} ATIVOS</span>
       </div>
 
@@ -79,19 +99,24 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
       <div className="space-y-4">
         <span className="text-[10px] font-black uppercase text-zinc-600 tracking-widest ml-1">Configurar Alerta</span>
         <div className="grid grid-cols-2 gap-2">
-          {options.map((opt) => (
-            <Button
-              key={opt.tipo}
-              variant="ghost"
-              className={cn(
-                "justify-center h-12 text-[10px] font-black uppercase tracking-tighter bg-zinc-900/50 hover:bg-[#00ff41] hover:text-black transition-all rounded-xl border border-zinc-800",
-                reminders.some(r => r.minutosAntecendia === opt.minutos) && "opacity-20 pointer-events-none"
-              )}
-              onClick={() => addReminder(opt.tipo, opt.minutos)}
-            >
-              {opt.label}
-            </Button>
-          ))}
+          {options.map((opt) => {
+            const isActive = reminders.some(r => r.minutosAntecendia === opt.minutos);
+            return (
+              <Button
+                key={opt.tipo}
+                variant="ghost"
+                className={cn(
+                  "justify-center h-12 text-[10px] font-black uppercase tracking-tighter bg-zinc-900/50 transition-all rounded-xl border border-zinc-800",
+                  isActive 
+                    ? "bg-[#00ff41] text-black border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.3)]" 
+                    : "hover:bg-[#00ff41] hover:text-black"
+                )}
+                onClick={() => toggleReminder(opt.tipo, opt.minutos)}
+              >
+                {opt.label}
+              </Button>
+            );
+          })}
         </div>
         
         <div className="flex gap-2 pt-2">
@@ -102,6 +127,7 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
               placeholder="Minutos..."
               value={customValue}
               onChange={(e) => setCustomValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddCustom()}
               className="w-full h-12 bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-4 text-xs font-bold text-white focus:outline-none focus:border-[#00ff41] transition-all"
             />
           </div>
@@ -109,13 +135,7 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
             variant="ghost"
             disabled={!customValue}
             className="h-12 w-12 bg-zinc-900 hover:bg-white hover:text-black rounded-xl border border-zinc-800"
-            onClick={() => {
-              const mins = parseInt(customValue);
-              if (!isNaN(mins)) {
-                addReminder('personalizado', mins);
-                setCustomValue('');
-              }
-            }}
+            onClick={handleAddCustom}
           >
             <Plus size={18} />
           </Button>
