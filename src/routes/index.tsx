@@ -403,7 +403,7 @@ function Dashboard() {
 
       <section className="mb-8">
         {(() => {
-          const today = new Date().toISOString().split('T')[0];
+          const today = getTodayStr();
           const now = new Date();
 
           // Filtering Reference and Non-execution items + Time filters
