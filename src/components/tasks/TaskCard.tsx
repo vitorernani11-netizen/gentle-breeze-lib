@@ -1,8 +1,8 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Trash2, RefreshCw, Bell } from 'lucide-react';
-import { format as formatDate, parseISO } from 'date-fns';
+import { Clock, Trash2, RefreshCw, Bell, Calendar } from 'lucide-react';
+import { format as formatDate, parseISO, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface TaskCardProps {
@@ -60,7 +60,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     task.hora_vencimento || task.lembrete
   );
 
-  const displayTime = task.lembrete || (task.hora_vencimento ? formatDate(parseISO(task.hora_vencimento), 'HH:mm') : null);
+  const displayTime = task.lembrete || (task.hora_vencimento ? task.hora_vencimento : null);
+  const dataVenc = task.data_execucao || task.data_vencimento;
+  const isScheduledToday = dataVenc ? isToday(parseISO(dataVenc)) : false;
+  const displayDate = dataVenc && !isScheduledToday ? formatDate(parseISO(dataVenc), 'dd/MM') : null;
 
   return (
     <Card className={cn(
@@ -132,8 +135,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             </h3>
             
             <div className="flex items-center flex-wrap gap-2">
+              {displayDate && (
+                <span className="text-[11px] font-black text-white/70 flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
+                  <Calendar size={10} /> {displayDate}
+                </span>
+              )}
               {displayTime && (
-                <span className="text-[11px] font-black text-[#00ff41] flex items-center gap-1 bg-[#00ff41]/5 px-2 py-0.5 rounded-md">
+                <span className="text-[11px] font-black text-[#00ff41] flex items-center gap-1 bg-[#00ff41]/5 px-2 py-0.5 rounded-md border border-[#00ff41]/20">
                   <Clock size={10} /> {displayTime}
                 </span>
               )}
