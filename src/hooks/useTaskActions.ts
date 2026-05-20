@@ -233,6 +233,8 @@ export const useTaskActions = (onSuccess?: () => void) => {
         prioridade: taskData.prioridade || 'P4',
         data_execucao: taskData.data_execucao,
         repeticao: taskData.repeticao || 'none',
+        recorrencia_semanal: taskData.recorrencia_semanal || null,
+        ultimo_processamento: null,
         lembrete: taskData.lembrete || null,
         reminders: taskData.reminders || [],
         hora_vencimento: taskData.hora_vencimento || null,
@@ -252,5 +254,48 @@ export const useTaskActions = (onSuccess?: () => void) => {
     }
   };
 
-  return { completeTask, rescheduleTask, moveTask, updateTriagemStage, restoreTask, deletePermanent, updateTask, addTask };
+  const checkAndRouteRecurringTasks = () => {
+    try {
+      const allTasks = loadFromLocal(TASKS_KEY) || [];
+      const today = new Date();
+      const todayStr = format(today, 'yyyy-MM-dd');
+      const currentWeekday = getWeekdayString(today);
+      let changed = false;
+
+      const updatedTasks = allTasks.map((task: any) => {
+        if (task.recorrencia_semanal === currentWeekday && task.ultimo_processamento !== todayStr) {
+          console.log('[Task:RecurringInit]', { taskId: task.id, title: task.titulo });
+          changed = true;
+          return {
+            ...task,
+            data_execucao: todayStr,
+            fase_pipeline: 1, // Volta para Entrada
+            ultimo_processamento: todayStr,
+            status_concluido: false
+          };
+        }
+        return task;
+      });
+
+      if (changed) {
+        saveToLocal(TASKS_KEY, updatedTasks);
+        window.dispatchEvent(new Event('storage'));
+        if (onSuccess) onSuccess();
+      }
+    } catch (error) {
+      console.error('Erro no processamento de rotinas:', error);
+    }
+  };
+
+  return { 
+    completeTask, 
+    rescheduleTask, 
+    moveTask, 
+    updateTriagemStage, 
+    restoreTask, 
+    deletePermanent, 
+    updateTask, 
+    addTask,
+    checkAndRouteRecurringTasks
+  };
 };
