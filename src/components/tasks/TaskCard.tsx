@@ -28,8 +28,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     if (!dueDateStr) return false;
 
     const agora = new Date();
-    // Comparação estrita de data YYYY-MM-DD
-    const hojeStr = agora.toISOString().split('T')[0];
+    // Comparação estrita de data YYYY-MM-DD em horário local
+    const hojeStr = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
     const tarefaStr = dueDateStr.split('T')[0];
 
     // Se a data é no passado
