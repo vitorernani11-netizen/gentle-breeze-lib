@@ -216,7 +216,7 @@ function Dashboard() {
     });
     setSleepHistory(history);
     
-    const currentCheckin = checkinHistory.find((d: any) => d.data === today);
+    const currentCheckin = checkinHistory.find((d: any) => d.data === getTodayStr());
     if (currentCheckin) {
       setHoursSleptToday(currentCheckin.horas_sono);
       setIsRecoveryMode(currentCheckin.horas_sono !== null && currentCheckin.horas_sono < 6);
