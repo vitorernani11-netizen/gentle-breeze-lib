@@ -111,15 +111,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       "bg-black border-0 border-b border-white/10 p-4 rounded-none flex flex-col group transition-all gap-4 relative active:bg-zinc-900/50",
       isOverdue ? "border-l-4 border-l-red-500" : ""
     )}>
-      <div className="flex items-start justify-between gap-4">
-        <div
-          role="button"
-          tabIndex={0}
-          onClick={() => onClick(task)}
-          onKeyDown={(e) => { if (e.key === 'Enter') onClick(task); }}
-          className="flex flex-col gap-2 flex-1 min-w-0 text-left cursor-pointer"
-        >
-          <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col gap-3">
+        {/* Top Unified Line (Ultra-Slim UX) */}
+        <div className="flex items-center justify-between w-full pb-2 border-b border-zinc-900/50">
+          <div className="flex items-center gap-4">
+            {/* Priority Selector */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -131,7 +127,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                   onUpdatePriority(task.id, nextPriority);
                 }
               }}
-              className={cn("text-[10px] font-black uppercase px-2 py-1 border rounded-md transition-colors", 
+              className={cn(
+                "text-[10px] font-black uppercase px-2 py-0.5 border rounded-md transition-all active:scale-95",
                 (task.prioridade === 'P1' || task.prioridade === 1) ? "text-red-500 border-red-500/40 bg-red-500/10" :
                 (task.prioridade === 'P2' || task.prioridade === 2) ? "text-orange-500 border-orange-500/40 bg-orange-500/10" :
                 (task.prioridade === 'P3' || task.prioridade === 3) ? "text-blue-500 border-blue-500/40 bg-blue-500/10" :
@@ -140,32 +137,56 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             >
               {task.prioridade || 'P4'}
             </button>
-            
-            <div className="flex items-center gap-1.5 py-1 px-2 border border-zinc-900 bg-zinc-950 rounded-md">
-              {[1, 2, 3, 4].map((stage) => (
-                <React.Fragment key={stage}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onUpdateStage(task.id, stage);
-                    }}
-                    className={cn(
-                      "text-[10px] font-black transition-all px-1",
-                      (task.fase_pipeline || 1) === stage 
-                        ? "text-[#00ff41] scale-110" 
-                        : "text-zinc-700 hover:text-zinc-500"
-                    )}
-                  >
-                    {stage}
-                  </button>
-                  {stage !== 4 && <span className="text-zinc-800 text-[8px]">|</span>}
-                </React.Fragment>
-              ))}
-            </div>
+
+            {/* Fixed Time Indicator (Inline) */}
+            {displayTime && (
+              <div className="flex items-center gap-1 text-[11px] font-black text-[#00ff41]">
+                <Clock size={12} strokeWidth={3} />
+                <span>{displayTime}</span>
+              </div>
+            )}
+
+            {displayDate && displayDate !== 'HOJE' && (
+              <div className="flex items-center gap-1 text-[11px] font-black text-zinc-500">
+                <Calendar size={12} />
+                <span>{displayDate}</span>
+              </div>
+            )}
           </div>
-          
-          <div className="space-y-1">
-            <h3 className="font-black text-base uppercase tracking-tight leading-tight flex items-center flex-wrap gap-2">
+
+          {/* Minimalist Pipeline 1 | 2 | 3 | 4 */}
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-700">
+            {[1, 2, 3, 4].map((stage) => (
+              <React.Fragment key={stage}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUpdateStage(task.id, stage);
+                  }}
+                  className={cn(
+                    "transition-all px-0.5",
+                    (task.fase_pipeline || 1) === stage 
+                      ? "text-[#00ff41] font-black scale-110" 
+                      : "hover:text-zinc-400"
+                  )}
+                >
+                  {stage}
+                </button>
+                {stage !== 4 && <span className="text-zinc-900 font-light">|</span>}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-start justify-between gap-4">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => onClick(task)}
+            onKeyDown={(e) => { if (e.key === 'Enter') onClick(task); }}
+            className="flex flex-col gap-1.5 flex-1 min-w-0 text-left cursor-pointer"
+          >
+            <h3 className="font-black text-base md:text-lg uppercase tracking-tight leading-tight flex items-center flex-wrap gap-2">
               {task.titulo}
               {(task.recorrencia_semanal || (task.repeticao && task.repeticao !== 'none')) && (
                 <RefreshCw className="w-4 h-4 text-[#00ff41] animate-none" />
@@ -177,30 +198,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               )}
             </h3>
             
-            <div className="flex items-center flex-wrap gap-2">
-              {displayDate && (
-                <span className="text-[11px] font-black text-white/70 flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
-                  <Calendar size={10} /> {displayDate}
-                </span>
-              )}
-              {displayTime && (
-                <span className="text-[11px] font-black text-[#00ff41] flex items-center gap-1 bg-[#00ff41]/5 px-2 py-0.5 rounded-md border border-[#00ff41]/20">
-                  <Clock size={10} /> {displayTime}
-                </span>
-              )}
-              {task.lembretes && task.lembretes.length > 0 && (
-                <span className="text-[11px] font-black text-[#ff00ff] flex items-center gap-1 bg-[#ff00ff]/5 px-2 py-0.5 rounded-md">
-                  <Bell size={10} /> {task.lembretes.length}
-                </span>
-              )}
-              {task.descricao && (
-                <p className="text-zinc-500 text-[11px] font-medium uppercase truncate opacity-70">
-                  {task.descricao}
-                </p>
-              )}
-            </div>
+            {task.descricao && (
+              <p className="text-zinc-500 text-[11px] font-medium uppercase truncate opacity-70 leading-relaxed">
+                {task.descricao}
+              </p>
+            )}
           </div>
-        </div>
 
         <div className="flex flex-col gap-2 shrink-0">
           <button 
