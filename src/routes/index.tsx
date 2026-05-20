@@ -71,15 +71,11 @@ const safeParseDate = (value: unknown) => {
 
 const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
   if (!dueDateStr) return false;
-
   try {
     const now = new Date();
     let dateOnly = dueDateStr.split('T')[0];
-    let ano = now.getFullYear();
-    let mes = now.getMonth() + 1;
-    let dia = now.getDate();
+    let ano = now.getFullYear(); let mes = now.getMonth() + 1; let dia = now.getDate();
 
-    // Suporta DD/MM/YYYY e YYYY-MM-DD
     if (dateOnly.includes('/')) {
       const parts = dateOnly.split('/');
       if (parts[2].length === 4) {
@@ -92,10 +88,9 @@ const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
       ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10);
     }
 
-    // Padrão para tarefas SEM horário: fim do dia (23:59:59) para não atrasar antes da hora
+    // Padrão para tarefas SEM horário: fim do dia (23:59:59) para não atrasar antes do tempo
     let hora = 23; let minuto = 59; let segundo = 59;
 
-    // Se tiver horário estrito (ex: 18:00)
     if (dueTimeStr && dueTimeStr.trim() !== '') {
       const timeParts = dueTimeStr.split(':');
       hora = parseInt(timeParts[0], 10);
@@ -103,13 +98,9 @@ const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
       segundo = 0;
     }
 
-    // Cria o objeto de data EXATAMENTE no fuso horário local do aparelho
     const targetDateTime = new Date(ano, mes - 1, dia, hora, minuto, segundo);
-
-    // Se o tempo da tarefa já passou em relação ao relógio do aparelho, TRUE (Atrasada)
     return targetDateTime.getTime() < now.getTime();
   } catch (e) {
-    console.error("Erro no cálculo do timestamp:", e);
     return false;
   }
 };
@@ -470,32 +461,29 @@ function Dashboard() {
 
       <section className="mb-8">
         {(() => {
-          const today = getTodayStr();
-          const now = new Date();
-
-          // Filtering Reference and Non-execution items + Time filters
-          const tarefasDeHojeEPassado = tasks.filter(tarefa => {
+          // 1. Captura o pool inicial: Tarefas do dia de hoje OU tarefas com datas do passado que estão ativas
+          const tarefasDoPool = tasks.filter(tarefa => {
             if (tarefa.status_concluido) return false;
-            
-            const isReference = tarefa.tags?.some((tag: string) => 
-              tag.toLowerCase().includes('referência') || 
-              tag.toLowerCase().includes('referencia') || 
-              tag.toLowerCase().includes('wishlist') ||
-              tag.toLowerCase().includes('leitura') ||
-              tag.toLowerCase().includes('ideia')
-            ) || tarefa.status === 'Referência';
-            if (isReference) return false;
+            if (!tarefa.data_vencimento && !tarefa.data_execucao) return false;
 
             const dueDate = tarefa.data_execucao || tarefa.data_vencimento;
-            if (!dueDate) return false;
-            
             const atrasada = isTaskOverdue(dueDate, tarefa.hora_vencimento || tarefa.lembrete);
-            const ehHoje = isTaskFromToday(dueDate);
             
+            // Verifica se pertence ao dia de hoje
+            const now = new Date();
+            const hojeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            let taskDateStr = dueDate.split('T')[0].replace(/\//g, '-');
+            if (taskDateStr.includes('-') && taskDateStr.split('-')[0].length !== 4) {
+              const parts = taskDateStr.split('-');
+              taskDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            const ehHoje = taskDateStr === hojeStr;
+
             return ehHoje || atrasada;
           });
 
-          const executionTasks = tarefasDeHojeEPassado.filter((tarefa) => {
+          // 2. Distribui as tarefas pelas abas de forma excludente
+          const executionTasks = tarefasDoPool.filter((tarefa) => {
             const dueDate = tarefa.data_execucao || tarefa.data_vencimento;
             const atrasada = isTaskOverdue(dueDate, tarefa.hora_vencimento || tarefa.lembrete);
             
@@ -505,27 +493,25 @@ function Dashboard() {
               horaTarefa = parseInt(dueTime.split(':')[0], 10);
             }
 
+            // Se o usuário está na aba ATRASADAS, mostra tudo o que venceu (passado histórico ou horas de hoje)
             if (filterMode === 'DELAYED') {
               return atrasada === true;
             }
 
-            if (atrasada) {
-              return false;
-            }
+            // Para as outras abas, esconde o que já atrasou
+            if (atrasada) return false;
 
+            // Filtro de blocos de tempo limpos
             if (filterMode === 'INTERVAL') {
               return horaTarefa >= 12 && horaTarefa < 14;
             }
 
             if (filterMode === 'POST18') {
-              return horaTarefa >= 18 && horaTarefa <= 23;
+              return horaTarefa >= 18;
             }
 
-            if (filterMode === 'ALL') {
-              return isTaskFromToday(dueDate || '');
-            }
-
-            return false;
+            // VER TUDO mostra todas as tarefas ativas planejadas para o dia corrente
+            return true;
           });
 
           // Grouping logic based on Projects
