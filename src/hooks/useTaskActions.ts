@@ -114,7 +114,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
       console.log('[Task:Reschedule]', { 
         taskId: task.id, 
         oldDate: task.data_execucao, 
-        newDate: newDate || new Date().toISOString().split('T')[0] 
+        newDate: newDate || getTodayStr() 
       });
       if (onSuccess) onSuccess();
     } catch (error) {
