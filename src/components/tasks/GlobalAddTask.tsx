@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Reminder } from './ReminderManager';
 import { Plus, Zap, Brain, X, ChevronRight, ClipboardList, Book, Lightbulb, Folder, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AddTaskOverlay } from './AddTaskOverlay';
