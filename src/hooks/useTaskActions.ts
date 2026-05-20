@@ -128,7 +128,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
 
     try {
       const allTasks = loadFromLocal(TASKS_KEY) || [];
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayStr();
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       const tomorrowStr = tomorrow.toISOString().split('T')[0];
