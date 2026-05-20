@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Reminder } from './ReminderManager';
 import { Plus, Zap, Brain, X, ChevronRight, ClipboardList, Book, Lightbulb, Folder, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,12 +24,26 @@ const CORE_PROJECTS = [
 
 export const GlobalAddTask: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isOtherModalOpen, setIsOtherModalOpen] = useState(false);
   const [mode, setMode] = useState<'choice' | 'action' | 'memory'>('choice');
   const [memoryData, setMemoryData] = useState({ titulo: '', conteudo: '', projeto_id: '', categoria: 'notes' });
   const { addTask } = useTaskActions();
   const { addVaultItem } = useVaultActions();
   
   const projects = loadFromLocal('hardware_humano_projects') || [];
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const dialogs = document.querySelectorAll('[role="dialog"]');
+      // Filtramos para ver se existe algum modal aberto que NÃO seja o de criação
+      // O AddTaskOverlay ou o Choice Menu usam dialogs ou divs com z-100
+      // Mas a regra simples é: se tem dialog aberto e o NOSSO menu de escolha não está aberto, escondemos o FAB.
+      setIsOtherModalOpen(dialogs.length > 0);
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -103,7 +117,7 @@ export const GlobalAddTask: React.FC = () => {
         onClick={handleOpen}
         className={cn(
           "fixed bottom-24 right-6 w-16 h-16 rounded-full bg-white text-black border-4 border-black shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-110 active:scale-90 transition-all z-[90] flex items-center justify-center p-0",
-          isOpen && "hidden"
+          (isOpen || isOtherModalOpen) && "hidden"
         )}
         aria-label="Adicionar nova tarefa ou memória"
       >
