@@ -141,23 +141,25 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               {task.prioridade || 'P4'}
             </button>
             
-            <div className="grid grid-cols-2 gap-1 border border-zinc-800 bg-zinc-950 p-1 rounded-md w-fit">
+            <div className="flex items-center gap-1.5 py-1 px-2 border border-zinc-900 bg-zinc-950 rounded-md">
               {[1, 2, 3, 4].map((stage) => (
-                <button
-                  key={stage}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onUpdateStage(task.id, stage);
-                  }}
-                  className={cn(
-                    "w-8 h-6 flex items-center justify-center text-[10px] font-black transition-all rounded-sm",
-                    (task.fase_pipeline || 1) === stage 
-                      ? "bg-white text-black scale-105 shadow-lg" 
-                      : "bg-black text-zinc-600 hover:text-zinc-400"
-                  )}
-                >
-                  {stage}
-                </button>
+                <React.Fragment key={stage}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUpdateStage(task.id, stage);
+                    }}
+                    className={cn(
+                      "text-[10px] font-black transition-all px-1",
+                      (task.fase_pipeline || 1) === stage 
+                        ? "text-[#00ff41] scale-110" 
+                        : "text-zinc-700 hover:text-zinc-500"
+                    )}
+                  >
+                    {stage}
+                  </button>
+                  {stage !== 4 && <span className="text-zinc-800 text-[8px]">|</span>}
+                </React.Fragment>
               ))}
             </div>
           </div>
