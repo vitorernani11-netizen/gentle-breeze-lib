@@ -3,7 +3,6 @@ import {
   Calendar as CalendarIcon, 
   Clock, 
   Flag, 
-  Tag, 
   Target,
   Send,
   X
@@ -214,10 +213,6 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               </PopoverContent>
             </Popover>
 
-            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border border-zinc-900 bg-zinc-900/50 text-zinc-700">
-              <Tag size={20} />
-            </Button>
-            
             <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border border-zinc-900 bg-zinc-900/50 text-zinc-700">
               <Target size={20} />
             </Button>
