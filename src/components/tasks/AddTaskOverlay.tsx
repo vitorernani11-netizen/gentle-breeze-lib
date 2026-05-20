@@ -28,6 +28,7 @@ interface AddTaskOverlayProps {
     recorrencia: string;
     prioridade: string;
     lembrete: string | null;
+    lembretes: Reminder[];
     reminders: any[];
     descricao?: string;
     hora_vencimento?: string | null;
