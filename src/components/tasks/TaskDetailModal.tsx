@@ -187,7 +187,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             </SidebarRow>
 
             {/* Notificações Push Inline */}
-            <div className="pt-2">
+            <div className="pt-4 border-t border-zinc-900 mt-4">
               <ReminderManager 
                 reminders={task.lembretes || []} 
                 onUpdate={(newReminders) => {
