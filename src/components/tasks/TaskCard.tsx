@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Trash2, RefreshCw } from 'lucide-react';
+import { Clock, Trash2, RefreshCw, Bell } from 'lucide-react';
 import { format as formatDate, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -131,10 +131,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               )}
             </h3>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center flex-wrap gap-2">
               {displayTime && (
                 <span className="text-[11px] font-black text-[#00ff41] flex items-center gap-1 bg-[#00ff41]/5 px-2 py-0.5 rounded-md">
                   <Clock size={10} /> {displayTime}
+                </span>
+              )}
+              {task.lembretes && task.lembretes.length > 0 && (
+                <span className="text-[11px] font-black text-[#ff00ff] flex items-center gap-1 bg-[#ff00ff]/5 px-2 py-0.5 rounded-md">
+                  <Bell size={10} /> {task.lembretes.length}
                 </span>
               )}
               {task.descricao && (

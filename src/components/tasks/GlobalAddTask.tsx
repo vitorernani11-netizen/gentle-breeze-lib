@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Reminder } from './ReminderManager';
 import { Plus, Zap, Brain, X, ChevronRight, ClipboardList, Book, Lightbulb, Folder, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AddTaskOverlay } from './AddTaskOverlay';
@@ -47,6 +48,7 @@ export const GlobalAddTask: React.FC = () => {
     recorrencia: string;
     prioridade: string;
     lembrete: string | null;
+    lembretes: Reminder[];
     reminders: any[];
     descricao?: string;
     hora_vencimento?: string | null;
@@ -62,6 +64,7 @@ export const GlobalAddTask: React.FC = () => {
       prioridade: taskData.prioridade || 'P4',
       status: status,
       lembrete: taskData.lembrete,
+      lembretes: taskData.lembretes || [],
       reminders: taskData.reminders || [],
       hora_vencimento: taskData.hora_vencimento
     });

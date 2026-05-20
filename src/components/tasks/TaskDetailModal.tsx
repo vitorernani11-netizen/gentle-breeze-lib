@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { ReminderManager, type Reminder } from './ReminderManager';
 
 import {
   Calendar,
@@ -10,7 +12,8 @@ import {
   Tag,
   Bell,
   Save,
-  X
+  X,
+  Plus
   } from 'lucide-react';
 import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
 import { cn } from '@/lib/utils';
@@ -173,8 +176,8 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               </div>
             </SidebarRow>
 
-            {/* Lembrete */}
-            <SidebarRow icon={<Bell size={18} />} label="Horário">
+            {/* Horário Fixo da Atividade */}
+            <SidebarRow icon={<Clock size={18} />} label="Horário Fixo">
               <input
                 type="time"
                 value={lembrete || ''}
@@ -183,11 +186,36 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               />
             </SidebarRow>
 
-            {/* Etiquetas (placeholder) */}
-            <SidebarRow icon={<Tag size={18} />} label="Tags">
-              <div className="bg-zinc-900/30 border border-dashed border-zinc-800 rounded-xl p-4 text-center">
-                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-700">Adicionar tags</span>
-              </div>
+            {/* Notificações Push */}
+            <SidebarRow icon={<Bell size={18} />} label="Notificações">
+              <ReminderManager 
+                reminders={task.lembretes || []} 
+                onUpdate={(newReminders) => {
+                  triggerSave({ lembretes: newReminders });
+                  // Solicita permissão ao adicionar lembrete se necessário
+                  if (newReminders.length > (task.lembretes?.length || 0)) {
+                    if ('Notification' in window && Notification.permission === 'default') {
+                      Notification.requestPermission();
+                    }
+                  }
+                }}
+              >
+                <Button 
+                  variant="ghost" 
+                  className={cn(
+                    "w-full h-14 bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-between px-4 transition-all hover:bg-zinc-800",
+                    (task.lembretes?.length > 0) && "border-[#00ff41]/30 bg-[#00ff41]/5"
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <Bell size={16} className={cn((task.lembretes?.length > 0) ? "text-[#00ff41]" : "text-zinc-600")} />
+                    <span className="text-xs font-black uppercase tracking-widest text-white">
+                      {task.lembretes?.length || 0} Ativos
+                    </span>
+                  </div>
+                  <Plus size={16} className="text-zinc-600" />
+                </Button>
+              </ReminderManager>
             </SidebarRow>
           </div>
         </div>

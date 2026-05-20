@@ -277,7 +277,10 @@ function TasksPage() {
       <TaskDetailModal
         task={detailTask}
         open={!!detailTask}
-        onClose={() => setDetailTask(null)}
+        onClose={() => {
+          setDetailTask(null);
+          fetchTasks();
+        }}
         onUpdate={updateTask}
       />
 

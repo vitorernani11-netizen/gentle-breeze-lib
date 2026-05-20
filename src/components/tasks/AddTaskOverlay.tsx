@@ -17,7 +17,7 @@ import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { parseNLP, NLPResult } from '@/utils/nlpParser';
 import { CalendarPopover } from './CalendarPopover';
-import { ReminderManager } from './ReminderManager';
+import { ReminderManager, type Reminder } from './ReminderManager';
 
 interface AddTaskOverlayProps {
   open: boolean;
@@ -28,6 +28,7 @@ interface AddTaskOverlayProps {
     recorrencia: string;
     prioridade: string;
     lembrete: string | null;
+    lembretes: Reminder[];
     reminders: any[];
     descricao?: string;
     hora_vencimento?: string | null;
@@ -96,6 +97,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       recorrencia: recurrence,
       prioridade,
       lembrete: format(vencimento, 'HH:mm'),
+      lembretes: reminders,
       reminders: reminders,
       descricao,
       hora_vencimento: horaVencISO

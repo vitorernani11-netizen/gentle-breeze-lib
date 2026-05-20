@@ -236,6 +236,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
         recorrencia_semanal: taskData.recorrencia_semanal || null,
         ultimo_processamento: null,
         lembrete: taskData.lembrete || null,
+        lembretes: taskData.lembretes || [],
         reminders: taskData.reminders || [],
         hora_vencimento: taskData.hora_vencimento || null,
         status: taskData.status || 'Entrada'
