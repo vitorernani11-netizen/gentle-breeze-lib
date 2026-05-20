@@ -184,7 +184,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             tabIndex={0}
             onClick={() => onClick(task)}
             onKeyDown={(e) => { if (e.key === 'Enter') onClick(task); }}
-            className="flex flex-col gap-1 flex-1 min-w-0 text-left cursor-pointer"
+            className="flex flex-col flex-grow items-start justify-start w-full min-w-0 text-left cursor-pointer"
           >
             <h3 className="font-black text-lg md:text-xl uppercase tracking-tight leading-tight flex items-center flex-wrap gap-2 text-white">
               {task.titulo}
