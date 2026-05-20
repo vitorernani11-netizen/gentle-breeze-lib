@@ -486,19 +486,20 @@ function Dashboard() {
             if (t.status_concluido) return false;
             const dataVenc = t.data_execucao || t.data_vencimento;
             if (!dataVenc) return false;
-            
+
             const atrasada = isTaskOverdue(dataVenc, t.hora_vencimento || t.lembrete);
             
-            // Nova checagem: O normalizador decide se a data é HOJE
-            const objData = normalizarParaObjetoDate(dataVenc, t.hora_vencimento || t.lembrete);
+            // Verifica se é explicitamente hoje
+            const dataTarefa = normalizarParaObjetoDate(dataVenc, t.hora_vencimento || t.lembrete);
             const agora = new Date();
-            const ehHoje = objData && 
-                          objData.getDate() === agora.getDate() && 
-                          objData.getMonth() === agora.getMonth() && 
-                          objData.getFullYear() === agora.getFullYear();
-            
-            // A tela "Hoje" aceita a tarefa se for programada para hoje OU se estiver atrasada
-            return ehHoje || atrasada || dataVenc.toUpperCase().trim() === 'HOJE';
+            const ehHoje = dataTarefa 
+              ? dataTarefa.getDate() === agora.getDate() && dataTarefa.getMonth() === agora.getMonth() && dataTarefa.getFullYear() === agora.getFullYear()
+              : false;
+
+            const stringHoje = dataVenc.toUpperCase().trim() === 'HOJE';
+
+            // A tela Hoje aceita a tarefa se for programada para hoje OU se estiver com o prazo vencido
+            return ehHoje || stringHoje || atrasada;
           });
 
           // 2. Separação Absoluta de Abas
