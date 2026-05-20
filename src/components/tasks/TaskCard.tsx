@@ -94,8 +94,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               ))}
             </div>
             
-            <h3 className="font-bold text-sm uppercase tracking-tight truncate leading-none">
-              {task.titulo} {(task.recorrencia_semanal || (task.repeticao && task.repeticao !== 'none')) && '🔄'}
+            <h3 className="font-bold text-sm uppercase tracking-tight truncate leading-none flex items-center gap-1">
+              {task.titulo}
+              {(task.recorrencia_semanal || (task.repeticao && task.repeticao !== 'none')) && (
+                <RefreshCw className="w-3 h-3 text-[#00ff41] animate-none" />
+              )}
             </h3>
 
             {isOverdue && (
