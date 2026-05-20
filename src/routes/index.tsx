@@ -151,7 +151,7 @@ function Dashboard() {
   };
 
   const fetchData = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayStr();
     const sevenDaysAgo = subDays(new Date(), 7);
     
     // Helper para validação de data segura contra dados antigos/corrompidos
