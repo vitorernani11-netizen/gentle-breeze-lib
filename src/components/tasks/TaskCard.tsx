@@ -17,15 +17,11 @@ interface TaskCardProps {
 
 export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
   if (!dueDateStr) return false;
-
   try {
     const now = new Date();
     let dateOnly = dueDateStr.split('T')[0];
-    let ano = now.getFullYear();
-    let mes = now.getMonth() + 1;
-    let dia = now.getDate();
+    let ano = now.getFullYear(); let mes = now.getMonth() + 1; let dia = now.getDate();
 
-    // Suporta DD/MM/YYYY e YYYY-MM-DD
     if (dateOnly.includes('/')) {
       const parts = dateOnly.split('/');
       if (parts[2].length === 4) {
@@ -38,10 +34,9 @@ export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) =>
       ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10);
     }
 
-    // Padrão para tarefas SEM horário: fim do dia (23:59:59) para não atrasar antes da hora
+    // Padrão para tarefas SEM horário: fim do dia (23:59:59) para não atrasar antes do tempo
     let hora = 23; let minuto = 59; let segundo = 59;
 
-    // Se tiver horário estrito (ex: 18:00)
     if (dueTimeStr && dueTimeStr.trim() !== '') {
       const timeParts = dueTimeStr.split(':');
       hora = parseInt(timeParts[0], 10);
@@ -49,13 +44,9 @@ export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) =>
       segundo = 0;
     }
 
-    // Cria o objeto de data EXATAMENTE no fuso horário local do aparelho
     const targetDateTime = new Date(ano, mes - 1, dia, hora, minuto, segundo);
-
-    // Se o tempo da tarefa já passou em relação ao relógio do aparelho, TRUE (Atrasada)
     return targetDateTime.getTime() < now.getTime();
   } catch (e) {
-    console.error("Erro no cálculo do timestamp:", e);
     return false;
   }
 };
