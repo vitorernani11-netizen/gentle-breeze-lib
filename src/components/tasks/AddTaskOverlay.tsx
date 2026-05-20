@@ -109,16 +109,16 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-2xl bg-zinc-950 border-t-2 border-x-2 border-white rounded-t-3xl p-6 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] animate-in slide-in-from-bottom-full duration-300"
+        className="w-full max-w-2xl bg-zinc-950 border-t border-x border-white/10 rounded-t-[2.5rem] p-8 pb-12 shadow-[0_-20px_60px_rgba(0,0,0,0.9)] animate-in slide-in-from-bottom-full duration-500 ease-out"
         onKeyDown={(e) => {
           if (e.key === 'Escape') onClose();
           if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit();
         }}
       >
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Nova Captura</span>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
-            <X size={20} />
+        <div className="flex justify-between items-center mb-6">
+          <span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-600">Nova Captura</span>
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center bg-zinc-900 rounded-full text-zinc-500 hover:text-white transition-all active:scale-90">
+            <X size={24} />
           </button>
         </div>
 
@@ -128,7 +128,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
             placeholder="Nome da tarefa"
-            className="bg-transparent border-none text-xl font-bold placeholder:text-zinc-800 focus-visible:ring-0 p-0 h-auto mb-2 relative z-10"
+            className="bg-transparent border-none text-2xl md:text-3xl font-black placeholder:text-zinc-800 focus-visible:ring-0 p-0 h-auto mb-4 relative z-10 uppercase tracking-tighter"
           />
           {nlpData && nlpData.detectedPatterns.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-2">
