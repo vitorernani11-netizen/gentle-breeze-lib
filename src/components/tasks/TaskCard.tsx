@@ -119,29 +119,31 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           onKeyDown={(e) => { if (e.key === 'Enter') onClick(task); }}
           className="flex flex-col gap-2 flex-1 min-w-0 text-left cursor-pointer"
         >
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="grid grid-cols-2 gap-1.5 max-w-[120px]">
-              {['P4', 'P1', 'P2', 'P3'].map((priority) => (
-                <button
-                  key={priority}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onUpdatePriority) {
-                      onUpdatePriority(task.id, priority);
-                    }
-                  }}
-                  className={cn(
-                    "text-[9px] font-black uppercase w-12 h-6 border rounded transition-colors flex items-center justify-center",
-                    (task.prioridade === priority || (priority === 'P4' && !task.prioridade)) 
-                      ? (priority === 'P1' ? "text-red-500 border-red-500/40 bg-red-500/10" :
-                         priority === 'P2' ? "text-orange-500 border-orange-500/40 bg-orange-500/10" :
-                         priority === 'P3' ? "text-blue-500 border-blue-500/40 bg-blue-500/10" :
-                         "text-white border-white bg-white/10")
-                      : "text-zinc-600 border-zinc-900 bg-zinc-950 hover:text-zinc-400"
-                  )}
-                >
-                  {priority}
-                </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 py-1 px-2 border border-zinc-900 bg-zinc-950 rounded-md">
+              {['P1', 'P2', 'P3', 'P4'].map((priority) => (
+                <React.Fragment key={priority}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onUpdatePriority) {
+                        onUpdatePriority(task.id, priority);
+                      }
+                    }}
+                    className={cn(
+                      "text-[10px] font-black transition-all px-1",
+                      (task.prioridade === priority || (priority === 'P4' && !task.prioridade))
+                        ? (priority === 'P1' ? "text-red-500 scale-110" :
+                           priority === 'P2' ? "text-orange-500 scale-110" :
+                           priority === 'P3' ? "text-blue-500 scale-110" :
+                           "text-white scale-110")
+                        : "text-zinc-700 hover:text-zinc-500"
+                    )}
+                  >
+                    {priority.replace('P', '')}
+                  </button>
+                  {priority !== 'P4' && <span className="text-zinc-800 text-[8px]">|</span>}
+                </React.Fragment>
               ))}
             </div>
             
