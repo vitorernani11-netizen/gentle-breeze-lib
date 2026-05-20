@@ -37,7 +37,7 @@ export const Route = createFileRoute('/tasks')({
 function TasksPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTasks, setActiveTasks] = useState<any[]>([]);
+  const [tarefasOrdenadasDaEntrada, setTarefasOrdenadasDaEntrada] = useState<any[]>([]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
   const [showCompleted, setShowCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
