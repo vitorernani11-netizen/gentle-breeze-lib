@@ -113,8 +113,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     )}>
       <div className="flex flex-col gap-3">
         {/* Top Unified Line (Ultra-Slim UX) */}
-        <div className="flex items-center justify-between w-full pb-2 border-b border-zinc-900/50">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-row items-center justify-between w-full gap-2 mb-1 pb-2 border-b border-zinc-800/40">
+          <div className="flex items-center gap-3">
             {/* Priority Selector */}
             <button
               onClick={(e) => {
@@ -140,23 +140,23 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
             {/* Fixed Time Indicator (Inline) */}
             {displayTime && (
-              <div className="flex items-center gap-1 text-[11px] font-black text-[#00ff41]">
-                <Clock size={12} strokeWidth={3} />
+              <div className="flex items-center gap-1 text-[11px] font-black text-[#00ff41] bg-[#00ff41]/5 px-2 py-0.5 rounded-md border border-[#00ff41]/20">
+                <Clock size={10} strokeWidth={3} />
                 <span>{displayTime}</span>
               </div>
             )}
 
             {displayDate && displayDate !== 'HOJE' && (
-              <div className="flex items-center gap-1 text-[11px] font-black text-zinc-500">
-                <Calendar size={12} />
+              <div className="flex items-center gap-1 text-[11px] font-black text-zinc-500 bg-zinc-900/50 px-2 py-0.5 rounded-md border border-zinc-800">
+                <Calendar size={10} />
                 <span>{displayDate}</span>
               </div>
             )}
           </div>
 
           {/* Minimalist Pipeline 1 | 2 | 3 | 4 */}
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-700">
-            {[1, 2, 3, 4].map((stage) => (
+          <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-700">
+            {[1, 2, 3, 4].map((stage, idx) => (
               <React.Fragment key={stage}>
                 <button
                   onClick={(e) => {
@@ -166,13 +166,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                   className={cn(
                     "transition-all px-0.5",
                     (task.fase_pipeline || 1) === stage 
-                      ? "text-[#00ff41] font-black scale-110" 
+                      ? "text-[#00ff41] font-black" 
                       : "hover:text-zinc-400"
                   )}
                 >
                   {stage}
                 </button>
-                {stage !== 4 && <span className="text-zinc-900 font-light">|</span>}
+                {idx < 3 && <span className="text-zinc-900/50 font-light mx-px">|</span>}
               </React.Fragment>
             ))}
           </div>
