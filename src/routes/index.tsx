@@ -72,37 +72,48 @@ const safeParseDate = (value: unknown) => {
 const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
   if (!dueDateStr) return false;
 
-  const now = new Date();
-  
-  // 1. Pega a data de hoje no formato YYYY-MM-DD (Garante 2 dígitos para mês e dia)
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  
-  // 2. Transforma a data da tarefa para o mesmo formato YYYY-MM-DD
-  let taskDateStr = dueDateStr.split('T')[0]; // Remove horas se houver
-  if (taskDateStr.includes('/')) {
-    const parts = taskDateStr.split('/');
-    // Se for DD/MM/YYYY converte para YYYY-MM-DD, senão mantém
-    taskDateStr = parts[2].length === 4 
-      ? `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
-      : `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+  try {
+    const now = new Date();
+    let dateOnly = dueDateStr.split('T')[0];
+    let ano = now.getFullYear();
+    let mes = now.getMonth() + 1;
+    let dia = now.getDate();
+
+    // Suporta DD/MM/YYYY e YYYY-MM-DD
+    if (dateOnly.includes('/')) {
+      const parts = dateOnly.split('/');
+      if (parts[2].length === 4) {
+        dia = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); ano = parseInt(parts[2], 10);
+      } else {
+        ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10);
+      }
+    } else if (dateOnly.includes('-')) {
+      const parts = dateOnly.split('-');
+      ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10);
+    }
+
+    // Padrão para tarefas SEM horário: fim do dia (23:59:59) para não atrasar antes da hora
+    let hora = 23; let minuto = 59; let segundo = 59;
+
+    // Se tiver horário estrito (ex: 18:00)
+    if (dueTimeStr && dueTimeStr.trim() !== '') {
+      const timeParts = dueTimeStr.split(':');
+      hora = parseInt(timeParts[0], 10);
+      minuto = parseInt(timeParts[1], 10);
+      segundo = 0;
+    }
+
+    // Cria o objeto de data EXATAMENTE no fuso horário local do aparelho
+    const targetDateTime = new Date(ano, mes - 1, dia, hora, minuto, segundo);
+
+    // Se o tempo da tarefa já passou em relação ao relógio do aparelho, TRUE (Atrasada)
+    return targetDateTime.getTime() < now.getTime();
+  } catch (e) {
+    console.error("Erro no cálculo do timestamp:", e);
+    return false;
   }
-
-  // 3. Comparação de Dias (String literal)
-  if (taskDateStr < todayStr) return true; // Passado
-  if (taskDateStr > todayStr) return false; // Futuro
-
-  // 4. Se for HOJE, compara a hora
-  if (dueTimeStr) {
-    const [hours, minutes] = dueTimeStr.split(':').map(Number);
-    const currentHours = now.getHours();
-    const currentMinutes = now.getMinutes();
-
-    if (currentHours > hours) return true; // Hora já passou
-    if (currentHours === hours && currentMinutes > minutes) return true; // Mesmo minuto já passou
-  }
-
-  return false;
 };
+
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
