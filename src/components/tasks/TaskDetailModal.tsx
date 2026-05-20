@@ -128,7 +128,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         {/* Body: 2 cols on desktop, stack on mobile */}
         <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] overflow-y-auto pb-40">
           {/* Main column */}
-          <div className="p-8 space-y-6 md:border-r border-zinc-900">
+          <div className="p-8 space-y-4 md:border-r border-zinc-900">
             <div>
               <Input
                 value={titulo}
@@ -137,11 +137,66 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 className="border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900"
               />
             </div>
+
+            {/* Top Unified Line (Ultra-Slim UX) */}
+            <div className="flex flex-row items-center justify-between gap-4 w-full pb-4 border-b border-zinc-800">
+              <div className="flex items-center gap-4">
+                {/* Priority Selector */}
+                <button
+                  onClick={() => {
+                    const priorities = ['P4', 'P1', 'P2', 'P3'];
+                    const currentIndex = priorities.indexOf(prioridade);
+                    const nextPriority = priorities[(currentIndex + 1) % priorities.length];
+                    handlePriority(nextPriority);
+                  }}
+                  className={cn(
+                    'flex items-center justify-center h-8 px-3 border rounded-lg transition-all active:scale-95 font-black text-[10px] uppercase',
+                    currentPriority.color,
+                    'bg-zinc-900/30 border-zinc-800'
+                  )}
+                >
+                  {prioridade}
+                </button>
+
+                {/* Fixed Time Input (Inline) */}
+                <div className="flex items-center gap-2">
+                  <Clock size={14} className="text-zinc-600" />
+                  <input
+                    type="time"
+                    value={lembrete || ''}
+                    onChange={(e) => handleLembrete(e.target.value)}
+                    className="bg-transparent border-none p-0 text-xs font-bold text-white focus:outline-none w-[50px] [color-scheme:dark]"
+                  />
+                </div>
+              </div>
+
+              {/* Minimalist Pipeline 1 | 2 | 3 | 4 */}
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-600">
+                {[1, 2, 3, 4].map((step, idx) => (
+                  <React.Fragment key={step}>
+                    <button
+                      onClick={() => {
+                        const updates = { etapa: step };
+                        triggerSave(updates);
+                      }}
+                      className={cn(
+                        "transition-all hover:text-white",
+                        (task.etapa || 1) === step ? "text-[#00ff41] font-black" : "text-zinc-600"
+                      )}
+                    >
+                      {step}
+                    </button>
+                    {idx < 3 && <span className="text-zinc-800 font-light">|</span>}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+
             <Textarea
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="Descrição da tarefa..."
-              className="border-0 bg-transparent text-base text-zinc-400 p-0 min-h-[150px] shadow-none focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-900"
+              className="border-0 bg-transparent text-base text-zinc-400 p-0 min-h-[300px] shadow-none focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-900"
             />
           </div>
 
@@ -156,38 +211,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg"
               />
             </SidebarRow>
-
-            {/* Prioridade */}
-            <SidebarRow icon={<Flag size={18} className={currentPriority.color.split(' ')[0]} />} label="Prioridade">
-              <button
-                onClick={() => {
-                  const priorities = ['P4', 'P1', 'P2', 'P3'];
-                  const currentIndex = priorities.indexOf(prioridade);
-                  const nextPriority = priorities[(currentIndex + 1) % priorities.length];
-                  handlePriority(nextPriority);
-                }}
-                className={cn(
-                  'flex items-center justify-center h-10 px-4 border rounded-xl transition-all active:scale-95 font-black text-xs uppercase',
-                  currentPriority.color,
-                  'bg-zinc-900/30 border-zinc-900'
-                )}
-              >
-                {prioridade}
-              </button>
-            </SidebarRow>
-
-
-            {/* Horário Fixo da Atividade */}
-            <div className="pb-4 border-b border-zinc-900/50">
-              <SidebarRow icon={<Clock size={18} />} label="Horário Fixo">
-                <input
-                  type="time"
-                  value={lembrete || ''}
-                  onChange={(e) => handleLembrete(e.target.value)}
-                  className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg pointer-events-auto"
-                />
-              </SidebarRow>
-            </div>
 
             {/* Lembretes Push Inline */}
             <div className="pt-2" id="lembretes-section">
