@@ -67,7 +67,7 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
     <div className="space-y-6">
       <div className="flex items-center gap-2 border-b border-zinc-900 pb-3">
         <Bell size={16} className="text-[#00ff41]" />
-        <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500">🔔 LEMBRETES</span>
+        <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500">LEMBRETES</span>
         <span className="ml-auto text-[10px] font-black text-zinc-700 bg-zinc-900 px-2 py-0.5 rounded-full">{reminders.length} ATIVOS</span>
       </div>
 

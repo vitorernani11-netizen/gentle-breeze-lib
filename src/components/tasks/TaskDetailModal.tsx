@@ -125,7 +125,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         </div>
 
         {/* Body: 2 cols on desktop, stack on mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] overflow-y-auto pb-32">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] overflow-y-auto pb-40">
           {/* Main column */}
           <div className="p-8 space-y-6 md:border-r border-zinc-900">
             <div>
