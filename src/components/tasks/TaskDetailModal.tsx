@@ -193,11 +193,12 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             {/* Lembretes Push Inline */}
             <div className="pt-2" id="lembretes-section">
               <ReminderManager 
-                reminders={task.lembretes || []} 
+                reminders={lembretesState} 
                 onUpdate={(newReminders) => {
+                  setLembretesState(newReminders);
                   triggerSave({ lembretes: newReminders });
                   // Solicita permissão ao adicionar lembrete se necessário
-                  if (newReminders.length > (task.lembretes?.length || 0)) {
+                  if (newReminders.length > (lembretesState.length || 0)) {
                     if ('Notification' in window && Notification.permission === 'default') {
                       Notification.requestPermission();
                     }
