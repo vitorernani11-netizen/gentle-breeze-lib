@@ -547,12 +547,8 @@ function Dashboard() {
             }
           });
 
-          // Apply Filter Mode (already filtered executionTasks, but some modes have specific grouping)
-          let finalGroups = { ...groupedTasks };
-
-          if (filterMode === 'INTERVAL' || filterMode === 'POST18' || filterMode === 'DELAYED') {
-            finalGroups = groupedTasks;
-          }
+          // Apply Filter Mode (already filtered executionTasks)
+          const finalGroups = groupedTasks;
 
           const hasAnyTasks = Object.values(finalGroups).some(g => g.tasks.length > 0);
 
