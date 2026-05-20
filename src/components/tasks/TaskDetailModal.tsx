@@ -195,8 +195,8 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             <Textarea
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
-              placeholder="Descrição da tarefa..."
-              className="border-0 bg-transparent text-base text-zinc-400 p-0 min-h-[300px] shadow-none focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-900"
+              placeholder="Adicione a descrição ou sub-tarefas aqui..."
+              className="flex-grow w-full min-h-[250px] md:min-h-[350px] bg-zinc-900/40 border border-zinc-800 p-3 text-sm text-zinc-400 focus:border-[#00ff41] focus:ring-0 resize-none leading-relaxed placeholder:text-zinc-700 transition-colors"
             />
           </div>
 
