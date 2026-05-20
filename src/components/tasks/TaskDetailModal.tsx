@@ -94,12 +94,12 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
   const handleDate = (v: string) => {
     setDataExecucao(v);
-    triggerSave({ data_execucao: v });
+    triggerSave({ data_execucao: v, data_vencimento: v });
   };
 
   const handleLembrete = (v: string) => {
     setLembrete(v);
-    triggerSave({ lembrete: v || null });
+    triggerSave({ lembrete: v || null, hora_vencimento: v || null });
   };
 
   const currentPriority = PRIORITIES.find((p) => p.value === prioridade) || PRIORITIES[3];

@@ -17,31 +17,32 @@ interface TaskCardProps {
 
 export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
   if (!dueDateStr) return false;
-  try {
-    const now = new Date();
-    let dateOnly = dueDateStr.split('T')[0];
-    let ano = now.getFullYear(); let mes = now.getMonth() + 1; let dia = now.getDate();
+  
+  const agora = new Date();
+  const anoStr = String(agora.getFullYear());
+  const mesStr = String(agora.getMonth() + 1).padStart(2, '0');
+  const diaStr = String(agora.getDate()).padStart(2, '0');
+  const hojeNum = parseInt(`${anoStr}${mesStr}${diaStr}`, 10); // Ex: 20260519
 
-    if (dateOnly.includes('/')) {
-      const parts = dateOnly.split('/');
-      if (parts[2].length === 4) { dia = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); ano = parseInt(parts[2], 10); } 
-      else { ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10); }
-    } else if (dateOnly.includes('-')) {
-      const parts = dateOnly.split('-');
-      ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10);
-    }
-
-    let hora = 23; let minuto = 59;
-    if (dueTimeStr && dueTimeStr.trim() !== '') {
-      const timeParts = dueTimeStr.split(':');
-      hora = parseInt(timeParts[0], 10); minuto = parseInt(timeParts[1], 10);
-    }
-
-    const targetDateTime = new Date(ano, mes - 1, dia, hora, minuto, 0);
-    return targetDateTime.getTime() < now.getTime();
-  } catch (e) {
-    return false;
+  // Normaliza a data da tarefa para YYYYMMDD
+  let limpa = dueDateStr.split('T')[0].replace(/[-/]/g, '');
+  if (limpa.length === 8 && dueDateStr.includes('/')) {
+    // Se veio como DDMMYYYY, inverte para YYYYMMDD
+    limpa = `${limpa.substring(4, 8)}${limpa.substring(2, 4)}${limpa.substring(0, 2)}`;
   }
+  const tarefaNum = parseInt(limpa, 10);
+
+  if (tarefaNum < hojeNum) return true;  // Passado histórico
+  if (tarefaNum > hojeNum) return false; // Futuro
+
+  // Se for exatamente o mesmo dia (hojeNum === tarefaNum)
+  if (dueTimeStr) {
+    const [h, m] = dueTimeStr.split(':').map(Number);
+    const tempoTarefa = h * 100 + m;
+    const tempoAtual = agora.getHours() * 100 + agora.getMinutes();
+    return tempoAtual > tempoTarefa;
+  }
+  return false;
 };
 
 
