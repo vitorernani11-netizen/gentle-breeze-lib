@@ -191,8 +191,8 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                     className={cn(
                       "p-3 flex flex-col gap-1 rounded-none transition-all text-left border",
                       (task.fase_pipeline || 1) === s.id
-                        ? "border-[#00ff41] bg-zinc-900/60"
-                        : "border-zinc-800 bg-zinc-900/20 opacity-60"
+                        ? "border-[#00ff41] bg-[#00ff41]/5 text-[#00ff41]"
+                        : "border-zinc-800 bg-zinc-900/20 opacity-60 text-zinc-500"
                     )}
                   >
                     <h3 className={cn(

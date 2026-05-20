@@ -246,101 +246,36 @@ function TasksPage() {
       {/* Triagem Section - Grade 2x2 Clean */}
       <section className="mb-6">
         <div className="grid grid-cols-2 gap-3 p-4 border-b border-zinc-800 bg-black/40 w-full rounded-2xl border">
-          {/* CARD 01 - CLASSIFICAÇÃO */}
-          <button 
-            onClick={() => setSelectedStage(selectedStage === 1 ? null : 1)}
-            className={cn(
-              "p-3 flex flex-col gap-1 rounded-none transition-all text-left border",
-              selectedStage === 1 
-                ? "border-[#00ff41] bg-zinc-900/60" 
-                : "border-zinc-800 bg-zinc-900/20 opacity-60"
-            )}
-          >
-            <h3 className={cn(
-              "font-bold text-xs uppercase tracking-wider",
-              selectedStage === 1 ? "text-[#00ff41]" : "text-zinc-400"
-            )}>
-              01. CLASSIFICAÇÃO
-            </h3>
-            <p className={cn(
-              "text-[10px] leading-tight",
-              selectedStage === 1 ? "text-zinc-400" : "text-zinc-500"
-            )}>
-              Identificação bruta do tipo de demanda e nível de urgência tática.
-            </p>
-          </button>
-
-          {/* CARD 02 - FRACIONAR */}
-          <button 
-            onClick={() => setSelectedStage(selectedStage === 2 ? null : 2)}
-            className={cn(
-              "p-3 flex flex-col gap-1 rounded-none transition-all text-left border",
-              selectedStage === 2 
-                ? "border-[#00ff41] bg-zinc-900/60" 
-                : "border-zinc-800 bg-zinc-900/20 opacity-60"
-            )}
-          >
-            <h3 className={cn(
-              "font-bold text-xs uppercase tracking-wider",
-              selectedStage === 2 ? "text-[#00ff41]" : "text-zinc-400"
-            )}>
-              02. FRACIONAR
-            </h3>
-            <p className={cn(
-              "text-[10px] leading-tight",
-              selectedStage === 2 ? "text-zinc-400" : "text-zinc-500"
-            )}>
-              Quebra de tarefas complexas em micro-ações digeríveis e acionáveis.
-            </p>
-          </button>
-
-          {/* CARD 03 - PLANEJAMENTO */}
-          <button 
-            onClick={() => setSelectedStage(selectedStage === 3 ? null : 3)}
-            className={cn(
-              "p-3 flex flex-col gap-1 rounded-none transition-all text-left border",
-              selectedStage === 3 
-                ? "border-[#00ff41] bg-zinc-900/60" 
-                : "border-zinc-800 bg-zinc-900/20 opacity-60"
-            )}
-          >
-            <h3 className={cn(
-              "font-bold text-xs uppercase tracking-wider",
-              selectedStage === 3 ? "text-[#00ff41]" : "text-zinc-400"
-            )}>
-              03. PLANEJAMENTO
-            </h3>
-            <p className={cn(
-              "text-[10px] leading-tight",
-              selectedStage === 3 ? "text-zinc-400" : "text-zinc-500"
-            )}>
-              Atribuição de blocos temporais (Timeboxing) e prioridade P1-P4.
-            </p>
-          </button>
-
-          {/* CARD 04 - EXECUÇÃO */}
-          <button 
-            onClick={() => setSelectedStage(selectedStage === 4 ? null : 4)}
-            className={cn(
-              "p-3 flex flex-col gap-1 rounded-none transition-all text-left border",
-              selectedStage === 4 
-                ? "border-[#00ff41] bg-zinc-900/60" 
-                : "border-zinc-800 bg-zinc-900/20 opacity-60"
-            )}
-          >
-            <h3 className={cn(
-              "font-bold text-xs uppercase tracking-wider",
-              selectedStage === 4 ? "text-[#00ff41]" : "text-zinc-400"
-            )}>
-              04. EXECUÇÃO
-            </h3>
-            <p className={cn(
-              "text-[10px] leading-tight",
-              selectedStage === 4 ? "text-zinc-400" : "text-zinc-500"
-            )}>
-              Foco absoluto no 'Agora' através de uma interface sem distrações.
-            </p>
-          </button>
+          {[
+            { id: 1, label: '01. CLASSIFICAÇÃO', desc: 'Identificação bruta do tipo de demanda e nível de urgência tática.' },
+            { id: 2, label: '02. FRACIONAR', desc: 'Quebra de tarefas complexas em micro-ações digeríveis e acionáveis.' },
+            { id: 3, label: '03. PLANEJAMENTO', desc: 'Atribuição de blocos temporais (Timeboxing) e prioridade P1-P4.' },
+            { id: 4, label: '04. EXECUÇÃO', desc: 'Foco absoluto no \'Agora\' através de uma interface sem distrações.' }
+          ].map((stage) => (
+            <button 
+              key={stage.id}
+              onClick={() => setSelectedStage(selectedStage === stage.id ? null : stage.id)}
+              className={cn(
+                "p-3 flex flex-col gap-1 rounded-none transition-all text-left border",
+                selectedStage === stage.id 
+                  ? "border-[#00ff41] bg-[#00ff41]/5 text-[#00ff41]" 
+                  : "border-zinc-800 bg-zinc-900/20 opacity-60 text-zinc-500"
+              )}
+            >
+              <h3 className={cn(
+                "font-bold text-xs uppercase tracking-wider",
+                selectedStage === stage.id ? "text-[#00ff41]" : "text-zinc-400"
+              )}>
+                {stage.label}
+              </h3>
+              <p className={cn(
+                "text-[10px] leading-tight",
+                selectedStage === stage.id ? "text-zinc-400" : "text-zinc-500"
+              )}>
+                {stage.desc}
+              </p>
+            </button>
+          ))}
         </div>
       </section>
 
