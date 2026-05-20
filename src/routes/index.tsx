@@ -435,40 +435,40 @@ function Dashboard() {
           <Button
             onClick={() => setFilterMode('DELAYED')}
             className={cn(
-              "h-12 px-6 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all shrink-0 shadow-lg active:scale-95",
+              "h-8 px-2.5 rounded-lg font-black uppercase text-[10px] tracking-wider transition-all shrink-0 shadow-lg active:scale-95",
               filterMode === 'DELAYED' 
                 ? "bg-[#ff0055] text-white border-none" 
                 : "bg-zinc-900 text-[#ff0055] border border-[#ff0055]/20"
             )}
           >
-            🔥 Atrasadas
+            Atrasadas
           </Button>
           <Button
             onClick={() => setFilterMode('INTERVAL')}
             className={cn(
-              "h-12 px-6 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all shrink-0 shadow-lg active:scale-95",
+              "h-8 px-2.5 rounded-lg font-black uppercase text-[10px] tracking-wider transition-all shrink-0 shadow-lg active:scale-95",
               filterMode === 'INTERVAL' 
                 ? "bg-[#00ff41] text-black border-none" 
                 : "bg-zinc-900 text-[#00ff41] border border-[#00ff41]/20"
             )}
           >
-            ⏱️ Intervalo
+            Intervalo
           </Button>
           <Button
             onClick={() => setFilterMode('POST18')}
             className={cn(
-              "h-12 px-6 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all shrink-0 shadow-lg active:scale-95",
+              "h-8 px-2.5 rounded-lg font-black uppercase text-[10px] tracking-wider transition-all shrink-0 shadow-lg active:scale-95",
               filterMode === 'POST18' 
                 ? "bg-[#ff00ff] text-white border-none" 
                 : "bg-zinc-900 text-[#ff00ff] border border-[#ff00ff]/20"
             )}
           >
-            🌙 Pós-18h
+            Pós-18h
           </Button>
           <Button
             onClick={() => setFilterMode('ALL')}
             className={cn(
-              "h-12 px-6 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all shrink-0 shadow-lg active:scale-95",
+              "h-8 px-2.5 rounded-lg font-black uppercase text-[10px] tracking-wider transition-all shrink-0 shadow-lg active:scale-95",
               filterMode === 'ALL' 
                 ? "bg-white text-black border-none" 
                 : "bg-zinc-900 text-white border border-white/20"
