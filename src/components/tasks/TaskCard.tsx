@@ -21,20 +21,21 @@ export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) =>
   try {
     const agora = new Date();
     
-    // 1. Limpa e isola a string da data (YYYY-MM-DD ou DD/MM/YYYY)
-    let dataLimpa = dueDateStr.split('T')[0].trim();
+    // 1. Isola apenas a parte da data (remove T00:00:00... se houver)
+    const apenasData = dueDateStr.split('T')[0].trim();
+    
     let ano = agora.getFullYear();
     let mes = agora.getMonth(); // 0-11
     let dia = agora.getDate();
 
-    if (dataLimpa.includes('/')) {
-      const parts = dataLimpa.split('/');
+    // 2. Extrai ano, mês e dia tratando padrões de barra ou hífen
+    if (apenasData.includes('/')) {
+      const parts = apenasData.split('/');
       dia = parseInt(parts[0], 10);
       mes = parseInt(parts[1], 10) - 1;
       ano = parseInt(parts[2], 10);
-    } else if (dataLimpa.includes('-')) {
-      const parts = dataLimpa.split('-');
-      // Se começar com 4 dígitos é YYYY-MM-DD, senão é DD-MM-YYYY
+    } else if (apenasData.includes('-')) {
+      const parts = apenasData.split('-');
       if (parts[0].length === 4) {
         ano = parseInt(parts[0], 10);
         mes = parseInt(parts[1], 10) - 1;
@@ -46,22 +47,28 @@ export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) =>
       }
     }
 
-    // 2. Extrai hora e minuto. Se não houver, joga para o fim do dia (23:59)
+    // Validação de segurança para evitar NaN
+    if (isNaN(ano) || isNaN(mes) || isNaN(dia)) return false;
+
+    // 3. Extrai hora e minuto. Padrão 23:59 se não houver horário fixo
     let hora = 23;
     let minuto = 59;
     if (dueTimeStr && dueTimeStr.trim() !== '' && dueTimeStr.includes(':')) {
       const timeParts = dueTimeStr.split(':');
-      hora = parseInt(timeParts[0], 10);
-      minuto = parseInt(timeParts[1], 10);
+      const hParsed = parseInt(timeParts[0], 10);
+      const mParsed = parseInt(timeParts[1], 10);
+      if (!isNaN(hParsed)) hora = hParsed;
+      if (!isNaN(mParsed)) minuto = mParsed;
     }
 
-    // 3. Monta o objeto de comparação no fuso horário do aparelho
-    const dataTarefa = new Date(ano, mes, dia, hora, minuto, 0, 0);
+    // 4. Monta os dois objetos de tempo usando o fuso horário LOCAL do aparelho
+    const tempoTarefa = new Date(ano, mes, dia, hora, minuto, 0, 0).getTime();
+    const tempoAtual = agora.getTime();
 
-    // Se o timestamp atual for maior que o da tarefa, ela está ATRASADA (true)
-    return agora.getTime() > dataTarefa.getTime();
+    // Se o relógio do aparelho passou do tempo da tarefa, ela está ATRASADA
+    return tempoAtual > tempoTarefa;
   } catch (error) {
-    console.error("Erro crítico no cálculo de atraso:", error);
+    console.error("Erro no cálculo de atraso:", error);
     return false;
   }
 };

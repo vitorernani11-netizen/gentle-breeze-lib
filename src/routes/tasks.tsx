@@ -35,6 +35,55 @@ export const Route = createFileRoute('/tasks')({
 });
 
 function TasksPage() {
+  const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
+    if (!dueDateStr) return false;
+    
+    try {
+      const agora = new Date();
+      const apenasData = dueDateStr.split('T')[0].trim();
+      let ano = agora.getFullYear();
+      let mes = agora.getMonth();
+      let dia = agora.getDate();
+
+      if (apenasData.includes('/')) {
+        const parts = apenasData.split('/');
+        dia = parseInt(parts[0], 10);
+        mes = parseInt(parts[1], 10) - 1;
+        ano = parseInt(parts[2], 10);
+      } else if (apenasData.includes('-')) {
+        const parts = apenasData.split('-');
+        if (parts[0].length === 4) {
+          ano = parseInt(parts[0], 10);
+          mes = parseInt(parts[1], 10) - 1;
+          dia = parseInt(parts[2], 10);
+        } else {
+          dia = parseInt(parts[0], 10);
+          mes = parseInt(parts[1], 10) - 1;
+          ano = parseInt(parts[2], 10);
+        }
+      }
+
+      if (isNaN(ano) || isNaN(mes) || isNaN(dia)) return false;
+
+      let hora = 23;
+      let minuto = 59;
+      if (dueTimeStr && dueTimeStr.trim() !== '' && dueTimeStr.includes(':')) {
+        const timeParts = dueTimeStr.split(':');
+        const hParsed = parseInt(timeParts[0], 10);
+        const mParsed = parseInt(timeParts[1], 10);
+        if (!isNaN(hParsed)) hora = hParsed;
+        if (!isNaN(mParsed)) minuto = mParsed;
+      }
+
+      const tempoTarefa = new Date(ano, mes, dia, hora, minuto, 0, 0).getTime();
+      const tempoAtual = agora.getTime();
+      return tempoAtual > tempoTarefa;
+    } catch (error) {
+      console.error("Erro no cálculo de atraso:", error);
+      return false;
+    }
+  };
+
   const navigate = useNavigate();
   const location = useLocation();
   const [tarefasOrdenadasDaEntrada, setTarefasOrdenadasDaEntrada] = useState<any[]>([]);
