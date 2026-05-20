@@ -189,8 +189,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               onClick={() => {
                 persistToHardware();
                 setIsDirty(false);
-                // Força a re-renderização imediata disparando o evento que o componente pai escuta
-                window.dispatchEvent(new Event('storage'));
               }}
               className="bg-[#00ff41] text-black font-black px-4 py-1.5 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2 uppercase tracking-tighter text-[10px] italic animate-in fade-in slide-in-from-right-4 duration-300"
             >
