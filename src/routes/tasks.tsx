@@ -108,14 +108,20 @@ function TasksPage() {
 
         const paraTimestampNumerico = (dataStr: string, horaStr?: string | null) => {
           let limpa = dataStr.split('T')[0].replace(/[-/]/g, '');
+          
           if (limpa.length === 8 && dataStr.includes('/')) {
             limpa = `${limpa.substring(4, 8)}${limpa.substring(2, 4)}${limpa.substring(0, 2)}`;
           }
+          
+          // SALVAGUARDA: Se o horário de vencimento estiver vazio, assume "2359"
           let horaLimpa = "2359";
-          if (horaStr && horaStr.trim() !== '') {
-            horaLimpa = horaStr.replace(':', '').padStart(4, '0');
+          if (horaStr && horaStr.trim() !== '' && horaStr.includes(':')) {
+            horaLimpa = horaStr.replace(':', '');
           }
-          return parseInt(`${limpa}${horaLimpa}`, 10);
+          
+          // Se por algum motivo o replace falhar ou não virar número, força padrão seguro
+          const resultado = parseInt(`${limpa}${horaLimpa}`, 10);
+          return isNaN(resultado) ? parseInt(`${limpa}2359`, 10) : resultado;
         };
 
         const tempoA = paraTimestampNumerico(dataA, a.hora_vencimento || a.lembrete);
