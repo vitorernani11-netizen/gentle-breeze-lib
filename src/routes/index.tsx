@@ -40,7 +40,7 @@ import { cn } from '@/lib/utils';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { EisenhowerMatrix } from '@/components/dashboard/EisenhowerMatrix';
 
-import { TaskCard } from '@/components/tasks/TaskCard';
+import { TaskCard, isTaskOverdue } from '@/components/tasks/TaskCard';
 import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
 import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
 import { TodayContextGroup } from '@/components/tasks/TodayContextGroup';
@@ -418,24 +418,34 @@ function Dashboard() {
             
             if (isReference) return false;
 
-            // Filtro para Atrasadas (Global: busca em todos os status)
+            const taskOverdue = isTaskOverdue(t.data_execucao || t.data_vencimento, t.hora_vencimento || t.lembrete);
+
+            // Filtro para Atrasadas
             if (filterMode === 'DELAYED') {
-              const taskDateStr = t.data_execucao?.split('T')[0];
-              if (taskDateStr && taskDateStr < today) return true;
+              return taskOverdue;
+            }
+
+            // Para as outras abas, garantimos que a data é HOJE
+            const taskDateStr = (t.data_execucao || t.data_vencimento)?.split('T')[0];
+            if (taskDateStr !== today) return false;
+
+            // Filtro para PÓS-18H
+            if (filterMode === 'POST18') {
+              // Se já está atrasada (dentro de hoje), não aparece em "PÓS-18H" se o critério for "no prazo"
+              // No entanto, as instruções dizem: contextos profissionais OU horário >= 18:00
+              const proj = projects.find(p => p.id === t.projeto_id);
+              const projName = proj?.nome?.toLowerCase() || '';
+              const isProfessional = projName.includes('esfiha') || projName.includes('riolax') || projName.includes('youtube') || projName.includes('vitor') || projName.includes('ernani');
               
-              if (taskDateStr === today && t.hora_vencimento) {
-                // Se a data é hoje, checamos se o horário já passou
-                return isBefore(new Date(t.hora_vencimento), now);
+              let isAfter18 = false;
+              const dueTime = t.hora_vencimento || t.lembrete;
+              if (dueTime) {
+                const hour = parseInt(dueTime.split(':')[0], 10);
+                if (hour >= 18) isAfter18 = true;
               }
-              return false;
-            }
 
-            // Filtro rigoroso para "Hoje" quando no modo padrão ou específicos de horário
-            if (filterMode === 'ALL' || filterMode === 'INTERVAL' || filterMode === 'POST18') {
-              const taskDateStr = t.data_execucao?.split('T')[0];
-              return taskDateStr === today;
+              return !taskOverdue && (isProfessional || isAfter18);
             }
-
 
             return true;
           });
@@ -486,14 +496,8 @@ function Dashboard() {
               outros: { title: '', color: '', tasks: [] }
             };
           } else if (filterMode === 'POST18') {
-            finalGroups = {
-              faculdade: { title: '', color: '', tasks: [] },
-              gestao: { title: '', color: '', tasks: [] },
-              esfiha: groupedTasks.esfiha,
-              riolax: groupedTasks.riolax,
-              youtube: groupedTasks.youtube,
-              outros: { title: '', color: '', tasks: [] }
-            };
+            // Em POST18, já filtramos as tarefas em executionTasks
+            finalGroups = groupedTasks;
           }
 
           const hasAnyTasks = Object.values(finalGroups).some(g => g.tasks.length > 0);
