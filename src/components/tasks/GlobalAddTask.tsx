@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Reminder } from './ReminderManager';
 import { Plus, Zap, Brain, X, ChevronRight, ClipboardList, Book, Lightbulb, Folder, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ const CORE_PROJECTS = [
 
 export const GlobalAddTask: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isOtherModalOpen, setIsOtherModalOpen] = useState(false);
   const [mode, setMode] = useState<'choice' | 'action' | 'memory'>('choice');
   const [memoryData, setMemoryData] = useState({ titulo: '', conteudo: '', projeto_id: '', categoria: 'notes' });
   const { addTask } = useTaskActions();
