@@ -207,7 +207,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         </div>
 
         {/* Footer */}
-        <div className="border-t border-zinc-900 px-6 py-6 flex items-center justify-end bg-black">
+        <div className="border-t border-zinc-900 px-6 py-6 flex items-center justify-end bg-black mb-20 sm:mb-0">
           {isDirty && (
             <button
               onClick={() => {
