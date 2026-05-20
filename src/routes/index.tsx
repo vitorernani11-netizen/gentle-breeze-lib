@@ -542,7 +542,10 @@ function Dashboard() {
                   title={group.title}
                   color={group.color}
                   tasks={group.tasks}
-                  onTaskClick={setDetailTask}
+                  onTaskClick={(t) => {
+                    setDetailTask(t);
+                    setIsDetailOpen(true);
+                  }}
                   onComplete={completeTask}
                   onMoveToToday={(id) => moveTask(id, 'Hoje')}
                   onDelete={deletePermanent}
