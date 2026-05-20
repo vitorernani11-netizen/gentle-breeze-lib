@@ -124,6 +124,4 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
     </div>
   );
 };
-  );
-};
 
