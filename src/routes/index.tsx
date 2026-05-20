@@ -71,31 +71,32 @@ const safeParseDate = (value: unknown) => {
 
 const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
   if (!dueDateStr) return false;
-  try {
-    const now = new Date();
-    let dateOnly = dueDateStr.split('T')[0];
-    let ano = now.getFullYear(); let mes = now.getMonth() + 1; let dia = now.getDate();
+  
+  const agora = new Date();
+  const anoStr = String(agora.getFullYear());
+  const mesStr = String(agora.getMonth() + 1).padStart(2, '0');
+  const diaStr = String(agora.getDate()).padStart(2, '0');
+  const hojeNum = parseInt(`${anoStr}${mesStr}${diaStr}`, 10); // Ex: 20260519
 
-    if (dateOnly.includes('/')) {
-      const parts = dateOnly.split('/');
-      if (parts[2].length === 4) { dia = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); ano = parseInt(parts[2], 10); } 
-      else { ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10); }
-    } else if (dateOnly.includes('-')) {
-      const parts = dateOnly.split('-');
-      ano = parseInt(parts[0], 10); mes = parseInt(parts[1], 10); dia = parseInt(parts[2], 10);
-    }
-
-    let hora = 23; let minuto = 59;
-    if (dueTimeStr && dueTimeStr.trim() !== '') {
-      const timeParts = dueTimeStr.split(':');
-      hora = parseInt(timeParts[0], 10); minuto = parseInt(timeParts[1], 10);
-    }
-
-    const targetDateTime = new Date(ano, mes - 1, dia, hora, minuto, 0);
-    return targetDateTime.getTime() < now.getTime();
-  } catch (e) {
-    return false;
+  // Normaliza a data da tarefa para YYYYMMDD
+  let limpa = dueDateStr.split('T')[0].replace(/[-/]/g, '');
+  if (limpa.length === 8 && dueDateStr.includes('/')) {
+    // Se veio como DDMMYYYY, inverte para YYYYMMDD
+    limpa = `${limpa.substring(4, 8)}${limpa.substring(2, 4)}${limpa.substring(0, 2)}`;
   }
+  const tarefaNum = parseInt(limpa, 10);
+
+  if (tarefaNum < hojeNum) return true;  // Passado histórico
+  if (tarefaNum > hojeNum) return false; // Futuro
+
+  // Se for exatamente o mesmo dia (hojeNum === tarefaNum)
+  if (dueTimeStr) {
+    const [h, m] = dueTimeStr.split(':').map(Number);
+    const tempoTarefa = h * 100 + m;
+    const tempoAtual = agora.getHours() * 100 + agora.getMinutes();
+    return tempoAtual > tempoTarefa;
+  }
+  return false;
 };
 
 const isTaskFromToday = (dueDateStr: string) => {
@@ -454,61 +455,45 @@ function Dashboard() {
 
       <section className="mb-8">
         {(() => {
-          // 1. Captura o pool inicial: Tarefas do dia de hoje OU tarefas com datas do passado que estão ativas
-          const tarefasDoPool = tasks.filter(tarefa => {
-            if (tarefa.status_concluido) return false;
-            if (!tarefa.data_vencimento && !tarefa.data_execucao) return false;
-
-            const dueDate = tarefa.data_execucao || tarefa.data_vencimento;
-            const atrasada = isTaskOverdue(dueDate, tarefa.hora_vencimento || tarefa.lembrete);
+          // 1. Coleta tudo o que é de Hoje ou Atrasado Histórico
+          const poolHoje = tasks.filter(t => {
+            if (t.status_concluido) return false;
+            const dataVenc = t.data_execucao || t.data_vencimento;
+            if (!dataVenc) return false;
             
-            // Verifica se pertence ao dia de hoje
+            const atrasada = isTaskOverdue(dataVenc, t.hora_vencimento || t.lembrete);
+            
+            // Checa se a data é hoje
             const now = new Date();
             const hojeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-            let taskDateStr = dueDate.split('T')[0].replace(/\//g, '-');
-            if (taskDateStr.includes('-') && taskDateStr.split('-')[0].length !== 4) {
-              const parts = taskDateStr.split('-');
-              taskDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            let taskStr = dataVenc.split('T')[0].replace(/\//g, '-');
+            if (taskStr.includes('-') && taskStr.split('-')[0].length !== 4) {
+              const p = taskStr.split('-');
+              taskStr = `${p[2]}-${p[1]}-${p[0]}`;
             }
-            const ehHoje = taskDateStr === hojeStr;
-
-            return ehHoje || atrasada;
+            
+            return taskStr === hojeStr || atrasada;
           });
 
-          // 2. Distribui as tarefas pelas abas de forma excludente
-          const executionTasks = tarefasDoPool.filter((tarefa) => {
-            const atrasada = isTaskOverdue(tarefa.data_execucao || tarefa.data_vencimento, tarefa.hora_vencimento || tarefa.lembrete);
+          // 2. Separação Absoluta de Abas
+          const executionTasks = poolHoje.filter(t => {
+            const dataVenc = t.data_execucao || t.data_vencimento;
+            const atrasada = isTaskOverdue(dataVenc, t.hora_vencimento || t.lembrete);
             
-            let horaTarefa = -1;
-            const dueTime = tarefa.hora_vencimento || tarefa.lembrete;
-            if (dueTime && typeof dueTime === 'string') {
-              horaTarefa = parseInt(dueTime.split(':')[0], 10);
+            let hora = -1;
+            const dueTime = t.hora_vencimento || t.lembrete;
+            if (dueTime) {
+              hora = parseInt(dueTime.split(':')[0], 10);
             }
 
-            // 1. Aba ATRASADAS: Mostra tudo o que passou do prazo (do passado ou de horas anteriores de hoje)
-            if (filterMode === 'DELAYED') {
-              return atrasada === true;
-            }
+            if (filterMode === 'DELAYED') return atrasada === true;
+            if (atrasada) return false; // Se está atrasada, some das abas de tempo real
 
-            // 2. Para as outras abas, se a tarefa já está atrasada, ela some daqui e vai para a aba ATRASADAS
-            if (atrasada) {
-              return false;
-            }
-
-            // 3. Filtro por faixas de horário (Apenas tarefas no prazo)
-            if (filterMode === 'INTERVAL') {
-              return horaTarefa >= 12 && horaTarefa < 14;
-            }
-
-            if (filterMode === 'POST18') {
-              return horaTarefa >= 18 && horaTarefa <= 23;
-            }
-
-            if (filterMode === 'ALL') {
-              return true; // Exibe todas as tarefas pendentes do dia que estão no prazo
-            }
-
-            return false;
+            if (filterMode === 'INTERVAL') return hora >= 12 && hora < 14;
+            if (filterMode === 'POST18') return hora >= 18;
+            
+            // VER TUDO
+            return true;
           });
 
           // Grouping logic based on Projects
