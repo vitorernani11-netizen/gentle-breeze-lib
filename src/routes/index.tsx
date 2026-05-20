@@ -59,14 +59,9 @@ const FINANCE_KEY = 'hardware_humano_finance';
 const SOCIAL_KEY = 'hardware_humano_social';
 
 const safeParseDate = (value: unknown) => {
-  try {
-    if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
-    if (typeof value !== 'string' || !value.trim()) return null;
-    const parsed = parseISO(value);
-    return isNaN(parsed.getTime()) ? null : parsed;
-  } catch {
-    return null;
-  }
+  if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
+  if (typeof value !== 'string') return null;
+  return normalizarParaObjetoDate(value);
 };
 
 const normalizarParaObjetoDate = (dataStr: string, horaStr?: string | null): Date | null => {
