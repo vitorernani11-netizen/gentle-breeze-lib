@@ -15,48 +15,36 @@ interface TaskCardProps {
   onUpdatePriority?: (id: string, priority: string) => void;
 }
 
-export const isTaskOverdue = (dueDate: string, dueTime?: string | null) => {
-  if (!dueDate) return false;
-  
-  let dateOnly = dueDate.split('T')[0];
-  let ano, mes, dia;
+export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
+  if (!dueDateStr) return false;
 
-  if (dateOnly.includes('/')) {
-    const parts = dateOnly.split('/');
-    if (parts[2].length === 4) { dia = parts[0]; mes = parts[1]; ano = parts[2]; }
-    else { ano = parts[0]; mes = parts[1]; dia = parts[2]; }
-  } else if (dateOnly.includes('-')) {
-    const parts = dateOnly.split('-');
-    ano = parts[0]; mes = parts[1]; dia = parts[2];
-  } else {
-    return false;
+  const now = new Date();
+  
+  // 1. Pega a data de hoje no formato YYYY-MM-DD (Garante 2 dígitos para mês e dia)
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  
+  // 2. Transforma a data da tarefa para o mesmo formato YYYY-MM-DD
+  let taskDateStr = dueDateStr.split('T')[0]; // Remove horas se houver
+  if (taskDateStr.includes('/')) {
+    const parts = taskDateStr.split('/');
+    // Se for DD/MM/YYYY converte para YYYY-MM-DD, senão mantém
+    taskDateStr = parts[2].length === 4 
+      ? `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
+      : `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
   }
 
-  const dataTarefa = new Date(Number(ano), Number(mes) - 1, Number(dia));
-  const hoje = new Date();
-  
-  dataTarefa.setHours(0, 0, 0, 0);
-  const dataHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-  dataHoje.setHours(0, 0, 0, 0);
+  // 3. Comparação de Dias (String literal)
+  if (taskDateStr < todayStr) return true; // Passado
+  if (taskDateStr > todayStr) return false; // Futuro
 
-  // Se a data é no passado literal
-  if (dataTarefa.getTime() < dataHoje.getTime()) return true;
-  // Se a data é no futuro literal
-  if (dataTarefa.getTime() > dataHoje.getTime()) return false;
+  // 4. Se for HOJE, compara a hora
+  if (dueTimeStr) {
+    const [hours, minutes] = dueTimeStr.split(':').map(Number);
+    const currentHours = now.getHours();
+    const currentMinutes = now.getMinutes();
 
-  // Se é exatamente HOJE, valida a hora e minuto locais do dispositivo
-  if (dataTarefa.getTime() === dataHoje.getTime() && dueTime) {
-    const [horaStr, minStr] = dueTime.split(':');
-    const horaTarefa = parseInt(horaStr, 10);
-    const minTarefa = parseInt(minStr, 10);
-
-    const horaAtual = hoje.getHours();
-    const minAtual = hoje.getMinutes();
-
-    const tempoAtual = horaAtual * 100 + minAtual;
-    const tempoTarefa = horaTarefa * 100 + minTarefa;
-
-    return tempoAtual > tempoTarefa; // Retorna TRUE se o horário atual já passou do horário da tarefa
+    if (currentHours > hours) return true; // Hora já passou
+    if (currentHours === hours && currentMinutes > minutes) return true; // Mesmo minuto já passou
   }
 
   return false;
