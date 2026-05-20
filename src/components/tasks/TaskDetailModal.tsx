@@ -159,19 +159,19 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
             {/* Prioridade */}
             <SidebarRow icon={<Flag size={18} className={currentPriority.color.split(' ')[0]} />} label="Prioridade">
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 gap-1.5 max-w-[120px]">
                 {PRIORITIES.map((p) => (
                   <button
                     key={p.value}
                     onClick={() => handlePriority(p.value)}
                     className={cn(
-                      'flex flex-col items-center justify-center gap-1 h-14 border rounded-xl transition-all active:scale-90',
+                      'flex items-center justify-center h-8 border rounded-lg transition-all active:scale-90',
                       prioridade === p.value
                         ? `${p.color} bg-white/5 border-white/20`
                         : 'border-zinc-900 bg-zinc-900/30 text-zinc-600 hover:text-zinc-300'
                     )}
                   >
-                    <span className="text-xs font-black">{p.label}</span>
+                    <span className="text-[10px] font-black">{p.label}</span>
                   </button>
                 ))}
               </div>
