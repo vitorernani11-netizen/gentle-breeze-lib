@@ -1,5 +1,11 @@
-import { format, isTomorrow, isAfter, addDays, startOfToday, parseISO, getDay } from 'date-fns';
+import { format, isTomorrow, isAfter, addDays, startOfToday, parseISO, getDay, isBefore } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+
+export const getTodayStr = (): string => {
+  const hoje = new Date();
+  return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+};
+
 
 export interface DateGroup {
   id: string;

@@ -44,6 +44,8 @@ import { TaskCard } from '@/components/tasks/TaskCard';
 import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
 import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
 import { TodayContextGroup } from '@/components/tasks/TodayContextGroup';
+import { getTodayStr } from '@/utils/dateHelpers';
+
 
 
 const TASKS_KEY = 'hardware_humano_data';
@@ -149,7 +151,7 @@ function Dashboard() {
   };
 
   const fetchData = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayStr();
     const sevenDaysAgo = subDays(new Date(), 7);
     
     // Helper para validação de data segura contra dados antigos/corrompidos
@@ -189,7 +191,7 @@ function Dashboard() {
     setAcademicUrgent(urgentAcademic);
 
     const hydrationData = (loadFromLocal(HYDRATION_KEY) || []).filter((h: any) => isValidDate(h.data));
-    const todayHydration = hydrationData.find((h: any) => h.data === today);
+    const todayHydration = hydrationData.find((h: any) => h.data === getTodayStr());
     setHydration(todayHydration ? todayHydration.quantidade_ml : 0);
 
     const checkinHistory = (loadFromLocal(CHECKIN_KEY) || []).filter((c: any) => isValidDate(c.data));
@@ -214,7 +216,7 @@ function Dashboard() {
     });
     setSleepHistory(history);
     
-    const currentCheckin = checkinHistory.find((d: any) => d.data === today);
+    const currentCheckin = checkinHistory.find((d: any) => d.data === getTodayStr());
     if (currentCheckin) {
       setHoursSleptToday(currentCheckin.horas_sono);
       setIsRecoveryMode(currentCheckin.horas_sono !== null && currentCheckin.horas_sono < 6);
@@ -279,7 +281,7 @@ function Dashboard() {
   };
 
   const checkTodayCheckin = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayStr();
     const history = loadFromLocal(CHECKIN_KEY) || [];
     const done = history.find((h: any) => h.data === today);
     if (!done) setShowCheckin(true);
@@ -287,7 +289,7 @@ function Dashboard() {
 
   const handleSaveCheckin = () => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayStr();
       const history = loadFromLocal(CHECKIN_KEY) || [];
       const index = history.findIndex((h: any) => h.data === today);
       
@@ -313,7 +315,7 @@ function Dashboard() {
 
   const handleAddHydration = () => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayStr();
       const hydrationData = loadFromLocal(HYDRATION_KEY) || [];
       const index = hydrationData.findIndex((h: any) => h.data === today);
       
@@ -401,7 +403,7 @@ function Dashboard() {
 
       <section className="mb-8">
         {(() => {
-          const today = new Date().toISOString().split('T')[0];
+          const today = getTodayStr();
           const now = new Date();
 
           // Filtering Reference and Non-execution items + Time filters
@@ -418,9 +420,10 @@ function Dashboard() {
 
             // Filtro para Atrasadas (Global: busca em todos os status)
             if (filterMode === 'DELAYED') {
-              const taskDate = t.data_execucao;
-              if (taskDate < today) return true;
-              if (taskDate === today && t.hora_vencimento) {
+              const taskDateStr = t.data_execucao?.split('T')[0];
+              if (taskDateStr && taskDateStr < today) return true;
+              
+              if (taskDateStr === today && t.hora_vencimento) {
                 // Se a data é hoje, checamos se o horário já passou
                 return isBefore(new Date(t.hora_vencimento), now);
               }
@@ -428,10 +431,11 @@ function Dashboard() {
             }
 
             // Filtro rigoroso para "Hoje" quando no modo padrão ou específicos de horário
-            // Nota: Só mostramos tarefas que explicitamente estão para Hoje ou que o usuário quer ver no dashboard
             if (filterMode === 'ALL' || filterMode === 'INTERVAL' || filterMode === 'POST18') {
-              return t.data_execucao === today;
+              const taskDateStr = t.data_execucao?.split('T')[0];
+              return taskDateStr === today;
             }
+
 
             return true;
           });

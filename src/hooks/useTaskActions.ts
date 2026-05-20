@@ -1,6 +1,6 @@
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { toast } from 'sonner';
-import { getWeekdayString, getNextWeekdayDate } from '@/utils/dateHelpers';
+import { getWeekdayString, getNextWeekdayDate, getTodayStr } from '@/utils/dateHelpers';
 import { format } from 'date-fns';
 
 const TASKS_KEY = 'hardware_humano_data'; // Unificando conforme instrução de persistência local
@@ -91,7 +91,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
           description: `"${task.titulo}" atingiu o limite de 3 reagendamentos.`
         });
       } else {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getTodayStr();
         const targetDate = newDate || today;
         
         updatedTasks = allTasks.map((t: any) => {
@@ -114,7 +114,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
       console.log('[Task:Reschedule]', { 
         taskId: task.id, 
         oldDate: task.data_execucao, 
-        newDate: newDate || new Date().toISOString().split('T')[0] 
+        newDate: newDate || getTodayStr() 
       });
       if (onSuccess) onSuccess();
     } catch (error) {
@@ -128,7 +128,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
 
     try {
       const allTasks = loadFromLocal(TASKS_KEY) || [];
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayStr();
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       const tomorrowStr = tomorrow.toISOString().split('T')[0];
