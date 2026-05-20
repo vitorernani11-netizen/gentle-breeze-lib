@@ -289,7 +289,7 @@ function Dashboard() {
 
   const handleSaveCheckin = () => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayStr();
       const history = loadFromLocal(CHECKIN_KEY) || [];
       const index = history.findIndex((h: any) => h.data === today);
       
