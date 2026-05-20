@@ -15,6 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "@/components/AppSidebar";
 import { GlobalAddTask } from "@/components/tasks/GlobalAddTask";
 import { useTaskActions } from "@/hooks/useTaskActions";
+import { persistToHardware, hasUnsavedChanges } from "@/lib/storage";
+import { Save } from "lucide-react";
 
 import appCss from "../styles.css?url";
 
@@ -62,6 +64,7 @@ function RootComponent() {
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [hasSession, setHasSession] = useState(true);
   const { checkAndRouteRecurringTasks } = useTaskActions();
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -72,6 +75,18 @@ function RootComponent() {
     };
 
     checkAuth();
+
+    const handleStorageUpdate = () => {
+      setIsDirty(hasUnsavedChanges());
+    };
+
+    window.addEventListener('storage_update', handleStorageUpdate);
+    window.addEventListener('storage', handleStorageUpdate);
+    
+    return () => {
+      window.removeEventListener('storage_update', handleStorageUpdate);
+      window.removeEventListener('storage', handleStorageUpdate);
+    };
   }, []);
 
   if (isAuthChecking) return null;
@@ -83,6 +98,20 @@ function RootComponent() {
         <Outlet />
       </div>
       <GlobalAddTask />
+      
+      {isDirty && (
+        <button
+          onClick={() => {
+            persistToHardware();
+            setIsDirty(false);
+          }}
+          className="fixed bottom-6 right-6 z-[100] bg-[#00ff41] text-black font-black px-6 py-3 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2 uppercase tracking-tighter text-sm italic animate-in fade-in slide-in-from-bottom-4 duration-300"
+        >
+          <Save size={18} strokeWidth={3} />
+          Salvar Alterações
+        </button>
+      )}
+
       <Toaster position="top-center" theme="dark" />
     </QueryClientProvider>
   );
