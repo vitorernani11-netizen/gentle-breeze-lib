@@ -199,7 +199,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             </h3>
             
             {task.descricao && (
-              <p className="text-zinc-400 text-xs font-medium uppercase truncate opacity-80 leading-relaxed">
+              <p className="w-full block text-left break-words text-zinc-400 text-xs font-medium uppercase opacity-80 leading-relaxed mt-1">
                 {task.descricao}
               </p>
             )}
