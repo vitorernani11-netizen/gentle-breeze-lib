@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { ReminderManager, type Reminder } from './ReminderManager';
 
 import {
   Calendar,
@@ -10,7 +12,8 @@ import {
   Tag,
   Bell,
   Save,
-  X
+  X,
+  Plus
   } from 'lucide-react';
 import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
 import { cn } from '@/lib/utils';
