@@ -106,7 +106,7 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
                 key={opt.tipo}
                 variant="ghost"
                 className={cn(
-                  "justify-center h-12 text-[10px] font-black uppercase tracking-tighter bg-zinc-900/50 transition-all rounded-xl border border-zinc-800",
+                  "justify-center h-12 text-[10px] font-black uppercase tracking-tighter bg-zinc-900/50 transition-all rounded-xl border border-zinc-800 pointer-events-auto",
                   isActive 
                     ? "bg-[#00ff41] text-black border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.3)]" 
                     : "hover:bg-[#00ff41] hover:text-black"
@@ -128,13 +128,13 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
               value={customValue}
               onChange={(e) => setCustomValue(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAddCustom()}
-              className="w-full h-12 bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-4 text-xs font-bold text-white focus:outline-none focus:border-[#00ff41] transition-all"
+              className="w-full h-12 bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-4 text-xs font-bold text-white focus:outline-none focus:border-[#00ff41] transition-all pointer-events-auto"
             />
           </div>
           <Button
             variant="ghost"
             disabled={!customValue}
-            className="h-12 w-12 bg-zinc-900 hover:bg-white hover:text-black rounded-xl border border-zinc-800"
+            className="h-12 w-12 bg-zinc-900 hover:bg-white hover:text-black rounded-xl border border-zinc-800 pointer-events-auto"
             onClick={handleAddCustom}
           >
             <Plus size={18} />

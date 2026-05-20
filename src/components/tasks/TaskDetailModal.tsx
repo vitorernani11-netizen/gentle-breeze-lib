@@ -177,17 +177,19 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             </SidebarRow>
 
             {/* Horário Fixo da Atividade */}
-            <SidebarRow icon={<Clock size={18} />} label="Horário Fixo">
-              <input
-                type="time"
-                value={lembrete || ''}
-                onChange={(e) => handleLembrete(e.target.value)}
-                className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg"
-              />
-            </SidebarRow>
+            <div className="pb-4 border-b border-zinc-900/50">
+              <SidebarRow icon={<Clock size={18} />} label="Horário Fixo">
+                <input
+                  type="time"
+                  value={lembrete || ''}
+                  onChange={(e) => handleLembrete(e.target.value)}
+                  className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg pointer-events-auto"
+                />
+              </SidebarRow>
+            </div>
 
             {/* Lembretes Push Inline */}
-            <div className="pt-4 border-t border-zinc-900 mt-4" id="lembretes-section">
+            <div className="pt-2" id="lembretes-section">
               <ReminderManager 
                 reminders={task.lembretes || []} 
                 onUpdate={(newReminders) => {
