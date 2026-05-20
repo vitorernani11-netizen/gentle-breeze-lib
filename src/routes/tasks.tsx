@@ -210,7 +210,10 @@ function TasksPage() {
                   navigate({ to: '/' });
                 }}
                 onDelete={deletePermanent}
-                onClick={setDetailTask}
+                onClick={(t) => {
+                  setDetailTask(t);
+                  setIsDetailOpen(true);
+                }}
                 onUpdateStage={updateTriagemStage}
                 onUpdatePriority={(id, p) => updateTask(id, { prioridade: p })}
               />
