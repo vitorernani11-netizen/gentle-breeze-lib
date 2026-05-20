@@ -201,14 +201,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         </div>
 
         <div className="flex flex-col gap-2 shrink-0">
-          <Button 
+          <button 
             aria-label="Concluir"
-            size="lg"
-            className="bg-white text-black hover:bg-zinc-200 font-black uppercase text-[11px] rounded-xl h-12 px-5 transition-all active:scale-95 shadow-xl"
+            className="w-8 h-8 rounded-full border-2 border-zinc-700 hover:border-[#00ff41] hover:bg-[#00ff41]/20 flex items-center justify-center transition-all self-end"
             onClick={() => onComplete(task)}
           >
-            Concluir
-          </Button>
+            <Check size={14} className="text-[#00ff41] opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
           <div className="flex justify-end">
             <Button 
               aria-label="Deletar"
