@@ -32,6 +32,19 @@ export const GlobalAddTask: React.FC = () => {
   
   const projects = loadFromLocal('hardware_humano_projects') || [];
 
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      const dialogs = document.querySelectorAll('[role="dialog"]');
+      // Filtramos para ver se existe algum modal aberto que NÃO seja o de criação
+      // O AddTaskOverlay ou o Choice Menu usam dialogs ou divs com z-100
+      // Mas a regra simples é: se tem dialog aberto e o NOSSO menu de escolha não está aberto, escondemos o FAB.
+      setIsOtherModalOpen(dialogs.length > 0);
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
   const handleOpen = () => {
     setIsOpen(true);
     setMode('choice');
