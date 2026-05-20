@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "@/components/AppSidebar";
+import { BottomNav } from "@/components/BottomNav";
 import { GlobalAddTask } from "@/components/tasks/GlobalAddTask";
 import { useTaskActions } from "@/hooks/useTaskActions";
 import { persistToHardware, hasUnsavedChanges } from "@/lib/storage";
@@ -94,9 +95,10 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {hasSession && <AppSidebar />}
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen pb-16 md:pb-0">
         <Outlet />
       </div>
+      {hasSession && <BottomNav />}
       <GlobalAddTask />
       
 
