@@ -99,9 +99,29 @@ function TasksPage() {
       const active = mappedTasks.filter((t: any) => 
         t && !t.status_concluido
       ).sort((a: any, b: any) => {
-        const dateA = new Date(a.created_at || 0).getTime();
-        const dateB = new Date(b.created_at || 0).getTime();
-        return dateB - dateA;
+        const dataA = a.data_execucao || a.data_vencimento;
+        const dataB = b.data_execucao || b.data_vencimento;
+
+        if (!dataA && !dataB) return 0;
+        if (!dataA) return 1;
+        if (!dataB) return -1;
+
+        const paraTimestampNumerico = (dataStr: string, horaStr?: string | null) => {
+          let limpa = dataStr.split('T')[0].replace(/[-/]/g, '');
+          if (limpa.length === 8 && dataStr.includes('/')) {
+            limpa = `${limpa.substring(4, 8)}${limpa.substring(2, 4)}${limpa.substring(0, 2)}`;
+          }
+          let horaLimpa = "2359";
+          if (horaStr && horaStr.trim() !== '') {
+            horaLimpa = horaStr.replace(':', '').padStart(4, '0');
+          }
+          return parseInt(`${limpa}${horaLimpa}`, 10);
+        };
+
+        const tempoA = paraTimestampNumerico(dataA, a.hora_vencimento || a.lembrete);
+        const tempoB = paraTimestampNumerico(dataB, b.hora_vencimento || b.lembrete);
+
+        return tempoA - tempoB;
       });
 
       const completed = mappedTasks.filter((t: any) => 
