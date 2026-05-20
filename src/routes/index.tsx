@@ -442,7 +442,7 @@ function Dashboard() {
           const now = new Date();
 
           // Filtering Reference and Non-execution items + Time filters
-          const executionTasks = tasks.filter(t => {
+          const tarefasDeHoje = tasks.filter(t => {
             const isReference = t.tags?.some((tag: string) => 
               tag.toLowerCase().includes('referência') || 
               tag.toLowerCase().includes('referencia') || 
@@ -453,7 +453,19 @@ function Dashboard() {
             
             if (isReference) return false;
 
-            const taskOverdue = isTaskOverdue(t.data_execucao || t.data_vencimento, t.hora_vencimento || t.lembrete);
+            const taskDateStr = (t.data_execucao || t.data_vencimento)?.split('T')[0];
+            const isToday = taskDateStr === today;
+            const atrasada = isTaskOverdue(t.data_execucao || t.data_vencimento, t.hora_vencimento || t.lembrete);
+            
+            // Se for atrasada (de hoje ou antes), incluímos para o filtro de atrasadas
+            if (atrasada) return true;
+            
+            // Senão, incluímos apenas se for hoje
+            return isToday;
+          });
+
+          const executionTasks = tarefasDeHoje.filter((t) => {
+            const atrasada = isTaskOverdue(t.data_execucao || t.data_vencimento, t.hora_vencimento || t.lembrete);
             
             let horaTarefa = -1;
             const dueTime = t.hora_vencimento || t.lembrete;
@@ -461,26 +473,21 @@ function Dashboard() {
               horaTarefa = parseInt(dueTime.split(':')[0], 10);
             }
 
-            switch (filterMode) {
-              case 'DELAYED':
-                return taskOverdue === true;
-                
-              case 'INTERVAL':
-                // Das 12:00 até as 13:59 (Hoje)
-                const isTodayInterval = (t.data_execucao || t.data_vencimento)?.split('T')[0] === today;
-                return isTodayInterval && horaTarefa >= 12 && horaTarefa < 14;
-                
-              case 'POST18':
-                // Das 18:00 até as 23:59 (Hoje)
-                const isTodayPost18 = (t.data_execucao || t.data_vencimento)?.split('T')[0] === today;
-                return isTodayPost18 && horaTarefa >= 18;
-                
-              case 'ALL':
-              default:
-                // Ver Tudo mostra o dia inteiro (Hoje)
-                const isToday = (t.data_execucao || t.data_vencimento)?.split('T')[0] === today;
-                return isToday;
+            // Roteamento Estrito
+            if (filterMode === 'DELAYED') {
+              return atrasada === true;
             }
+            
+            if (filterMode === 'INTERVAL') {
+              return horaTarefa >= 12 && horaTarefa < 14;
+            }
+            
+            if (filterMode === 'POST18') {
+              return horaTarefa >= 18;
+            }
+            
+            // filterMode === 'ALL'
+            return true; 
           });
 
           // Grouping logic based on Projects
