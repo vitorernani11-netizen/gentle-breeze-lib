@@ -390,17 +390,17 @@ function Dashboard() {
       "min-h-screen p-4 pt-12 pb-16 max-w-xl mx-auto transition-colors duration-1000",
       isRecoveryMode ? "bg-zinc-950 text-zinc-400 grayscale-[0.8]" : "bg-black text-zinc-100"
     )}>
-      <div className="fixed top-4 right-4 flex items-center gap-2 bg-zinc-900/30 px-3 py-1 rounded-full border border-zinc-800/50 z-50">
-        <WifiOff size={10} className="text-zinc-600" />
-        <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-600">Local</span>
+      <div className="fixed top-4 right-4 flex items-center gap-2 bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800/50 z-50 backdrop-blur-md">
+        <WifiOff size={12} className="text-zinc-500" />
+        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Offline Local</span>
       </div>
 
       {isLocked && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
           <PowerOff size={48} className="text-zinc-900 mb-6 animate-pulse" />
-          <h2 className="text-xl font-black tracking-tighter uppercase mb-2">Hardware exausto</h2>
-          <p className="text-zinc-600 font-bold uppercase tracking-widest text-[10px] max-w-xs">
-            PROJETO X: DESLIGAMENTO OBRIGATÓRIO.
+          <h2 className="text-2xl font-black tracking-tighter uppercase mb-2">Hardware exausto</h2>
+          <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs max-w-xs leading-relaxed">
+            PROJETO X: DESLIGAMENTO OBRIGATÓRIO PARA PRESERVAÇÃO.
           </p>
         </div>
       )}
