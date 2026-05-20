@@ -562,7 +562,10 @@ function Dashboard() {
         <TaskDetailModal 
           task={detailTask}
           open={!!detailTask}
-          onClose={() => setDetailTask(null)}
+          onClose={() => {
+            setDetailTask(null);
+            fetchData();
+          }}
           onUpdate={updateTask}
         />
       )}
