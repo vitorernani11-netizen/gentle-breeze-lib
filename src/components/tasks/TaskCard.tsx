@@ -113,8 +113,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     )}>
       <div className="flex flex-col gap-3">
         {/* Top Unified Line (Ultra-Slim UX) */}
-        <div className=\"flex flex-row items-center flex-wrap gap-2 w-full mb-1 pb-2 border-b border-zinc-800/40\">
-          <div className=\"flex items-center flex-wrap gap-2\">
+        <div className="flex flex-row items-center flex-wrap gap-2 w-full mb-1 pb-2 border-b border-zinc-800/40">
+          <div className="flex items-center flex-wrap gap-2">
             {/* Priority Selector */}
             <button
               onClick={(e) => {
@@ -155,7 +155,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           </div>
 
           {/* Minimalist Pipeline 1 | 2 | 3 | 4 */}
-          <div className=\"flex items-center gap-1 text-[10px] font-bold text-zinc-700 ml-auto\">
+          <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-700 ml-auto">
             {[1, 2, 3, 4].map((stage, idx) => (
               <React.Fragment key={stage}>
                 <button
