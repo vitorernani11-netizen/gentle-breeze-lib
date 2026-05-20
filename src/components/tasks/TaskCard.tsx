@@ -15,70 +15,62 @@ interface TaskCardProps {
   onUpdatePriority?: (id: string, priority: string) => void;
 }
 
-export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
-  if (!dueDateStr) return false;
-  
+const normalizarParaObjetoDate = (dataStr: string, horaStr?: string | null): Date | null => {
+  if (!dataStr) return null;
   try {
     const agora = new Date();
-    
-    // Se a string contiver a palavra "HOJE" de forma literal, tratamos como o dia atual
-    const strLimpa = dueDateStr.toUpperCase().trim();
-    
-    let ano = agora.getFullYear();
-    let mes = agora.getMonth(); // 0-11
+    const anoAtual = 2026; // Força o ano corrente do sistema
     let dia = agora.getDate();
+    let mes = agora.getMonth(); // 0-11
+    let ano = anoAtual;
 
-    if (strLimpa !== 'HOJE' && strLimpa !== '') {
-      // Isola a parte da data caso venha no formato ISO completo (remove o "T00:00...")
-      const apenasData = dueDateStr.split('T')[0].trim();
-      
+    const str = dataStr.toUpperCase().trim();
+
+    if (str !== 'HOJE' && str !== '') {
+      // Remove resíduos de ISO timestamp (T00:00...)
+      const apenasData = dataStr.split('T')[0].trim();
+
       if (apenasData.includes('/')) {
-        // Formato BR: DD/MM ou DD/MM/YYYY
         const parts = apenasData.split('/');
         dia = parseInt(parts[0], 10);
         mes = parseInt(parts[1], 10) - 1;
-        if (parts[2]) {
-          ano = parseInt(parts[2], 10);
-        }
+        ano = parts[2] ? parseInt(parts[2], 10) : anoAtual;
       } else if (apenasData.includes('-')) {
         const parts = apenasData.split('-');
         if (parts[0].length === 4) {
-          // Formato ISO: YYYY-MM-DD
           ano = parseInt(parts[0], 10);
           mes = parseInt(parts[1], 10) - 1;
           dia = parseInt(parts[2], 10);
         } else {
-          // Formato alternativo: DD-MM-YYYY
           dia = parseInt(parts[0], 10);
           mes = parseInt(parts[1], 10) - 1;
-          ano = parseInt(parts[2], 10);
+          ano = parts[2] ? parseInt(parts[2], 10) : anoAtual;
         }
       }
     }
 
-    // Validação final de segurança para evitar corrupção de dados (NaN)
-    if (isNaN(ano) || isNaN(mes) || isNaN(dia)) return false;
-
-    // Processamento do Horário Fixo. Se nulo ou vazio, assume o último minuto do dia (23:59)
+    // Configuração do Horário Fixo (Se vazio, assume 23:59)
     let hora = 23;
     let minuto = 59;
-    if (dueTimeStr && dueTimeStr.trim() !== '' && dueTimeStr.includes(':')) {
-      const timeParts = dueTimeStr.split(':');
-      const hParsed = parseInt(timeParts[0], 10);
-      const mParsed = parseInt(timeParts[1], 10);
-      if (!isNaN(hParsed)) hora = hParsed;
-      if (!isNaN(mParsed)) minuto = mParsed;
+    if (horaStr && horaStr.trim() !== '' && horaStr.includes(':')) {
+      const timeParts = horaStr.split(':');
+      const h = parseInt(timeParts[0], 10);
+      const m = parseInt(timeParts[1], 10);
+      if (!isNaN(h)) hora = h;
+      if (!isNaN(m)) minuto = m;
     }
 
-    // Monta o timestamp de comparação baseado estritamente no hardware do usuário
-    const tempoTarefa = new Date(ano, mes, dia, hora, minuto, 0, 0).getTime();
-    const tempoAtual = agora.getTime();
-
-    return tempoAtual > tempoTarefa;
-  } catch (error) {
-    console.error("Erro crítico no parser de data:", error);
-    return false;
+    return new Date(ano, mes, dia, hora, minuto, 0, 0);
+  } catch (e) {
+    return null;
   }
+};
+
+// Nova função unificada de atraso baseada no normalizador acima
+export const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null): boolean => {
+  const dataTarefa = normalizarParaObjetoDate(dueDateStr, dueTimeStr);
+  if (!dataTarefa) return false;
+  return new Date().getTime() > dataTarefa.getTime();
 };
 
 
