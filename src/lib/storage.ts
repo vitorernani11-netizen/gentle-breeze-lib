@@ -96,8 +96,8 @@ export const persistToHardware = () => {
     console.log('[Persistência:Local]', 'Dados sincronizados com o hardware');
     toast.success('Alterações salvas no hardware.');
     
-    // Also update external keys for compatibility if they were modified in memory
-    // (This part is tricky because memoryData is a unified object)
+    // Dispara evento para reatividade global
+    window.dispatchEvent(new Event('storage'));
   } catch (e: any) {
     console.error('[Persistência:Local] Erro ao salvar dados:', e);
     if (e.name === 'QuotaExceededError') {
