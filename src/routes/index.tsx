@@ -191,7 +191,7 @@ function Dashboard() {
     setAcademicUrgent(urgentAcademic);
 
     const hydrationData = (loadFromLocal(HYDRATION_KEY) || []).filter((h: any) => isValidDate(h.data));
-    const todayHydration = hydrationData.find((h: any) => h.data === today);
+    const todayHydration = hydrationData.find((h: any) => h.data === getTodayStr());
     setHydration(todayHydration ? todayHydration.quantidade_ml : 0);
 
     const checkinHistory = (loadFromLocal(CHECKIN_KEY) || []).filter((c: any) => isValidDate(c.data));
