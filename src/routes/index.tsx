@@ -44,6 +44,8 @@ import { TaskCard } from '@/components/tasks/TaskCard';
 import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
 import { TaskDetailModal } from '@/components/tasks/TaskDetailModal';
 import { TodayContextGroup } from '@/components/tasks/TodayContextGroup';
+import { getTodayStr } from '@/utils/dateHelpers';
+
 
 
 const TASKS_KEY = 'hardware_humano_data';
