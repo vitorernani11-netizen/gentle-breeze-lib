@@ -73,6 +73,53 @@ export const Route = createFileRoute('/')({
   component: Dashboard,
 });
 
+const isTaskOverdue = (dueDate: string, dueTime?: string | null) => {
+  if (!dueDate) return false;
+  
+  let dateOnly = dueDate.split('T')[0];
+  let ano, mes, dia;
+
+  if (dateOnly.includes('/')) {
+    const parts = dateOnly.split('/');
+    if (parts[2].length === 4) { dia = parts[0]; mes = parts[1]; ano = parts[2]; }
+    else { ano = parts[0]; mes = parts[1]; dia = parts[2]; }
+  } else if (dateOnly.includes('-')) {
+    const parts = dateOnly.split('-');
+    ano = parts[0]; mes = parts[1]; dia = parts[2];
+  } else {
+    return false;
+  }
+
+  const dataTarefa = new Date(Number(ano), Number(mes) - 1, Number(dia));
+  const hoje = new Date();
+  
+  dataTarefa.setHours(0, 0, 0, 0);
+  const dataHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  dataHoje.setHours(0, 0, 0, 0);
+
+  // Se a data é no passado literal
+  if (dataTarefa.getTime() < dataHoje.getTime()) return true;
+  // Se a data é no futuro literal
+  if (dataTarefa.getTime() > dataHoje.getTime()) return false;
+
+  // Se é exatamente HOJE, valida a hora e minuto locais do dispositivo
+  if (dataTarefa.getTime() === dataHoje.getTime() && dueTime) {
+    const [horaStr, minStr] = dueTime.split(':');
+    const horaTarefa = parseInt(horaStr, 10);
+    const minTarefa = parseInt(minStr, 10);
+
+    const horaAtual = hoje.getHours();
+    const minAtual = hoje.getMinutes();
+
+    const tempoAtual = horaAtual * 100 + minAtual;
+    const tempoTarefa = horaTarefa * 100 + minTarefa;
+
+    return tempoAtual > tempoTarefa; // Retorna TRUE se o horário atual já passou do horário da tarefa
+  }
+
+  return false;
+};
+
 function Dashboard() {
   const navigate = useNavigate();
   const [session, setSession] = useState<any>(null);
@@ -418,24 +465,34 @@ function Dashboard() {
             
             if (isReference) return false;
 
-            // Filtro para Atrasadas (Global: busca em todos os status)
+            const taskOverdue = isTaskOverdue(t.data_execucao || t.data_vencimento, t.hora_vencimento || t.lembrete);
+
+            // Filtro para Atrasadas
             if (filterMode === 'DELAYED') {
-              const taskDateStr = t.data_execucao?.split('T')[0];
-              if (taskDateStr && taskDateStr < today) return true;
+              return taskOverdue;
+            }
+
+            // Para as outras abas, garantimos que a data é HOJE
+            const taskDateStr = (t.data_execucao || t.data_vencimento)?.split('T')[0];
+            if (taskDateStr !== today) return false;
+
+            // Filtro para PÓS-18H
+            if (filterMode === 'POST18') {
+              // Se já está atrasada (dentro de hoje), não aparece em "PÓS-18H" se o critério for "no prazo"
+              // No entanto, as instruções dizem: contextos profissionais OU horário >= 18:00
+              const proj = projects.find(p => p.id === t.projeto_id);
+              const projName = proj?.nome?.toLowerCase() || '';
+              const isProfessional = projName.includes('esfiha') || projName.includes('riolax') || projName.includes('youtube') || projName.includes('vitor') || projName.includes('ernani');
               
-              if (taskDateStr === today && t.hora_vencimento) {
-                // Se a data é hoje, checamos se o horário já passou
-                return isBefore(new Date(t.hora_vencimento), now);
+              let isAfter18 = false;
+              const dueTime = t.hora_vencimento || t.lembrete;
+              if (dueTime) {
+                const hour = parseInt(dueTime.split(':')[0], 10);
+                if (hour >= 18) isAfter18 = true;
               }
-              return false;
-            }
 
-            // Filtro rigoroso para "Hoje" quando no modo padrão ou específicos de horário
-            if (filterMode === 'ALL' || filterMode === 'INTERVAL' || filterMode === 'POST18') {
-              const taskDateStr = t.data_execucao?.split('T')[0];
-              return taskDateStr === today;
+              return !taskOverdue && (isProfessional || isAfter18);
             }
-
 
             return true;
           });
@@ -486,14 +543,8 @@ function Dashboard() {
               outros: { title: '', color: '', tasks: [] }
             };
           } else if (filterMode === 'POST18') {
-            finalGroups = {
-              faculdade: { title: '', color: '', tasks: [] },
-              gestao: { title: '', color: '', tasks: [] },
-              esfiha: groupedTasks.esfiha,
-              riolax: groupedTasks.riolax,
-              youtube: groupedTasks.youtube,
-              outros: { title: '', color: '', tasks: [] }
-            };
+            // Em POST18, já filtramos as tarefas em executionTasks
+            finalGroups = groupedTasks;
           }
 
           const hasAnyTasks = Object.values(finalGroups).some(g => g.tasks.length > 0);
