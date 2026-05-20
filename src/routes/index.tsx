@@ -564,8 +564,9 @@ function Dashboard() {
       {detailTask && (
         <TaskDetailModal 
           task={detailTask}
-          open={!!detailTask}
+          open={isDetailOpen}
           onClose={() => {
+            setIsDetailOpen(false);
             setDetailTask(null);
             fetchData();
           }}
