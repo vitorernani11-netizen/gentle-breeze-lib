@@ -149,16 +149,16 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
         />
 
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
             <CalendarPopover 
               selectedDate={vencimento} 
               onSelect={setVencimento}
               recurrence={recurrence}
               onRecurrenceSelect={setRecurrence}
             >
-              <Button variant="ghost" className={cn("h-9 px-3 rounded-xl border border-zinc-900", vencimento && "text-[#00ff41] border-[#00ff41]/20")}>
-                <CalendarIcon size={18} />
-                <span className="ml-2 text-[10px] font-bold uppercase whitespace-nowrap">
+              <Button variant="ghost" className={cn("h-12 px-4 rounded-2xl border border-zinc-900 bg-zinc-900/50 transition-all", vencimento && "text-[#00ff41] border-[#00ff41]/30 bg-[#00ff41]/5")}>
+                <CalendarIcon size={20} />
+                <span className="ml-2 text-xs font-bold uppercase whitespace-nowrap">
                   {format(vencimento, "dd MMM", { locale: ptBR })} • {format(vencimento, 'HH:mm')}
                 </span>
               </Button>
@@ -168,12 +168,12 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               <Button 
                 variant="ghost" 
                 className={cn(
-                  "h-9 px-3 rounded-xl border border-zinc-900 transition-all", 
-                  reminders.length > 0 && "text-[#00ff41] border-[#00ff41] shadow-[0_0_10px_rgba(0,255,65,0.2)]"
+                  "h-12 px-4 rounded-2xl border border-zinc-900 bg-zinc-900/50 transition-all", 
+                  reminders.length > 0 && "text-[#00ff41] border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.2)] bg-[#00ff41]/5"
                 )}
               >
-                <Clock size={18} />
-                {reminders.length > 0 && <span className="ml-2 text-[10px] font-black tracking-tighter">{reminders.length}</span>}
+                <Clock size={20} />
+                {reminders.length > 0 && <span className="ml-2 text-xs font-black tracking-tighter">{reminders.length}</span>}
               </Button>
             </ReminderManager>
 
