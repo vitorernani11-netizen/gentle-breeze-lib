@@ -419,6 +419,12 @@ function Dashboard() {
             if (isReference) return false;
 
             const taskOverdue = isTaskOverdue(t.data_execucao || t.data_vencimento, t.hora_vencimento || t.lembrete);
+            
+            let horaTarefa = -1;
+            const dueTime = t.hora_vencimento || t.lembrete;
+            if (dueTime) {
+              horaTarefa = parseInt(dueTime.split(':')[0], 10);
+            }
 
             // Filtro para Atrasadas
             if (filterMode === 'DELAYED') {
@@ -429,22 +435,14 @@ function Dashboard() {
             const taskDateStr = (t.data_execucao || t.data_vencimento)?.split('T')[0];
             if (taskDateStr !== today) return false;
 
-            // Filtro para PÓS-18H
-            if (filterMode === 'POST18') {
-              // Se já está atrasada (dentro de hoje), não aparece em "PÓS-18H" se o critério for "no prazo"
-              // No entanto, as instruções dizem: contextos profissionais OU horário >= 18:00
-              const proj = projects.find(p => p.id === t.projeto_id);
-              const projName = proj?.nome?.toLowerCase() || '';
-              const isProfessional = projName.includes('esfiha') || projName.includes('riolax') || projName.includes('youtube') || projName.includes('vitor') || projName.includes('ernani');
-              
-              let isAfter18 = false;
-              const dueTime = t.hora_vencimento || t.lembrete;
-              if (dueTime) {
-                const hour = parseInt(dueTime.split(':')[0], 10);
-                if (hour >= 18) isAfter18 = true;
-              }
+            // Filtro para INTERVALO (12h - 14h)
+            if (filterMode === 'INTERVAL') {
+              return horaTarefa >= 12 && horaTarefa <= 14;
+            }
 
-              return !taskOverdue && (isProfessional || isAfter18);
+            // Filtro para PÓS-18H (>= 18h)
+            if (filterMode === 'POST18') {
+              return horaTarefa >= 18;
             }
 
             return true;
@@ -483,20 +481,7 @@ function Dashboard() {
           // Apply Filter Mode (already filtered executionTasks, but some modes have specific grouping)
           let finalGroups = { ...groupedTasks };
 
-          if (filterMode === 'INTERVAL') {
-            finalGroups = {
-              faculdade: groupedTasks.faculdade,
-              gestao: { 
-                ...groupedTasks.gestao, 
-                tasks: groupedTasks.gestao.tasks.filter(t => t.tags?.some((tag: string) => tag.toLowerCase().includes('rápida') || tag.toLowerCase().includes('rapida'))) 
-              },
-              esfiha: { title: '', color: '', tasks: [] },
-              riolax: { title: '', color: '', tasks: [] },
-              youtube: { title: '', color: '', tasks: [] },
-              outros: { title: '', color: '', tasks: [] }
-            };
-          } else if (filterMode === 'POST18') {
-            // Em POST18, já filtramos as tarefas em executionTasks
+          if (filterMode === 'INTERVAL' || filterMode === 'POST18' || filterMode === 'DELAYED') {
             finalGroups = groupedTasks;
           }
 
