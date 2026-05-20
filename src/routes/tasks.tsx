@@ -210,16 +210,16 @@ function TasksPage() {
       </section>
 
       <div className="grid grid-cols-1 gap-0 border-t border-white/10">
-        {activeTasks.length > 0 ? (
-          activeTasks
-            .filter(task => {
+        {tarefasOrdenadasDaEntrada.length > 0 ? (
+          tarefasOrdenadasDaEntrada
+            .filter((task: any) => {
               if (!selectedStage) return true;
               if (selectedStage === 1) {
                 return task.fase_pipeline === 1 || task.fase_pipeline === null || task.fase_pipeline === undefined;
               }
               return task.fase_pipeline === selectedStage;
             })
-            .map((task) => (
+            .map((task: any) => (
               <TaskCard 
                 key={task.id}
                 task={task}
