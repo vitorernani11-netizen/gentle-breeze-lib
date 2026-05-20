@@ -114,6 +114,27 @@ const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
   }
 };
 
+const isTaskFromToday = (dueDateStr: string) => {
+  if (!dueDateStr) return false;
+  const today = getTodayStr(); // 'YYYY-MM-DD'
+  const dateOnly = dueDateStr.split('T')[0];
+  
+  // Normalizar para YYYY-MM-DD se estiver em outro formato (DD/MM/YYYY)
+  let normalizedDate = dateOnly;
+  if (dateOnly.includes('/')) {
+    const parts = dateOnly.split('/');
+    if (parts.length === 3) {
+      if (parts[2].length === 4) {
+        normalizedDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      } else {
+        normalizedDate = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+      }
+    }
+  }
+  
+  return normalizedDate === today;
+};
+
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
@@ -453,68 +474,58 @@ function Dashboard() {
           const now = new Date();
 
           // Filtering Reference and Non-execution items + Time filters
-          const tarefasDeHoje = tasks.filter(t => {
-            const isReference = t.tags?.some((tag: string) => 
+          const tarefasDeHojeEPassado = tasks.filter(tarefa => {
+            if (tarefa.status_concluido) return false;
+            
+            const isReference = tarefa.tags?.some((tag: string) => 
               tag.toLowerCase().includes('referência') || 
               tag.toLowerCase().includes('referencia') || 
               tag.toLowerCase().includes('wishlist') ||
               tag.toLowerCase().includes('leitura') ||
               tag.toLowerCase().includes('ideia')
-            ) || t.status === 'Referência';
-            
+            ) || tarefa.status === 'Referência';
             if (isReference) return false;
 
-            const taskDateStr = (t.data_execucao || t.data_vencimento)?.split('T')[0];
-            const isToday = taskDateStr === today;
-            const atrasada = isTaskOverdue(t.data_execucao || t.data_vencimento, t.hora_vencimento || t.lembrete);
+            const dueDate = tarefa.data_execucao || tarefa.data_vencimento;
+            if (!dueDate) return false;
             
-            // Se for atrasada (de hoje ou antes), incluímos para o filtro de atrasadas
-            if (atrasada) return true;
+            const atrasada = isTaskOverdue(dueDate, tarefa.hora_vencimento || tarefa.lembrete);
+            const ehHoje = isTaskFromToday(dueDate);
             
-            // Senão, incluímos apenas se for hoje
-            return isToday;
+            return ehHoje || atrasada;
           });
 
-          const executionTasks = tarefasDeHoje.filter((tarefa) => {
-            // 1. Calcula se a tarefa está estritamente atrasada (passou do horário atual)
-            const atrasada = isTaskOverdue(tarefa.data_execucao || tarefa.data_vencimento, tarefa.hora_vencimento || tarefa.lembrete);
+          const executionTasks = tarefasDeHojeEPassado.filter((tarefa) => {
+            const dueDate = tarefa.data_execucao || tarefa.data_vencimento;
+            const atrasada = isTaskOverdue(dueDate, tarefa.hora_vencimento || tarefa.lembrete);
             
-            // 2. Extrai a hora numérica de forma isolada e segura
             let horaTarefa = -1;
             const dueTime = tarefa.hora_vencimento || tarefa.lembrete;
             if (dueTime && typeof dueTime === 'string') {
-              const [horaStr] = dueTime.split(':');
-              horaTarefa = parseInt(horaStr, 10);
+              horaTarefa = parseInt(dueTime.split(':')[0], 10);
             }
 
-            // REGRA DE OURO 1: Se o usuário clicou na aba "ATRASADAS", só entram tarefas vencidas
             if (filterMode === 'DELAYED') {
               return atrasada === true;
             }
 
-            // REGRA DE OURO 2: Para as abas normais (INTERVALO, PÓS-18H), tarefas já atrasadas DEVEM SUMIR 
-            // (elas migram automaticamente para a aba ATRASADAS para limpar o fluxo)
             if (atrasada) {
               return false;
             }
 
-            // REGRA DE OURO 3: Roteamento por faixa de horário estrita (Tarefas no prazo)
             if (filterMode === 'INTERVAL') {
-              // Entra estritamente se for 12:00 até 13:59 e NÃO estiver atrasada
               return horaTarefa >= 12 && horaTarefa < 14;
             }
 
             if (filterMode === 'POST18') {
-              // Entra estritamente se for de 18:00 até 23:59 e NÃO estiver atrasada
               return horaTarefa >= 18 && horaTarefa <= 23;
             }
 
             if (filterMode === 'ALL') {
-              // A aba global mostra todas as tarefas ativas do dia atual (no prazo ou atrasadas de hoje)
-              return true;
+              return isTaskFromToday(dueDate || '');
             }
 
-            return true;
+            return false;
           });
 
           // Grouping logic based on Projects
