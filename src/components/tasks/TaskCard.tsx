@@ -186,7 +186,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             onKeyDown={(e) => { if (e.key === 'Enter') onClick(task); }}
             className="flex flex-col flex-grow items-start justify-start w-full min-w-0 text-left cursor-pointer"
           >
-            <h3 className="font-black text-lg md:text-xl uppercase tracking-tight leading-tight flex items-center flex-wrap gap-2 text-white">
+            <h3 className="font-black text-base md:text-xl uppercase tracking-tight leading-tight flex items-center flex-wrap gap-2 text-white">
               {task.titulo}
               {(task.recorrencia_semanal || (task.repeticao && task.repeticao !== 'none')) && (
                 <RefreshCw className="w-4 h-4 text-[#00ff41] animate-none" />

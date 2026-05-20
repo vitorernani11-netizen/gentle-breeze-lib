@@ -112,7 +112,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
-        className="max-w-4xl w-full sm:w-[95vw] h-full sm:h-auto sm:max-h-[85vh] p-0 bg-black border-0 sm:border-2 border-white rounded-none sm:rounded-3xl overflow-hidden gap-0"
+        className="max-w-4xl w-full sm:w-[95vw] h-[100dvh] sm:h-auto sm:max-h-[85vh] p-0 bg-black border-0 sm:border-2 border-white rounded-none sm:rounded-3xl overflow-hidden gap-0 flex flex-col"
         onInteractOutside={onClose}
       >
         {/* Header */}
@@ -126,7 +126,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         </div>
 
         {/* Body: 2 cols on desktop, stack on mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] overflow-y-auto pb-40">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] overflow-y-auto flex-grow">
           {/* Main column */}
           <div className="p-8 space-y-6 md:border-r border-zinc-900">
             <div>
@@ -209,7 +209,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         </div>
 
         {/* Footer */}
-        <div className="border-t border-zinc-900 px-6 py-6 flex items-center justify-end bg-black mb-20 sm:mb-0">
+        <div className="border-t border-zinc-900 px-6 py-4 flex items-center justify-end bg-black shrink-0">
           {isDirty && (
             <button
               onClick={() => {
