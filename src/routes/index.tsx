@@ -426,26 +426,26 @@ function Dashboard() {
               horaTarefa = parseInt(dueTime.split(':')[0], 10);
             }
 
-            // Filtro para Atrasadas
-            if (filterMode === 'DELAYED') {
-              return taskOverdue;
+            switch (filterMode) {
+              case 'DELAYED':
+                return taskOverdue === true;
+                
+              case 'INTERVAL':
+                // Das 12:00 até as 13:59 (Hoje)
+                const isTodayInterval = (t.data_execucao || t.data_vencimento)?.split('T')[0] === today;
+                return isTodayInterval && horaTarefa >= 12 && horaTarefa < 14;
+                
+              case 'POST18':
+                // Das 18:00 até as 23:59 (Hoje)
+                const isTodayPost18 = (t.data_execucao || t.data_vencimento)?.split('T')[0] === today;
+                return isTodayPost18 && horaTarefa >= 18;
+                
+              case 'ALL':
+              default:
+                // Ver Tudo mostra o dia inteiro (Hoje)
+                const isToday = (t.data_execucao || t.data_vencimento)?.split('T')[0] === today;
+                return isToday;
             }
-
-            // Para as outras abas, garantimos que a data é HOJE
-            const taskDateStr = (t.data_execucao || t.data_vencimento)?.split('T')[0];
-            if (taskDateStr !== today) return false;
-
-            // Filtro para INTERVALO (12h - 14h)
-            if (filterMode === 'INTERVAL') {
-              return horaTarefa >= 12 && horaTarefa <= 14;
-            }
-
-            // Filtro para PÓS-18H (>= 18h)
-            if (filterMode === 'POST18') {
-              return horaTarefa >= 18;
-            }
-
-            return true;
           });
 
           // Grouping logic based on Projects
