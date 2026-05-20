@@ -198,22 +198,9 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               placeholder="Adicione a descrição ou sub-tarefas aqui..."
               className="flex-grow w-full min-h-[250px] md:min-h-[350px] bg-zinc-900/40 border border-zinc-800 p-3 text-sm text-zinc-400 focus:border-[#00ff41] focus:ring-0 resize-none leading-relaxed placeholder:text-zinc-700 transition-colors"
             />
-          </div>
 
-          {/* Sidebar */}
-          <div className="p-6 space-y-6 bg-zinc-950/50">
-            {/* Data */}
-            <SidebarRow icon={<Calendar size={18} />} label="Vencimento">
-              <input
-                type="date"
-                value={dataExecucao}
-                onChange={(e) => handleDate(e.target.value)}
-                className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg"
-              />
-            </SidebarRow>
-
-            {/* Lembretes Push Inline */}
-            <div className="pt-2" id="lembretes-section">
+            {/* Lembretes Push Inline (Moved under description) */}
+            <div className="pt-4" id="lembretes-section">
               <ReminderManager 
                 reminders={lembretesState} 
                 onUpdate={(newReminders) => {
@@ -228,6 +215,19 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 }}
               />
             </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="p-6 space-y-6 bg-zinc-950/50">
+            {/* Data */}
+            <SidebarRow icon={<Calendar size={18} />} label="Vencimento">
+              <input
+                type="date"
+                value={dataExecucao}
+                onChange={(e) => handleDate(e.target.value)}
+                className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg"
+              />
+            </SidebarRow>
           </div>
         </div>
 
