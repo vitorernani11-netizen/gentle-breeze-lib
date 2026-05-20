@@ -205,24 +205,25 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             )}
           </div>
 
-        <div className="flex flex-col gap-2 shrink-0">
-          <button 
-            aria-label="Concluir"
-            className="w-8 h-8 rounded-full border-2 border-zinc-700 hover:border-[#00ff41] hover:bg-[#00ff41]/20 flex items-center justify-center transition-all self-end"
-            onClick={() => onComplete(task)}
-          >
-            <Check size={14} className="text-[#00ff41] opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-          <div className="flex justify-end">
-            <Button 
-              aria-label="Deletar"
-              size="icon"
-              variant="ghost"
-              className="text-zinc-800 hover:text-red-500 h-10 w-10 border border-zinc-900 rounded-lg transition-all active:scale-95"
-              onClick={() => onDelete(task.id)}
+          <div className="flex flex-col gap-2 shrink-0">
+            <button 
+              aria-label="Concluir"
+              className="w-8 h-8 rounded-full border-2 border-zinc-700 hover:border-[#00ff41] hover:bg-[#00ff41]/20 flex items-center justify-center transition-all self-end"
+              onClick={() => onComplete(task)}
             >
-              <Trash2 size={16} />
-            </Button>
+              <Check size={14} className="text-[#00ff41] opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
+            <div className="flex justify-end">
+              <Button 
+                aria-label="Deletar"
+                size="icon"
+                variant="ghost"
+                className="text-zinc-800 hover:text-red-500 h-10 w-10 border border-zinc-900 rounded-lg transition-all active:scale-95"
+                onClick={() => onDelete(task.id)}
+              >
+                <Trash2 size={16} />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
