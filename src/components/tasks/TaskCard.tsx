@@ -114,7 +114,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     )}>
       <div className="flex flex-col gap-3">
         {/* Top Unified Line (Ultra-Slim UX) */}
-        <div className="flex flex-row items-center flex-wrap gap-2 w-full mb-1 pb-2 border-b border-zinc-800/40">
+        <div className="flex flex-row items-center flex-wrap gap-2 w-full mb-2">
           <div className="flex items-center flex-wrap gap-2">
             {/* Priority Selector */}
             <button
@@ -140,10 +140,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             </button>
 
             {/* Fixed Time Indicator (Inline) */}
-            {displayTime && (
+            {task.hora_vencimento && (
               <div className="flex items-center gap-1 text-[11px] font-black text-[#00ff41] bg-[#00ff41]/5 px-2 py-0.5 rounded-md border border-[#00ff41]/20">
                 <Clock size={10} strokeWidth={3} />
-                <span>{displayTime}</span>
+                <span>{task.hora_vencimento}</span>
               </div>
             )}
 
