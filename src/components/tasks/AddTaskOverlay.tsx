@@ -97,6 +97,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       recorrencia: recurrence,
       prioridade,
       lembrete: format(vencimento, 'HH:mm'),
+      lembretes: reminders,
       reminders: reminders,
       descricao,
       hora_vencimento: horaVencISO
