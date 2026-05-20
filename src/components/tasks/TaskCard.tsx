@@ -120,26 +120,30 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           className="flex flex-col gap-2 flex-1 min-w-0 text-left cursor-pointer"
         >
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                const priorities = ['P4', 'P1', 'P2', 'P3'];
-                const currentP = typeof task.prioridade === 'number' ? `P${task.prioridade}` : (task.prioridade || 'P4');
-                const currentIndex = priorities.indexOf(currentP);
-                const nextPriority = priorities[(currentIndex + 1) % priorities.length];
-                if (onUpdatePriority) {
-                  onUpdatePriority(task.id, nextPriority);
-                }
-              }}
-              className={cn("text-[10px] font-black uppercase px-2 py-1 border rounded-md transition-colors", 
-                (task.prioridade === 'P1' || task.prioridade === 1) ? "text-red-500 border-red-500/40 bg-red-500/10" :
-                (task.prioridade === 'P2' || task.prioridade === 2) ? "text-orange-500 border-orange-500/40 bg-orange-500/10" :
-                (task.prioridade === 'P3' || task.prioridade === 3) ? "text-blue-500 border-blue-500/40 bg-blue-500/10" :
-                "text-zinc-500 border-zinc-800 bg-zinc-900/50"
-              )}
-            >
-              {typeof task.prioridade === 'number' ? `P${task.prioridade}` : (task.prioridade || 'P4')}
-            </button>
+            <div className="grid grid-cols-2 gap-1.5 max-w-[120px]">
+              {['P4', 'P1', 'P2', 'P3'].map((priority) => (
+                <button
+                  key={priority}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onUpdatePriority) {
+                      onUpdatePriority(task.id, priority);
+                    }
+                  }}
+                  className={cn(
+                    "text-[9px] font-black uppercase w-12 h-6 border rounded transition-colors flex items-center justify-center",
+                    (task.prioridade === priority || (priority === 'P4' && !task.prioridade)) 
+                      ? (priority === 'P1' ? "text-red-500 border-red-500/40 bg-red-500/10" :
+                         priority === 'P2' ? "text-orange-500 border-orange-500/40 bg-orange-500/10" :
+                         priority === 'P3' ? "text-blue-500 border-blue-500/40 bg-blue-500/10" :
+                         "text-white border-white bg-white/10")
+                      : "text-zinc-600 border-zinc-900 bg-zinc-950 hover:text-zinc-400"
+                  )}
+                >
+                  {priority}
+                </button>
+              ))}
+            </div>
             
             <div className="flex items-center gap-1 border border-zinc-800 bg-zinc-950 p-1 rounded-md">
               {[1, 2, 3, 4].map((stage) => (
