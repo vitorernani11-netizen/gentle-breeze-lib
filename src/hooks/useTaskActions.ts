@@ -91,7 +91,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
           description: `"${task.titulo}" atingiu o limite de 3 reagendamentos.`
         });
       } else {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getTodayStr();
         const targetDate = newDate || today;
         
         updatedTasks = allTasks.map((t: any) => {
