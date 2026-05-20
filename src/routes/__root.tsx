@@ -91,6 +91,98 @@ function RootComponent() {
     };
   }, []);
 
+  // Notification Engine
+  useEffect(() => {
+    if (!hasSession) return;
+
+    const TASKS_KEY = 'hardware_humano_data';
+
+    const verificarELancarNotificacoes = () => {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+      const tasks = loadFromLocal(TASKS_KEY) || [];
+      const agora = new Date();
+      const hojeStr = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
+      const horaAtualMinutos = agora.getHours() * 60 + agora.getMinutes();
+
+      let hasChanges = false;
+      const updatedTasks = tasks.map((tarefa: any) => {
+        if (tarefa.status_concluido || !tarefa.data_execucao || !tarefa.hora_vencimento) return tarefa;
+
+        // Garante que a tarefa é de hoje
+        const dataTarefaStr = tarefa.data_execucao.split('T')[0].replace(/\//g, '-');
+        if (dataTarefaStr !== hojeStr) return tarefa;
+
+        const [h, m] = tarefa.hora_vencimento.split(':').map(Number);
+        const horaTarefaMinutos = h * 60 + m;
+
+        // 1. Checa o Horário Fixo da Atividade (Notificação no exato momento)
+        // Usamos uma flag para não disparar várias vezes no mesmo minuto
+        if (horaAtualMinutos === horaTarefaMinutos && !tarefa.notificado_fixo) {
+          new Notification(`🚨 Hora Fixa: ${tarefa.titulo}`, {
+            body: `Sua atividade agendada para às ${tarefa.hora_vencimento} começou agora!`,
+            icon: '/pwa-192x192.png'
+          });
+          hasChanges = true;
+          return { ...tarefa, notificado_fixo: true };
+        }
+
+        // 2. Checa os Lembretes personalizados antecipados
+        if (tarefa.lembretes && Array.isArray(tarefa.lembretes)) {
+          let lembreteAlterado = false;
+          const novosLembretes = tarefa.lembretes.map((lembrete: any) => {
+            if (lembrete.disparado) return lembrete;
+
+            const minutoDoDisparo = horaTarefaMinutos - lembrete.minutosAntecendia;
+
+            if (horaAtualMinutos === minutoDoDisparo) {
+              new Notification(`⏰ Lembrete: ${tarefa.titulo}`, {
+                body: `Faltam ${lembrete.minutosAntecendia} minutos para o início do seu compromisso das ${tarefa.hora_vencimento}.`,
+                icon: '/pwa-192x192.png'
+              });
+              lembreteAlterado = true;
+              return { ...lembrete, disparado: true };
+            }
+            return lembrete;
+          });
+
+          if (lembreteAlterado) {
+            hasChanges = true;
+            return { ...tarefa, lembretes: novosLembretes };
+          }
+        }
+        
+        // Reset flags if minute passed (optional but safer for recurring)
+        if (horaAtualMinutos !== horaTarefaMinutos && tarefa.notificado_fixo) {
+           // We don't necessarily want to reset here if we want to avoid double triggers in same session
+        }
+
+        return tarefa;
+      });
+
+      if (hasChanges) {
+        saveToLocal(TASKS_KEY, updatedTasks);
+        window.dispatchEvent(new Event('storage'));
+      }
+    };
+
+    // Solicita permissão inicial se o usuário interagir ou via toast
+    const requestInitialPermission = async () => {
+      if ('Notification' in window && Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          toast.success("Notificações ativadas!");
+        }
+      }
+    };
+
+    // Delay permission request to not annoy on load
+    setTimeout(requestInitialPermission, 2000);
+
+    const interval = setInterval(verificarELancarNotificacoes, 30000); // Checa a cada 30s
+    return () => clearInterval(interval);
+  }, [hasSession]);
+
   if (isAuthChecking) return null;
 
   return (
