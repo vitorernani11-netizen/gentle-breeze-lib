@@ -4,6 +4,10 @@ import { isValid, parseISO } from 'date-fns';
 
 const STORAGE_KEY = 'hardware_humano_data';
 
+// In-memory cache to implement manual save
+let memoryData: any = null;
+let isDirty = false;
+
 /**
  * Valida se uma string é uma data ISO válida.
  */
@@ -39,16 +43,24 @@ export const validateCollectionDates = (collection: string, items: any[], dateFi
 
 export const getStorageData = () => {
   if (typeof window === 'undefined') return {};
+  
+  // Return from memory if already loaded
+  if (memoryData !== null) return memoryData;
+
   try {
     const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) return {};
+    if (!data) {
+      memoryData = {};
+      return memoryData;
+    }
     
     try {
-      return JSON.parse(data);
+      memoryData = JSON.parse(data);
+      return memoryData;
     } catch (parseError) {
       console.error('[Persistência:Local] Dados corrompidos no localStorage. Resetando...', parseError);
-      // Opcional: toast.error('Falha crítica na leitura de dados. Tentando recuperar hardware...');
-      return {};
+      memoryData = {};
+      return memoryData;
     }
   } catch (e) {
     console.error('[Persistência:Local] Erro de acesso ao localStorage:', e);
@@ -58,11 +70,34 @@ export const getStorageData = () => {
 };
 
 export const setStorageData = (data: any) => {
-  if (typeof window === 'undefined') return;
+  // Update memory only (Remove auto-save)
+  memoryData = data;
+  isDirty = true;
+  
+  // Notify listeners so UI updates immediately
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('storage_update')); // Custom event for internal sync
+    window.dispatchEvent(new Event('storage')); // Compatibility
+  }
+  
+  console.log('[Persistência:Memória]', 'Dados atualizados em memória (não salvos)');
+};
+
+/**
+ * Actually persists memory data to localStorage
+ */
+export const persistToHardware = () => {
+  if (typeof window === 'undefined' || memoryData === null) return;
+  
   try {
-    const stringifiedData = JSON.stringify(data);
+    const stringifiedData = JSON.stringify(memoryData);
     localStorage.setItem(STORAGE_KEY, stringifiedData);
-    console.log('[Persistência:Local]', 'Dados sincronizados');
+    isDirty = false;
+    console.log('[Persistência:Local]', 'Dados sincronizados com o hardware');
+    toast.success('Alterações salvas no hardware.');
+    
+    // Also update external keys for compatibility if they were modified in memory
+    // (This part is tricky because memoryData is a unified object)
   } catch (e: any) {
     console.error('[Persistência:Local] Erro ao salvar dados:', e);
     if (e.name === 'QuotaExceededError') {
@@ -72,6 +107,8 @@ export const setStorageData = (data: any) => {
     }
   }
 };
+
+export const hasUnsavedChanges = () => isDirty;
 
 export const getLocalCollection = (collection: string) => {
   try {
@@ -85,7 +122,7 @@ export const getLocalCollection = (collection: string) => {
 
 export const saveLocalCollection = (collection: string, data: any[]) => {
   try {
-    const current = getStorageData();
+    const current = { ...getStorageData() };
     current[collection] = data;
     setStorageData(current);
   } catch (e) {
@@ -98,25 +135,26 @@ export const saveToLocal = (key: string, data: any) => {
   if (key.startsWith('hardware_humano_')) {
     const collection = key.replace('hardware_humano_', '');
     saveLocalCollection(collection, data);
+  } else if (key === STORAGE_KEY) {
+    setStorageData(data);
   } else {
-    try {
-      localStorage.setItem(key, JSON.stringify(data));
-    } catch (e) {
-      console.error(`Erro ao salvar chave externa ${key}:`, e);
-    }
+    // For other keys, we still use localStorage directly or we could also cache them.
+    // Given the prompt "REMOVA O AUTO-SAVE", let's cache everything.
+    const current = { ...getStorageData() };
+    current[key] = data;
+    setStorageData(current);
   }
 };
 
 export const loadFromLocal = (key: string) => {
+  const data = getStorageData();
+  
   if (key.startsWith('hardware_humano_')) {
     const collection = key.replace('hardware_humano_', '');
-    return getLocalCollection(collection);
+    return Array.isArray(data[collection]) ? data[collection] : [];
   }
-  try {
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : null;
-  } catch (e) {
-    console.error(`Erro ao carregar chave externa ${key}:`, e);
-    return null;
-  }
+  
+  if (key === STORAGE_KEY) return data;
+  
+  return data[key] || null;
 };
