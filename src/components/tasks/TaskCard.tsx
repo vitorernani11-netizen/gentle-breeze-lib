@@ -27,30 +27,43 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   const checkIsOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
     if (!dueDateStr) return false;
 
+    // 1. Pega a hora LOCAL real do aparelho do usuário
     const agora = new Date();
-    // Comparação estrita de data YYYY-MM-DD em horário local
-    const hojeStr = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}-${String(agora.getDate()).padStart(2, '0')}`;
-    const tarefaStr = dueDateStr.split('T')[0];
+    const anoAtual = agora.getFullYear();
+    const mesAtual = agora.getMonth() + 1;
+    const diaAtual = agora.getDate();
 
-    // Se a data é no passado
-    if (tarefaStr < hojeStr) return true;
+    // 2. Trata a string da data da tarefa de forma limpa, sem conversão de UTC
+    const parts = dueDateStr.split(/[-/T]/);
+    if (parts.length < 3) return false;
+    const anoTarefa = Number(parts[0]);
+    const mesTarefa = Number(parts[1]);
+    const diaTarefa = Number(parts[2]);
 
-    // Se a data é hoje, verifica o horário
-    if (tarefaStr === hojeStr && dueTimeStr) {
-      try {
-        const timeToParse = dueTimeStr.includes('T') 
-          ? formatDate(parseISO(dueTimeStr), 'HH:mm') 
-          : dueTimeStr;
-          
-        const [horaTarefa, minTarefa] = timeToParse.split(':').map(Number);
-        const horaAtual = agora.getHours();
-        const minAtual = agora.getMinutes();
+    // 3. Transforma as datas em números inteiros puros (Ex: 20260519)
+    const hojeNum = anoAtual * 10000 + mesAtual * 100 + diaAtual;
+    const tarefaNum = anoTarefa * 10000 + mesTarefa * 100 + diaTarefa;
 
-        if (horaAtual > horaTarefa) return true;
-        if (horaAtual === horaTarefa && minAtual > minTarefa) return true;
-      } catch (e) {
-        console.error("Erro ao processar horário de vencimento:", e);
-      }
+    // Comparações de Dias
+    if (tarefaNum < hojeNum) return true;  // Dia no passado = Atrasada
+    if (tarefaNum > hojeNum) return false; // Dia no futuro = No prazo
+
+    // 4. Se for EXATAMENTE o mesmo dia de hoje, compara o horário local do aparelho
+    if (dueTimeStr) {
+      // Garantir que estamos pegando apenas o horário HH:mm se vier uma string ISO
+      const timeToParse = dueTimeStr.includes('T') 
+        ? dueTimeStr.split('T')[1].substring(0, 5) 
+        : dueTimeStr;
+        
+      const [horaTarefa, minTarefa] = timeToParse.split(':').map(Number);
+      const horaAtual = agora.getHours();
+      const minAtual = agora.getMinutes();
+
+      // Transforma os horários em números inteiros (Ex: 2224 vs 2300)
+      const tempoAtualNum = horaAtual * 100 + minAtual;
+      const tempoTarefaNum = horaTarefa * 100 + minTarefa;
+
+      return tempoAtualNum > tempoTarefaNum; // Se a hora atual passou da hora da tarefa = Atrasada
     }
 
     return false;
