@@ -193,16 +193,13 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         </div>
 
         {/* Footer */}
-        <div className="border-t border-zinc-800 px-4 py-3 flex items-center justify-end bg-zinc-950/30">
+        <div className="border-t border-zinc-900 px-6 py-6 flex items-center justify-end bg-black">
           {isDirty && (
             <button
               onClick={() => {
                 persistToHardware();
                 setIsDirty(false);
-                // Força o React a remontar a árvore de dados passando o novo array reativo
                 if (typeof onUpdate === 'function') {
-                  // Fallback para o comportamento anterior se precisar de id e objeto, 
-                  // mas seguindo a instrução de tentar chamar onUpdate() puro primeiro
                   try {
                     (onUpdate as any)();
                   } catch (e) {
@@ -211,14 +208,13 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 } else if (typeof (window as any).onRefresh === 'function') {
                   (window as any).onRefresh();
                 } else {
-                  // Fallback: se o componente pai passar um gerenciador de estado direto
-                  window.location.reload(); // Último caso de salvaguarda caso o hook não esteja exposto
+                  window.location.reload();
                 }
               }}
-              className="bg-[#00ff41] text-black font-black px-4 py-1.5 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2 uppercase tracking-tighter text-[10px] italic animate-in fade-in slide-in-from-right-4 duration-300"
+              className="w-full sm:w-auto bg-[#00ff41] text-black font-black px-8 py-4 rounded-2xl border-b-4 border-black shadow-2xl active:translate-y-1 active:border-b-0 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm italic"
             >
-              <Save size={12} strokeWidth={3} />
-              Salvar
+              <Save size={20} strokeWidth={3} />
+              Confirmar Alterações
             </button>
           )}
         </div>
