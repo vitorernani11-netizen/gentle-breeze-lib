@@ -114,6 +114,27 @@ const isTaskOverdue = (dueDateStr: string, dueTimeStr?: string | null) => {
   }
 };
 
+const isTaskFromToday = (dueDateStr: string) => {
+  if (!dueDateStr) return false;
+  const today = getTodayStr(); // 'YYYY-MM-DD'
+  const dateOnly = dueDateStr.split('T')[0];
+  
+  // Normalizar para YYYY-MM-DD se estiver em outro formato (DD/MM/YYYY)
+  let normalizedDate = dateOnly;
+  if (dateOnly.includes('/')) {
+    const parts = dateOnly.split('/');
+    if (parts.length === 3) {
+      if (parts[2].length === 4) {
+        normalizedDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      } else {
+        normalizedDate = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+      }
+    }
+  }
+  
+  return normalizedDate === today;
+};
+
 
 export const Route = createFileRoute('/')({
   component: Dashboard,
