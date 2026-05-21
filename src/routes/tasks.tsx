@@ -18,7 +18,8 @@ import {
   ChevronUp,
   RefreshCw,
   Flame,
-  Check
+  Check,
+  Archive
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskActions } from '@/hooks/useTaskActions';
