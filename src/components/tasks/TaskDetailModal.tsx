@@ -100,8 +100,12 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
   const handleLembrete = (v: string) => {
     // Blindagem: salva apenas o texto HH:mm do input type="time"
-    setLembrete(v);
-    triggerSave({ hora_vencimento: v || null });
+    let cleanValue = v;
+    if (v && v.includes('T')) {
+      cleanValue = v.split('T')[1].substring(0, 5);
+    }
+    setLembrete(cleanValue);
+    triggerSave({ hora_vencimento: cleanValue || null });
   };
 
   const currentPriority = PRIORITIES.find((p) => p.value === prioridade) || PRIORITIES[3];
