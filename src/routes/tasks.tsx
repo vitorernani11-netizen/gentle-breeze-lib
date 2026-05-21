@@ -244,38 +244,20 @@ function TasksPage() {
       {/* Input removido conforme Fase 1 */}
 
 
-      <section className="mb-6 border-b border-zinc-800 pb-4 overflow-hidden">
-        <div className="grid grid-cols-2 gap-2 w-full touch-none">
-          {[
-            { id: 1, label: '01. CLASSIFICAÇÃO', desc: 'Urgência tática.' },
-            { id: 2, label: '02. FRACIONAR', desc: 'Micro-ações.' },
-            { id: 3, label: '03. PLANEJAMENTO', desc: 'Agendamento.' },
-            { id: 4, label: '04. EXECUÇÃO', desc: 'Foco total.' }
-          ].map((stage) => (
-            <div 
-              key={stage.id}
-              className={cn(
-                "p-2.5 flex flex-col gap-1 border transition-all cursor-pointer select-none",
-                selectedStage === stage.id 
-                  ? "border-[#00ff41] bg-[#00ff41]/5 text-[#00ff41]" 
-                  : "border-zinc-800 bg-zinc-900/20 text-zinc-500"
-              )}
-              onClick={() => setSelectedStage(selectedStage === stage.id ? null : stage.id)}
-              role="button"
-            >
-              <h3 className={cn(
-                "font-black text-[10px] uppercase tracking-wider",
-                selectedStage === stage.id ? "text-[#00ff41]" : "text-zinc-400"
-              )}>
-                {stage.label}
-              </h3>
-              <p className="text-[9px] leading-tight opacity-60">
-                {stage.desc}
-              </p>
-            </div>
-          ))}
+      <div className="grid grid-cols-2 gap-2 w-full mb-4 px-4 pt-4">
+        <div className="border border-[#00ff41]/40 bg-zinc-900 flex items-center justify-center py-2 rounded">
+          <span className="text-[#00ff41] font-bold text-xs uppercase">01. Classificação</span>
         </div>
-      </section>
+        <div className="border border-zinc-800 bg-zinc-900/50 flex items-center justify-center py-2 rounded">
+          <span className="text-zinc-500 font-bold text-xs uppercase">02. Fracionar</span>
+        </div>
+        <div className="border border-zinc-800 bg-zinc-900/50 flex items-center justify-center py-2 rounded">
+          <span className="text-zinc-500 font-bold text-xs uppercase">03. Planejamento</span>
+        </div>
+        <div className="border border-[#00ff41]/40 bg-zinc-900 flex items-center justify-center py-2 rounded">
+          <span className="text-[#00ff41] font-bold text-xs uppercase">04. Execução</span>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-0 border-t border-white/10">
         {tarefasOrdenadasDaEntrada.length > 0 ? (
