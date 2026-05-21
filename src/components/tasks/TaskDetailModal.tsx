@@ -34,6 +34,9 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const [dataExecucao, setDataExecucao] = useState('');
   const [lembrete, setLembrete] = useState('');
   const [lembretesState, setLembretesState] = useState<Reminder[]>([]);
+  const [subTasks, setSubTasks] = useState<any[]>([]);
+  const [isAddingSub, setIsAddingSub] = useState(false);
+  const [newSubTitulo, setNewSubTitulo] = useState('');
   
   const [isDirty, setIsDirty] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -51,6 +54,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
       if (t.includes('T')) t = t.split('T')[1];
       setLembrete(t.substring(0, 5));
       setLembretesState(task.lembretes || []);
+      setSubTasks(task.sub_tasks || []);
       // mark as initialized after state apply
       setTimeout(() => { initRef.current = true; }, 0);
     }
@@ -225,15 +229,115 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             </button>
           </div>
 
-          {/* 4. Sub-tarefas (Placeholder Visual) */}
+          {/* 4. Sub-tarefas (Estilo Todoist Linear) */}
           <div className="space-y-3 pt-2">
             <h4 className="text-xs font-black uppercase tracking-widest text-zinc-600">Sub-tarefas</h4>
-            <Button
-              variant="ghost"
-              className="w-full justify-start border border-dashed border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-600 hover:bg-zinc-900/50 rounded-xl py-6 transition-all"
-            >
-              + Adicionar sub-tarefa
-            </Button>
+            
+            {/* Lista de Sub-tarefas existentes com recuo */}
+            {subTasks.length > 0 && (
+              <div className="space-y-1.5 ml-2 border-l border-zinc-900 pl-4 mb-3">
+                {subTasks.map((sub) => (
+                  <div key={sub.id} className="flex items-center justify-between group py-1 border-b border-zinc-950">
+                    <div className="flex items-center gap-3 min-w-0 flex-grow">
+                      <button
+                        onClick={() => {
+                          const updated = subTasks.map(s => s.id === sub.id ? { ...s, status_concluido: !s.status_concluido } : s);
+                          setSubTasks(updated);
+                          triggerSave({ sub_tasks: updated });
+                          forceGlobalSync();
+                        }}
+                        className={cn(
+                          "w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0",
+                          sub.status_concluido 
+                            ? "bg-[#00ff41] border-[#00ff41] text-black" 
+                            : "border-zinc-800 hover:border-[#00ff41]"
+                        )}
+                      >
+                        {sub.status_concluido && <span className="text-[10px] font-bold">✓</span>}
+                      </button>
+                      <span className={cn(
+                        "text-sm font-medium truncate pr-4 uppercase tracking-tight",
+                        sub.status_concluido ? "line-through text-zinc-600 italic" : "text-zinc-300"
+                      )}>
+                        {sub.titulo}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const updated = subTasks.filter(s => s.id !== sub.id);
+                        setSubTasks(updated);
+                        triggerSave({ sub_tasks: updated });
+                        forceGlobalSync();
+                      }}
+                      className="text-zinc-700 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-black uppercase tracking-wider pr-1 shrink-0"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Formulário Inline para Criar Sub-tarefa */}
+            {isAddingSub ? (
+              <div className="space-y-3 ml-2 border-l border-zinc-800 pl-4 animate-in fade-in slide-in-from-top-1">
+                <Input
+                  autoFocus
+                  value={newSubTitulo}
+                  onChange={(e) => setNewSubTitulo(e.target.value)}
+                  placeholder="O que precisa ser feito?"
+                  className="bg-zinc-900/40 border-zinc-800 rounded-xl text-sm text-white h-10 focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 placeholder:text-zinc-700 uppercase font-bold"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newSubTitulo.trim()) {
+                      const newSub = { id: Math.random().toString(36).substring(2, 11), titulo: newSubTitulo.trim(), status_concluido: false };
+                      const updated = [...subTasks, newSub];
+                      setSubTasks(updated);
+                      triggerSave({ sub_tasks: updated });
+                      setNewSubTitulo('');
+                      setIsAddingSub(false);
+                      forceGlobalSync();
+                    }
+                  }}
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setIsAddingSub(false);
+                      setNewSubTitulo('');
+                    }}
+                    className="text-zinc-500 hover:text-white text-xs font-bold uppercase"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    disabled={!newSubTitulo.trim()}
+                    onClick={() => {
+                      const newSub = { id: Math.random().toString(36).substring(2, 11), titulo: newSubTitulo.trim(), status_concluido: false };
+                      const updated = [...subTasks, newSub];
+                      setSubTasks(updated);
+                      triggerSave({ sub_tasks: updated });
+                      setNewSubTitulo('');
+                      setIsAddingSub(false);
+                      forceGlobalSync();
+                    }}
+                    className="bg-[#00ff41] hover:bg-[#00ff41]/80 text-black text-xs font-black uppercase rounded-lg px-3"
+                  >
+                    Adicionar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                variant="ghost"
+                onClick={() => setIsAddingSub(true)}
+                className="w-full justify-start border border-dashed border-zinc-900 text-zinc-500 hover:text-white hover:border-zinc-800 hover:bg-zinc-950/30 rounded-xl py-5 transition-all text-xs font-bold uppercase"
+              >
+                + Adicionar sub-tarefa
+              </Button>
+            )}
           </div>
           
           {/* 5. Lembretes Push */}
