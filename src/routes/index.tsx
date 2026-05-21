@@ -549,56 +549,21 @@ function Dashboard() {
             return false;
           });
 
-          // Grouping logic based on Projects
-          const groupedTasks: Record<string, { title: string, color: string, tasks: any[] }> = {
-            'faculdade': { title: '#FACULDADE / CURSOS', color: '#00ff41', tasks: [] },
-            'esfiha': { title: '#ESFIHA', color: '#ffaa00', tasks: [] },
-            'riolax': { title: '#RIOLAX', color: '#00ccff', tasks: [] },
-            'youtube': { title: '#YOUTUBE DARK', color: '#ff0055', tasks: [] },
-            'gestao': { title: '#VITOR ERNANI', color: '#ff00ff', tasks: [] },
-            'outros': { title: '#OUTROS PROJETOS', color: '#a1a1aa', tasks: [] }
-          };
-
-          executionTasks.forEach(t => {
-            const proj = projects.find(p => p.id === t.projeto_id);
-            const projName = proj?.nome?.toLowerCase() || '';
-            const tags = (t.tags || []).map((tag: any) => String(tag).toLowerCase());
-
-            if (projName.includes('faculdade') || projName.includes('curso') || tags.includes('faculdade')) {
-              groupedTasks.faculdade.tasks.push(t);
-            } else if (projName.includes('esfiha')) {
-              groupedTasks.esfiha.tasks.push(t);
-            } else if (projName.includes('riolax')) {
-              groupedTasks.riolax.tasks.push(t);
-            } else if (projName.includes('youtube')) {
-              groupedTasks.youtube.tasks.push(t);
-            } else if (projName.includes('gestão') || projName.includes('pessoal') || projName.includes('casa') || projName.includes('vitor') || projName.includes('ernani')) {
-              groupedTasks.gestao.tasks.push(t);
-            } else {
-              groupedTasks.outros.tasks.push(t);
-            }
-          });
-
-          // Apply Filter Mode (already filtered executionTasks)
-          const finalGroups = groupedTasks;
-
-          const hasAnyTasks = Object.values(finalGroups).some(g => g.tasks.length > 0);
+          const hasAnyTasks = executionTasks.length > 0;
 
           return hasAnyTasks ? (
             <div className="space-y-4">
-              {Object.entries(finalGroups).map(([key, group]) => (
-                <TodayContextGroup
-                  key={key}
-                  title={group.title}
-                  color={group.color}
-                  tasks={group.tasks}
-                  onTaskClick={(t) => {
-                    setDetailTask(t);
-                    setIsDetailOpen(true);
-                  }}
+              {executionTasks.map((tarefa) => (
+                <TaskCard
+                  key={tarefa.id}
+                  task={tarefa}
                   onComplete={completeTask}
                   onMoveToToday={(id) => moveTask(id, 'Hoje')}
                   onDelete={deletePermanent}
+                  onClick={(t) => {
+                    setDetailTask(t);
+                    setIsDetailOpen(true);
+                  }}
                   onUpdateStage={updateTriagemStage}
                   onUpdatePriority={(id, p) => updateTask(id, { prioridade: p })}
                 />
