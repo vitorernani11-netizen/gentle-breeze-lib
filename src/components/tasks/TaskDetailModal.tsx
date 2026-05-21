@@ -46,7 +46,9 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
       setDescricao(task.descricao || '');
       setPrioridade(task.prioridade || 'P4');
       setDataExecucao(task.data_execucao || '');
-      setLembrete(task.lembrete || '');
+      let t = task.hora_vencimento || task.lembrete || '';
+      if (t.includes('T')) t = t.split('T')[1];
+      setLembrete(t.substring(0, 5));
       setLembretesState(task.lembretes || []);
       // mark as initialized after state apply
       setTimeout(() => { initRef.current = true; }, 0);
