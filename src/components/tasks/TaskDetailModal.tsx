@@ -180,7 +180,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
             {/* Horário Fixo da Atividade */}
             <div className="pb-4 border-b border-zinc-900/50">
-              <SidebarRow icon={<Clock size={18} className="text-[#00ff41]" />} label="Horário Fixo">
+              <SidebarRow icon={null} label="Horário Fixo">
                 <input
                   type="time"
                   value={task.hora_vencimento || lembrete || ''}
