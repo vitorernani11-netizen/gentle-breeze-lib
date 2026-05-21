@@ -161,6 +161,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 type="date"
                 value={dataExecucao}
                 onChange={(e) => handleDate(e.target.value)}
+                onBlur={() => forceGlobalSync()}
                 className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg"
               />
             </SidebarRow>
