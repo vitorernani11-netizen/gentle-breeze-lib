@@ -34,10 +34,9 @@ export const GlobalAddTask: React.FC = () => {
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
-      const dialogs = document.querySelectorAll('[role="dialog"]');
+      const dialogs = document.querySelectorAll('[role="dialog"], [data-state="open"], .fixed.inset-0');
       // Filtramos para ver se existe algum modal aberto que NÃO seja o de criação
-      // O AddTaskOverlay ou o Choice Menu usam dialogs ou divs com z-100
-      // Mas a regra simples é: se tem dialog aberto e o NOSSO menu de escolha não está aberto, escondemos o FAB.
+      // Se houver qualquer overlay ou diálogo aberto, escondemos o FAB.
       setIsOtherModalOpen(dialogs.length > 0);
     });
 
