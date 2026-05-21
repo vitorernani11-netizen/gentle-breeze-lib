@@ -7,13 +7,9 @@ import { ReminderManager, type Reminder } from './ReminderManager';
 
 import {
   Calendar,
-  Clock,
   Flag,
-  Bell,
-  Save,
-  X,
-  Plus
-  } from 'lucide-react';
+  Save
+} from 'lucide-react';
 import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
 import { cn } from '@/lib/utils';
 
