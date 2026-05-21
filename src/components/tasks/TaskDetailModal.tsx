@@ -124,7 +124,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
-        className="max-w-4xl w-full sm:w-[95vw] h-[100dvh] sm:h-auto sm:max-h-[90vh] p-0 bg-black border-0 sm:border-2 border-white rounded-none sm:rounded-3xl overflow-hidden gap-0 flex flex-col"
+        className="max-w-3xl w-full sm:w-[95vw] h-[100dvh] sm:h-auto sm:max-h-[90vh] p-0 bg-black border-0 sm:border-2 border-white rounded-none sm:rounded-3xl overflow-hidden gap-0 flex flex-col"
         onInteractOutside={onClose}
       >
         {/* Header */}
@@ -134,88 +134,109 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           </div>
         </div>
 
-        {/* Body: 2 cols on desktop, stack on mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_320px] overflow-y-auto flex-grow">
-          {/* Main column */}
-          <div className="p-8 space-y-6 md:border-r border-zinc-900">
-            <div>
-              <Input
-                value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
-                placeholder="Título da tarefa"
-                className="border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900 break-all"
-              />
-            </div>
-            <Textarea
-              value={descricao}
-              onChange={(e) => setDescricao(e.target.value)}
-              placeholder="Descrição da tarefa..."
-              className="border-0 bg-transparent text-base text-zinc-400 p-0 min-h-[150px] shadow-none focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-900 break-all whitespace-pre-wrap overflow-hidden w-full"
+        {/* Body: Linear Layout (Todoist Style) */}
+        <div className="overflow-y-auto flex-grow p-8 space-y-6">
+          {/* Título */}
+          <div>
+            <Input
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
+              placeholder="Título da tarefa"
+              className="border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900 break-all"
             />
           </div>
 
-          {/* Sidebar */}
-          <div className="p-6 space-y-6 bg-zinc-950/50">
-            {/* Data */}
-            <SidebarRow icon={<Calendar size={18} />} label="Vencimento">
+          {/* Descrição Colapsável */}
+          <div className="group cursor-text" onClick={() => !isEditingDesc && setIsEditingDesc(true)}>
+            {isEditingDesc ? (
+              <Textarea
+                autoFocus
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+                onBlur={() => setIsEditingDesc(false)}
+                placeholder="Descrição da tarefa..."
+                className="border-0 bg-zinc-900/50 rounded-xl text-base text-zinc-300 p-4 min-h-[120px] shadow-none focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-800 break-all whitespace-pre-wrap w-full transition-all"
+              />
+            ) : (
+              <div className="text-base text-zinc-400 leading-relaxed break-all whitespace-pre-wrap line-clamp-3 hover:text-zinc-300 transition-colors">
+                {descricao || <span className="text-zinc-800 italic">Adicionar descrição...</span>}
+              </div>
+            )}
+          </div>
+
+          {/* Metadata Row: Data, Hora e Prioridade */}
+          <div className="flex flex-wrap items-center gap-4 pt-2">
+            <div className="flex items-center gap-3 bg-zinc-900/50 border border-zinc-800 rounded-2xl px-4 py-2 hover:border-zinc-700 transition-colors">
+              <Calendar size={16} className="text-zinc-500" />
               <input
                 type="date"
                 value={dataExecucao}
                 onChange={(e) => handleDate(e.target.value)}
                 onBlur={forceGlobalSync}
-                className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg"
+                className="bg-transparent text-sm font-bold text-white focus:outline-none w-[120px] [color-scheme:dark]"
               />
-            </SidebarRow>
-
-            {/* Prioridade */}
-            <SidebarRow icon={<Flag size={18} className={currentPriority.color.split(' ')[0]} />} label="Prioridade">
-              <button
-                onClick={() => {
-                  const priorities = ['P4', 'P1', 'P2', 'P3'];
-                  const currentIndex = priorities.indexOf(prioridade);
-                  const nextPriority = priorities[(currentIndex + 1) % priorities.length];
-                  handlePriority(nextPriority);
-                }}
-                className={cn(
-                  'flex items-center justify-center h-10 px-4 border rounded-xl transition-all active:scale-95 font-black text-xs uppercase',
-                  currentPriority.color,
-                  'bg-zinc-900/30 border-zinc-900'
-                )}
-              >
-                {prioridade}
-              </button>
-            </SidebarRow>
-
-
-            {/* Horário Fixo da Atividade */}
-            <div className="pb-4 border-b border-zinc-900/50">
-              <SidebarRow icon={null} label="Horário Fixo">
-                <input
-                  type="time"
-                  value={lembrete}
-                  onChange={(e) => handleLembrete(e.target.value)}
-                  onBlur={forceGlobalSync}
-                  className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg pointer-events-auto"
-                />
-              </SidebarRow>
             </div>
 
-            {/* Lembretes Push Inline */}
-            <div className="pt-2" id="lembretes-section">
-              <ReminderManager 
-                reminders={lembretesState} 
-                onUpdate={(newReminders) => {
-                  setLembretesState(newReminders);
-                  triggerSave({ lembretes: newReminders });
-                  // Solicita permissão ao adicionar lembrete se necessário
-                  if (newReminders.length > (lembretesState.length || 0)) {
-                    if ('Notification' in window && Notification.permission === 'default') {
-                      Notification.requestPermission();
-                    }
+            <div className="flex items-center gap-3 bg-zinc-900/50 border border-zinc-800 rounded-2xl px-4 py-2 hover:border-zinc-700 transition-colors">
+              <span className="text-xs font-black text-zinc-600 uppercase">Hora</span>
+              <input
+                type="time"
+                value={lembrete}
+                onChange={(e) => handleLembrete(e.target.value)}
+                onBlur={forceGlobalSync}
+                className="bg-transparent text-sm font-bold text-white focus:outline-none w-[80px] [color-scheme:dark]"
+              />
+            </div>
+
+            <button
+              onClick={() => {
+                const priorities = ['P4', 'P1', 'P2', 'P3'];
+                const currentIndex = priorities.indexOf(prioridade);
+                const nextPriority = priorities[(currentIndex + 1) % priorities.length];
+                handlePriority(nextPriority);
+              }}
+              className={cn(
+                'flex items-center gap-2 h-10 px-4 border rounded-2xl transition-all active:scale-95 font-black text-xs uppercase bg-zinc-900/50',
+                currentPriority.color.replace('border-', 'border-zinc-800 hover:border-')
+              )}
+            >
+              <Flag size={14} className={currentPriority.color.split(' ')[0]} />
+              {prioridade}
+            </button>
+          </div>
+
+          {/* Sub-tarefas (Skeleton) */}
+          <div className="pt-6 border-t border-zinc-900">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 mb-4 flex items-center gap-2">
+              Sub-tarefas
+              <span className="text-[10px] bg-zinc-900 px-2 py-0.5 rounded text-zinc-500">BETA</span>
+            </h3>
+            
+            <button 
+              className="w-full flex items-center gap-3 p-4 rounded-2xl border border-dashed border-zinc-800 text-zinc-600 hover:text-zinc-400 hover:border-zinc-600 transition-all group"
+              onClick={() => alert("A funcionalidade de Sub-tarefas requer uma nova tabela no banco de dados e será implementada em breve.")}
+            >
+              <div className="w-5 h-5 rounded-full border-2 border-zinc-800 group-hover:border-zinc-600 flex items-center justify-center">
+                <span className="text-lg leading-none mb-0.5">+</span>
+              </div>
+              <span className="text-sm font-bold uppercase tracking-wider">Adicionar sub-tarefa</span>
+            </button>
+          </div>
+
+          {/* Lembretes (Mantidos do layout anterior) */}
+          <div className="pt-6 border-t border-zinc-900">
+             <ReminderManager 
+              reminders={lembretesState} 
+              onUpdate={(newReminders) => {
+                setLembretesState(newReminders);
+                triggerSave({ lembretes: newReminders });
+                if (newReminders.length > (lembretesState.length || 0)) {
+                  if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission();
                   }
-                }}
-              />
-            </div>
+                }
+              }}
+            />
           </div>
         </div>
 
