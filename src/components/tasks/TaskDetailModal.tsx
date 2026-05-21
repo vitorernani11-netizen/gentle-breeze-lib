@@ -46,7 +46,9 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
       setDescricao(task.descricao || '');
       setPrioridade(task.prioridade || 'P4');
       setDataExecucao(task.data_execucao || '');
-      setLembrete(task.lembrete || '');
+      let t = task.hora_vencimento || task.lembrete || '';
+      if (t.includes('T')) t = t.split('T')[1];
+      setLembrete(t.substring(0, 5));
       setLembretesState(task.lembretes || []);
       // mark as initialized after state apply
       setTimeout(() => { initRef.current = true; }, 0);
@@ -109,13 +111,11 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const handleDate = (v: string) => {
     setDataExecucao(v);
     triggerSave({ data_execucao: v, data_vencimento: v });
-    forceGlobalSync(); // Injeta a reatividade na interface
   };
 
   const handleLembrete = (v: string) => {
     setLembrete(v);
     triggerSave({ hora_vencimento: v || null });
-    forceGlobalSync(); // Injeta a reatividade na interface
   };
 
   const currentPriority = PRIORITIES.find((p) => p.value === prioridade) || PRIORITIES[3];
@@ -161,6 +161,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 type="date"
                 value={dataExecucao}
                 onChange={(e) => handleDate(e.target.value)}
+                onBlur={() => forceGlobalSync()}
                 className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg"
               />
             </SidebarRow>
@@ -190,12 +191,9 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               <SidebarRow icon={null} label="Horário Fixo">
                 <input
                   type="time"
-                  value={(() => {
-                    const t = task.hora_vencimento || lembrete || '';
-                    if (t.includes('T')) return t.split('T')[1].substring(0, 5);
-                    return t.substring(0, 5);
-                  })()}
+                  value={lembrete}
                   onChange={(e) => handleLembrete(e.target.value)}
+                  onBlur={() => forceGlobalSync()}
                   className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-white w-full focus:outline-none focus:border-white transition-all shadow-lg pointer-events-auto"
                 />
               </SidebarRow>
