@@ -244,19 +244,31 @@ function TasksPage() {
       {/* Input removido conforme Fase 1 */}
 
 
-      <div className="grid grid-cols-2 gap-3 w-full p-4 border-b border-zinc-800">
-        <div className="border border-[#00ff41]/40 bg-[#00ff41]/5 flex items-center justify-center p-3 rounded-md">
-          <span className="text-[#00ff41] font-bold text-[10px] sm:text-xs uppercase tracking-wider">01. Classificação</span>
-        </div>
-        <div className="border border-zinc-800 bg-zinc-900/50 flex items-center justify-center p-3 rounded-md">
-          <span className="text-zinc-500 font-bold text-[10px] sm:text-xs uppercase tracking-wider">02. Fracionar</span>
-        </div>
-        <div className="border border-zinc-800 bg-zinc-900/50 flex items-center justify-center p-3 rounded-md">
-          <span className="text-zinc-500 font-bold text-[10px] sm:text-xs uppercase tracking-wider">03. Planejamento</span>
-        </div>
-        <div className="border border-[#00ff41]/40 bg-[#00ff41]/5 flex items-center justify-center p-3 rounded-md">
-          <span className="text-[#00ff41] font-bold text-[10px] sm:text-xs uppercase tracking-wider">04. Execução</span>
-        </div>
+      <div className="grid grid-cols-2 gap-3 w-full p-4 border-b border-zinc-800 shrink-0">
+        {[
+          { id: 1, label: "01. Classificação" },
+          { id: 2, label: "02. Fracionar" },
+          { id: 3, label: "03. Planejamento" },
+          { id: 4, label: "04. Execução" }
+        ].map((stage) => {
+          const isActive = selectedStage === stage.id; 
+          
+          return (
+            <button
+              key={stage.id}
+              onClick={() => setSelectedStage(isActive ? null : stage.id)}
+              className={`flex items-center justify-center p-3 rounded-md border transition-all active:scale-95 ${
+                isActive 
+                  ? "border-[#00ff41]/40 bg-[#00ff41]/5 text-[#00ff41]" 
+                  : "border-zinc-800 bg-zinc-900/50 text-zinc-500 hover:border-zinc-700 hover:text-zinc-400"
+              }`}
+            >
+              <span className="font-bold text-[10px] sm:text-xs uppercase tracking-wider">
+                {stage.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 gap-0 border-t border-white/10">
