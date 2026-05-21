@@ -139,7 +139,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="Descrição da tarefa..."
-              className="border-0 bg-transparent text-base text-zinc-400 p-0 min-h-[150px] shadow-none focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-900 break-all"
+              className="border-0 bg-transparent text-base text-zinc-400 p-0 min-h-[150px] shadow-none focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-900 break-all whitespace-pre-wrap overflow-hidden w-full"
             />
           </div>
 
