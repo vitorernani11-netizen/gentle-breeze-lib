@@ -36,6 +36,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const [lembretesState, setLembretesState] = useState<Reminder[]>([]);
   
   const [isDirty, setIsDirty] = useState(false);
+  const [isEditingDesc, setIsEditingDesc] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const initRef = useRef(false);
 
