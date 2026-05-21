@@ -111,13 +111,11 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const handleDate = (v: string) => {
     setDataExecucao(v);
     triggerSave({ data_execucao: v, data_vencimento: v });
-    forceGlobalSync(); // Injeta a reatividade na interface
   };
 
   const handleLembrete = (v: string) => {
     setLembrete(v);
     triggerSave({ hora_vencimento: v || null });
-    forceGlobalSync(); // Injeta a reatividade na interface
   };
 
   const currentPriority = PRIORITIES.find((p) => p.value === prioridade) || PRIORITIES[3];
