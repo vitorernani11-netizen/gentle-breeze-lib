@@ -34,6 +34,9 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const [dataExecucao, setDataExecucao] = useState('');
   const [lembrete, setLembrete] = useState('');
   const [lembretesState, setLembretesState] = useState<Reminder[]>([]);
+  const [subTasks, setSubTasks] = useState<any[]>([]);
+  const [isAddingSub, setIsAddingSub] = useState(false);
+  const [newSubTitulo, setNewSubTitulo] = useState('');
   
   const [isDirty, setIsDirty] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -51,6 +54,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
       if (t.includes('T')) t = t.split('T')[1];
       setLembrete(t.substring(0, 5));
       setLembretesState(task.lembretes || []);
+      setSubTasks(task.sub_tasks || []);
       // mark as initialized after state apply
       setTimeout(() => { initRef.current = true; }, 0);
     }
