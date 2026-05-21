@@ -121,9 +121,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-zinc-600">
             <span>Entrada / Detalhes</span>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
-            <X size={24} />
-          </button>
         </div>
 
         {/* Body: 2 cols on desktop, stack on mobile */}
@@ -135,14 +132,14 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Título da tarefa"
-                className="border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900"
+                className="border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900 break-all"
               />
             </div>
             <Textarea
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="Descrição da tarefa..."
-              className="border-0 bg-transparent text-base text-zinc-400 p-0 min-h-[150px] shadow-none focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-900"
+              className="border-0 bg-transparent text-base text-zinc-400 p-0 min-h-[150px] shadow-none focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-900 break-all"
             />
           </div>
 
