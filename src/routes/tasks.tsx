@@ -244,8 +244,7 @@ function TasksPage() {
       {/* Input removido conforme Fase 1 */}
 
 
-      {/* Metodologia Header - Grid 2x2 Fixed (No Scroll) */}
-      <section className="mb-6">
+      <section className="mb-6 border-b border-zinc-800 pb-4">
         <div className="grid grid-cols-2 gap-2 w-full">
           {[
             { id: 1, label: '01. CLASSIFICAÇÃO', desc: 'Urgência tática.' },
@@ -256,7 +255,7 @@ function TasksPage() {
             <div 
               key={stage.id}
               className={cn(
-                "p-2.5 flex flex-col gap-1 border transition-all",
+                "p-2.5 flex flex-col gap-1 border transition-all cursor-pointer",
                 selectedStage === stage.id 
                   ? "border-[#00ff41] bg-[#00ff41]/5 text-[#00ff41]" 
                   : "border-zinc-800 bg-zinc-900/20 text-zinc-500"
