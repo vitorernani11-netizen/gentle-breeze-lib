@@ -105,7 +105,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const handlePriority = (p: string) => {
     setPrioridade(p);
     triggerSave({ prioridade: p });
-    forceGlobalSync(); // Injeta a reatividade na interface
+    forceGlobalSync(); // Botão é de clique único, pode sincronizar na hora
   };
 
   const handleDate = (v: string) => {
