@@ -244,18 +244,18 @@ function TasksPage() {
       {/* Input removido conforme Fase 1 */}
 
 
-      <div className="grid grid-cols-2 gap-2 w-full mb-4 px-4 pt-4">
-        <div className="border border-[#00ff41]/40 bg-zinc-900 flex items-center justify-center py-2 rounded">
-          <span className="text-[#00ff41] font-bold text-xs uppercase">01. Classificação</span>
+      <div className="grid grid-cols-2 gap-3 w-full p-4 border-b border-zinc-800">
+        <div className="border border-[#00ff41]/40 bg-[#00ff41]/5 flex items-center justify-center p-3 rounded-md">
+          <span className="text-[#00ff41] font-bold text-xs uppercase tracking-wider">01. Classificação</span>
         </div>
-        <div className="border border-zinc-800 bg-zinc-900/50 flex items-center justify-center py-2 rounded">
-          <span className="text-zinc-500 font-bold text-xs uppercase">02. Fracionar</span>
+        <div className="border border-zinc-800 bg-zinc-900/50 flex items-center justify-center p-3 rounded-md">
+          <span className="text-zinc-500 font-bold text-xs uppercase tracking-wider">02. Fracionar</span>
         </div>
-        <div className="border border-zinc-800 bg-zinc-900/50 flex items-center justify-center py-2 rounded">
-          <span className="text-zinc-500 font-bold text-xs uppercase">03. Planejamento</span>
+        <div className="border border-zinc-800 bg-zinc-900/50 flex items-center justify-center p-3 rounded-md">
+          <span className="text-zinc-500 font-bold text-xs uppercase tracking-wider">03. Planejamento</span>
         </div>
-        <div className="border border-[#00ff41]/40 bg-zinc-900 flex items-center justify-center py-2 rounded">
-          <span className="text-[#00ff41] font-bold text-xs uppercase">04. Execução</span>
+        <div className="border border-[#00ff41]/40 bg-[#00ff41]/5 flex items-center justify-center p-3 rounded-md">
+          <span className="text-[#00ff41] font-bold text-xs uppercase tracking-wider">04. Execução</span>
         </div>
       </div>
 
