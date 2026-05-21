@@ -235,9 +235,9 @@ function TasksPage() {
         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Offline Local</span>
       </div>
 
-      <header className="mb-8 flex items-center justify-between gap-4">
+      <header className="mb-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-black uppercase tracking-tighter italic">Entrada</h1>
+          <h1 className="text-2xl font-black uppercase tracking-tighter italic">Entrada</h1>
         </div>
       </header>
 

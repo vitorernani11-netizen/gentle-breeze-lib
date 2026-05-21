@@ -121,7 +121,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-zinc-600">
             <span>Entrada / Detalhes</span>
           </div>
-          <button onClick={onClose} className="sm:hidden text-zinc-500">
+          <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
             <X size={24} />
           </button>
         </div>
@@ -180,7 +180,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
             {/* Horário Fixo da Atividade */}
             <div className="pb-4 border-b border-zinc-900/50">
-              <SidebarRow icon={<Clock size={18} />} label="Horário Fixo">
+              <SidebarRow icon={<Clock size={18} className="text-[#00ff41]" />} label="Horário Fixo">
                 <input
                   type="time"
                   value={task.hora_vencimento || lembrete || ''}
