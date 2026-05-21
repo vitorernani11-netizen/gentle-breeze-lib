@@ -20,6 +20,7 @@ import { Route as MenuRouteImport } from './routes/menu'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FinanceRouteImport } from './routes/finance'
 import { Route as FailureReportRouteImport } from './routes/failure-report'
+import { Route as CompletedRouteImport } from './routes/completed'
 import { Route as AcademicRouteImport } from './routes/academic'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -78,6 +79,11 @@ const FailureReportRoute = FailureReportRouteImport.update({
   path: '/failure-report',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompletedRoute = CompletedRouteImport.update({
+  id: '/completed',
+  path: '/completed',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AcademicRoute = AcademicRouteImport.update({
   id: '/academic',
   path: '/academic',
@@ -92,6 +98,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/academic': typeof AcademicRoute
+  '/completed': typeof CompletedRoute
   '/failure-report': typeof FailureReportRoute
   '/finance': typeof FinanceRoute
   '/login': typeof LoginRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/academic': typeof AcademicRoute
+  '/completed': typeof CompletedRoute
   '/failure-report': typeof FailureReportRoute
   '/finance': typeof FinanceRoute
   '/login': typeof LoginRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/academic': typeof AcademicRoute
+  '/completed': typeof CompletedRoute
   '/failure-report': typeof FailureReportRoute
   '/finance': typeof FinanceRoute
   '/login': typeof LoginRoute
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/academic'
+    | '/completed'
     | '/failure-report'
     | '/finance'
     | '/login'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/academic'
+    | '/completed'
     | '/failure-report'
     | '/finance'
     | '/login'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/academic'
+    | '/completed'
     | '/failure-report'
     | '/finance'
     | '/login'
@@ -186,6 +198,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AcademicRoute: typeof AcademicRoute
+  CompletedRoute: typeof CompletedRoute
   FailureReportRoute: typeof FailureReportRoute
   FinanceRoute: typeof FinanceRoute
   LoginRoute: typeof LoginRoute
@@ -278,6 +291,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FailureReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/completed': {
+      id: '/completed'
+      path: '/completed'
+      fullPath: '/completed'
+      preLoaderRoute: typeof CompletedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/academic': {
       id: '/academic'
       path: '/academic'
@@ -298,6 +318,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcademicRoute: AcademicRoute,
+  CompletedRoute: CompletedRoute,
   FailureReportRoute: FailureReportRoute,
   FinanceRoute: FinanceRoute,
   LoginRoute: LoginRoute,
@@ -313,3 +334,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

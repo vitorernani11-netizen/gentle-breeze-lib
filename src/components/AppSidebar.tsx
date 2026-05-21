@@ -8,7 +8,8 @@ import {
   GraduationCap,
   Inbox,
   AlertTriangle,
-  Archive
+  Archive,
+  CheckCircle2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ export function AppSidebar() {
     { label: 'Em Breve', icon: Clock, href: '/upcoming', color: 'text-orange-400' },
     { label: 'Rotinas', icon: RotateCcw, href: '/routines', color: 'text-green-400' },
     { label: 'Cofre', icon: Archive, href: '/vault', color: 'text-purple-400' },
+    { label: 'Concluídas', icon: CheckCircle2, href: '/completed', color: 'text-[#00ff41]' },
   ];
 
   const systemItems = [
