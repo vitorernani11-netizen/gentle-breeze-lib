@@ -134,9 +134,9 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           </div>
         </div>
 
-        {/* Body: Linear Layout (Todoist Style) */}
-        <div className="overflow-y-auto flex-grow p-8 space-y-6">
-          {/* Título */}
+        {/* Body: Single Column Todoist-Style */}
+        <div className="flex flex-col overflow-y-auto flex-grow p-6 sm:p-8 space-y-6">
+          {/* 1. Título */}
           <div>
             <Input
               value={titulo}
@@ -146,45 +146,64 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             />
           </div>
 
-          {/* Descrição Colapsável */}
-          <div className="group cursor-text" onClick={() => !isEditingDesc && setIsEditingDesc(true)}>
+          {/* 2. Descrição Colapsável */}
+          <div className="min-h-[60px]">
             {isEditingDesc ? (
-              <Textarea
-                autoFocus
-                value={descricao}
-                onChange={(e) => setDescricao(e.target.value)}
-                onBlur={() => setIsEditingDesc(false)}
-                placeholder="Descrição da tarefa..."
-                className="border-0 bg-zinc-900/50 rounded-xl text-base text-zinc-300 p-4 min-h-[120px] shadow-none focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-800 break-all whitespace-pre-wrap w-full transition-all"
-              />
+              <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                <Textarea
+                  autoFocus
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
+                  placeholder="Descrição da tarefa..."
+                  className="border border-zinc-800 bg-zinc-900/50 rounded-xl text-base text-zinc-300 p-4 min-h-[150px] shadow-none focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 resize-none leading-relaxed placeholder:text-zinc-700 break-all whitespace-pre-wrap overflow-hidden w-full"
+                />
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setIsEditingDesc(false)}
+                    className="text-zinc-400 hover:text-white"
+                  >
+                    Concluir Edição
+                  </Button>
+                </div>
+              </div>
             ) : (
-              <div className="text-base text-zinc-400 leading-relaxed break-all whitespace-pre-wrap line-clamp-3 hover:text-zinc-300 transition-colors">
-                {descricao || <span className="text-zinc-800 italic">Adicionar descrição...</span>}
+              <div
+                onClick={() => setIsEditingDesc(true)}
+                className="cursor-pointer group rounded-xl hover:bg-zinc-900/30 p-2 -ml-2 transition-colors"
+              >
+                {descricao ? (
+                  <p className="text-zinc-400 text-sm leading-relaxed line-clamp-3 overflow-hidden text-ellipsis whitespace-pre-wrap break-words">
+                    {descricao}
+                  </p>
+                ) : (
+                  <p className="text-zinc-600 text-sm italic">Adicionar descrição...</p>
+                )}
               </div>
             )}
           </div>
 
-          {/* Metadata Row: Data, Hora e Prioridade */}
-          <div className="flex flex-wrap items-center gap-4 pt-2">
-            <div className="flex items-center gap-3 bg-zinc-900/50 border border-zinc-800 rounded-2xl px-4 py-2 hover:border-zinc-700 transition-colors">
-              <Calendar size={16} className="text-zinc-500" />
+          {/* 3. Metadados (Data, Hora, Prioridade) - Linha Única */}
+          <div className="flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/80">
+            <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-1.5 focus-within:border-zinc-500 transition-colors">
+              <Calendar size={14} className="text-zinc-500" />
               <input
                 type="date"
                 value={dataExecucao}
                 onChange={(e) => handleDate(e.target.value)}
                 onBlur={forceGlobalSync}
-                className="bg-transparent text-sm font-bold text-white focus:outline-none w-[120px] [color-scheme:dark]"
+                className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[120px]"
               />
             </div>
 
-            <div className="flex items-center gap-3 bg-zinc-900/50 border border-zinc-800 rounded-2xl px-4 py-2 hover:border-zinc-700 transition-colors">
-              <span className="text-xs font-black text-zinc-600 uppercase">Hora</span>
+            <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-1.5 focus-within:border-zinc-500 transition-colors">
               <input
                 type="time"
                 value={lembrete}
                 onChange={(e) => handleLembrete(e.target.value)}
                 onBlur={forceGlobalSync}
-                className="bg-transparent text-sm font-bold text-white focus:outline-none w-[80px] [color-scheme:dark]"
+                className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[80px]"
               />
             </div>
 
@@ -196,8 +215,9 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 handlePriority(nextPriority);
               }}
               className={cn(
-                'flex items-center gap-2 h-10 px-4 border rounded-2xl transition-all active:scale-95 font-black text-xs uppercase bg-zinc-900/50',
-                currentPriority.color.replace('border-', 'border-zinc-800 hover:border-')
+                'flex items-center gap-2 px-3 py-1.5 border rounded-lg transition-all active:scale-95 font-black text-xs uppercase',
+                currentPriority.color,
+                'bg-zinc-900/30 border-zinc-800 hover:border-current'
               )}
             >
               <Flag size={14} className={currentPriority.color.split(' ')[0]} />
@@ -205,27 +225,20 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             </button>
           </div>
 
-          {/* Sub-tarefas (Skeleton) */}
-          <div className="pt-6 border-t border-zinc-900">
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 mb-4 flex items-center gap-2">
-              Sub-tarefas
-              <span className="text-[10px] bg-zinc-900 px-2 py-0.5 rounded text-zinc-500">BETA</span>
-            </h3>
-            
-            <button 
-              className="w-full flex items-center gap-3 p-4 rounded-2xl border border-dashed border-zinc-800 text-zinc-600 hover:text-zinc-400 hover:border-zinc-600 transition-all group"
-              onClick={() => alert("A funcionalidade de Sub-tarefas requer uma nova tabela no banco de dados e será implementada em breve.")}
+          {/* 4. Sub-tarefas (Placeholder Visual) */}
+          <div className="space-y-3 pt-2">
+            <h4 className="text-xs font-black uppercase tracking-widest text-zinc-600">Sub-tarefas</h4>
+            <Button
+              variant="ghost"
+              className="w-full justify-start border border-dashed border-zinc-800 text-zinc-500 hover:text-white hover:border-zinc-600 hover:bg-zinc-900/50 rounded-xl py-6 transition-all"
             >
-              <div className="w-5 h-5 rounded-full border-2 border-zinc-800 group-hover:border-zinc-600 flex items-center justify-center">
-                <span className="text-lg leading-none mb-0.5">+</span>
-              </div>
-              <span className="text-sm font-bold uppercase tracking-wider">Adicionar sub-tarefa</span>
-            </button>
+              + Adicionar sub-tarefa
+            </Button>
           </div>
-
-          {/* Lembretes (Mantidos do layout anterior) */}
-          <div className="pt-6 border-t border-zinc-900">
-             <ReminderManager 
+          
+          {/* 5. Lembretes Push */}
+          <div className="pt-2">
+            <ReminderManager 
               reminders={lembretesState} 
               onUpdate={(newReminders) => {
                 setLembretesState(newReminders);
