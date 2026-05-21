@@ -91,11 +91,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
   const formatarHoraLimpa = (horaStr?: string | null) => {
     if (!horaStr) return null;
+    let clean = horaStr;
     if (horaStr.includes('T')) {
-      const tempo = horaStr.split('T')[1];
-      return tempo.substring(0, 5);
+      clean = horaStr.split('T')[1];
     }
-    return horaStr.substring(0, 5);
+    clean = clean.substring(0, 5);
+    return clean.replace(':', 'h'); // Converte 17:30 para 17h30
   };
 
   const horaExibicao = formatarHoraLimpa(task.hora_vencimento || task.lembrete);
