@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Calendar as CalendarIcon, 
-  Clock, 
   Flag, 
   Target,
-  Send,
-  X
+  Send
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -118,9 +116,6 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       >
         <div className="flex justify-between items-center mb-6">
           <span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-600">Nova Captura</span>
-          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center bg-zinc-900 rounded-full text-zinc-500 hover:text-white transition-all active:scale-90">
-            <X size={24} />
-          </button>
         </div>
 
         <div className="relative">
@@ -166,7 +161,6 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
             </CalendarPopover>
 
             <div className="flex items-center gap-2 h-12 px-4 rounded-2xl border border-zinc-900 bg-zinc-900/50">
-              <Clock size={20} className="text-zinc-500" />
               <input
                 type="time"
                 value={lembrete || ''}

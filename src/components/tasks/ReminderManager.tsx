@@ -121,7 +121,6 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
         
         <div className="flex gap-2 pt-2">
           <div className="relative flex-1">
-            <Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" />
             <input 
               type="number"
               placeholder="Minutos..."
