@@ -75,6 +75,18 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
     onUpdate(task.id, tarefaAtualizada);
   };
 
+  const forceGlobalSync = () => {
+    setTimeout(() => {
+      try {
+        persistToHardware();
+        window.dispatchEvent(new Event('storage_update'));
+        if (typeof (window as any).onRefresh === 'function') {
+          (window as any).onRefresh();
+        }
+      } catch (e) {}
+    }, 100);
+  };
+
   // Debounced save for text fields
   useEffect(() => {
     if (!open || !task?.id || !initRef.current) return;
@@ -91,21 +103,19 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const handlePriority = (p: string) => {
     setPrioridade(p);
     triggerSave({ prioridade: p });
+    forceGlobalSync(); // Injeta a reatividade na interface
   };
 
   const handleDate = (v: string) => {
     setDataExecucao(v);
     triggerSave({ data_execucao: v, data_vencimento: v });
+    forceGlobalSync(); // Injeta a reatividade na interface
   };
 
   const handleLembrete = (v: string) => {
-    // Blindagem: salva apenas o texto HH:mm do input type="time"
-    let cleanValue = v;
-    if (v && v.includes('T')) {
-      cleanValue = v.split('T')[1].substring(0, 5);
-    }
-    setLembrete(cleanValue);
-    triggerSave({ hora_vencimento: cleanValue || null });
+    setLembrete(v);
+    triggerSave({ hora_vencimento: v || null });
+    forceGlobalSync(); // Injeta a reatividade na interface
   };
 
   const currentPriority = PRIORITIES.find((p) => p.value === prioridade) || PRIORITIES[3];
