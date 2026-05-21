@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, X, Bell, Clock } from 'lucide-react';
+import { Plus, X, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface Reminder {
