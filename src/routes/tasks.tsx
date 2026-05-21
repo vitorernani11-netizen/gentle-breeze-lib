@@ -18,7 +18,8 @@ import {
   ChevronUp,
   RefreshCw,
   Flame,
-  Check
+  Check,
+  Archive
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskActions } from '@/hooks/useTaskActions';
@@ -305,56 +306,20 @@ function TasksPage() {
           </div>
         )}
 
-        {/* Completed Tasks Accordion */}
+        {/* Botão de Histórico */}
         {completedTasks.length > 0 && (
-          <div className="mt-20">
+          <div className="mt-20 px-4">
             <button 
-              aria-label={showCompleted ? "Recolher tarefas concluídas" : "Expandir tarefas concluídas"}
-              onClick={() => setShowCompleted(!showCompleted)}
-              className="w-full border-t-2 border-dashed border-zinc-800 py-6 flex items-center justify-between group"
+              onClick={() => navigate({ to: '/completed' })}
+              className="w-full border-2 border-dashed border-zinc-900 rounded-3xl py-10 flex flex-col items-center justify-center gap-3 group hover:border-zinc-700 transition-all"
             >
-              <span className="text-zinc-600 font-black uppercase tracking-[0.2em] text-[10px]">
-                Tarefas Concluídas ({completedTasks.length})
-              </span>
-              {showCompleted ? <ChevronUp size={16} className="text-zinc-700" /> : <ChevronDown size={16} className="text-zinc-700" />}
-            </button>
-            
-            {showCompleted && (
-              <div className="space-y-4 pt-4 animate-in slide-in-from-top-2 duration-300">
-                {completedTasks.map((task) => (
-                  <div 
-                    key={task.id} 
-                    className="flex items-center justify-between p-4 bg-zinc-950/50 border border-zinc-900 opacity-40 group hover:opacity-100 transition-opacity"
-                  >
-                    <div className="flex flex-col gap-1 min-w-0 pr-4">
-                      <span className="font-bold text-zinc-400 line-through uppercase tracking-tight truncate">
-                        {task.titulo}
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        aria-label="Restaurar tarefa"
-                        size="icon"
-                        variant="ghost"
-                        className="w-10 h-10 border border-zinc-800 text-zinc-600 hover:text-[#00ff41] hover:border-[#00ff41] rounded-none transition-none"
-                        onClick={() => restoreTask(task.id)}
-                      >
-                        <RefreshCw size={14} />
-                      </Button>
-                      <Button 
-                        aria-label="Incinerar permanentemente"
-                        size="icon"
-                        variant="ghost"
-                        className="w-10 h-10 border border-zinc-800 text-zinc-600 hover:text-red-500 hover:border-red-500 rounded-none transition-none"
-                        onClick={() => deletePermanent(task.id)}
-                      >
-                        <Flame size={14} />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+              <div className="p-3 bg-zinc-900 rounded-2xl text-zinc-600 group-hover:text-zinc-400">
+                <Archive size={20} />
               </div>
-            )}
+              <span className="text-zinc-600 font-black uppercase tracking-[0.2em] text-[10px] group-hover:text-zinc-400">
+                Ver Histórico de Concluídas ({completedTasks.length})
+              </span>
+            </button>
           </div>
         )}
       </div>
