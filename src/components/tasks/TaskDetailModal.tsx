@@ -8,7 +8,8 @@ import { ReminderManager, type Reminder } from './ReminderManager';
 import {
   Calendar,
   Flag,
-  Save
+  Save,
+  X
 } from 'lucide-react';
 import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
 import { cn } from '@/lib/utils';
@@ -197,25 +198,41 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
           {/* 3. Metadados (Data, Hora, Prioridade) - Linha Única */}
           <div className="flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/80">
-            <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-1.5 focus-within:border-zinc-500 transition-colors">
-              <Calendar size={14} className="text-zinc-500" />
-              <input
-                type="date"
-                value={dataExecucao}
-                onChange={(e) => handleDate(e.target.value)}
-                onBlur={forceGlobalSync}
-                className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[120px]"
-              />
+            {/* Vencimento (Data) */}
+            <div className="relative group">
+              <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-1.5 focus-within:border-zinc-500 transition-colors">
+                <Calendar size={14} className="text-zinc-500" />
+                <input
+                  type="date"
+                  value={dataExecucao}
+                  onChange={(e) => handleDate(e.target.value)}
+                  onBlur={forceGlobalSync}
+                  className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[120px]"
+                />
+                {dataExecucao && (
+                  <button onClick={handleClearSchedule} className="text-zinc-600 hover:text-red-500 p-1">
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-1.5 focus-within:border-zinc-500 transition-colors">
-              <input
-                type="time"
-                value={lembrete}
-                onChange={(e) => handleLembrete(e.target.value)}
-                onBlur={forceGlobalSync}
-                className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[80px]"
-              />
+            {/* Horário Fixo */}
+            <div className="relative group">
+              <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-1.5 focus-within:border-zinc-500 transition-colors">
+                <input
+                  type="time"
+                  value={lembrete}
+                  onChange={(e) => handleLembrete(e.target.value)}
+                  onBlur={forceGlobalSync}
+                  className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[80px]"
+                />
+                {lembrete && (
+                  <button onClick={handleClearSchedule} className="text-zinc-600 hover:text-red-500 p-1">
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
             </div>
 
             <button
