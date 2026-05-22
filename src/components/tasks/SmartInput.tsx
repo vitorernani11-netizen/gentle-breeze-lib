@@ -80,15 +80,13 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
   };
 
   const renderHighlights = () => {
-    if (!nlpData || nlpData.detectedPatterns.length === 0) return null;
+    if (!nlpData) return null;
 
     return (
       <div className="absolute left-3 top-[-24px] flex gap-2 animate-in fade-in slide-in-from-bottom-2">
-        {nlpData.detectedPatterns.map((pattern, idx) => (
-          <span key={idx} className="bg-[#ff00ff] text-white text-[10px] font-black px-2 py-0.5 uppercase tracking-tighter border border-white">
-            {pattern}
-          </span>
-        ))}
+        <span className="bg-[#ff00ff] text-white text-[10px] font-black px-2 py-0.5 uppercase tracking-tighter border border-white">
+          {nlpData.text}
+        </span>
       </div>
     );
   };
