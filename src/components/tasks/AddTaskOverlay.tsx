@@ -119,14 +119,14 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
           <span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-600">Nova Captura</span>
         </div>
 
-        <div className="relative">
-          <Input
-            ref={inputRef}
+        <div className="relative group">
+          <SmartInput
             value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
-            placeholder="Nome da tarefa"
-            className="bg-transparent border-none text-2xl md:text-3xl font-black placeholder:text-zinc-800 focus-visible:ring-0 p-0 h-auto mb-4 relative z-10 uppercase tracking-tighter"
+            onChange={(val) => setTitulo(val)}
+            placeholder="Nova tarefa... (ex: reunião amanhã as 14h)"
+            className="bg-transparent border-none text-xl md:text-3xl font-black uppercase text-white placeholder:text-zinc-700 w-full focus:outline-none"
           />
+        </div>
           {nlpData && (nlpData.detectedData.date || nlpData.detectedData.time) && (
             <div className="flex flex-wrap gap-1 mb-2">
               <span className="bg-[#00ff41] text-black text-[10px] font-black px-1.5 py-0.5 uppercase tracking-tighter rounded-sm">

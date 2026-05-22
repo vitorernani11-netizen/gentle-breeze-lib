@@ -209,11 +209,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                   onBlur={forceGlobalSync}
                   className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[120px]"
                 />
-                {dataExecucao && (
-                  <button onClick={handleClearSchedule} className="text-zinc-600 hover:text-red-500 p-1">
-                    <X size={14} />
-                  </button>
-                )}
               </div>
             </div>
 
@@ -227,11 +222,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                   onBlur={forceGlobalSync}
                   className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[80px]"
                 />
-                {lembrete && (
-                  <button onClick={handleClearSchedule} className="text-zinc-600 hover:text-red-500 p-1">
-                    <X size={14} />
-                  </button>
-                )}
               </div>
             </div>
 
