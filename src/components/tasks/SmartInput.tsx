@@ -54,15 +54,21 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
 
     const result = nlpData || parseNLP(inputValue);
     
-    const finalDueDate = selectedDate || result.dueDate || new Date();
+    const finalDueDate = selectedDate || result?.date || new Date();
     
+    // The title is the input value minus the matched token
+    let finalTitle = inputValue;
+    if (result) {
+      finalTitle = (inputValue.substring(0, result.startIndex) + inputValue.substring(result.endIndex)).replace(/\s\s+/g, ' ').trim();
+    }
+
     onAddTask({
-      titulo: result.text,
+      titulo: finalTitle || inputValue,
       vencimento: format(finalDueDate, 'yyyy-MM-dd'),
-      recorrencia: recorrencia !== 'none' ? recorrencia : result.recurrence,
-      recorrencia_semanal: result.recorrencia_semanal,
+      recorrencia: recorrencia,
+      recorrencia_semanal: null,
       prioridade: priority,
-      lembrete: reminder || result.reminderTime
+      lembrete: reminder || (result?.type === 'time' ? format(result.date || new Date(), 'HH:mm') : null)
     });
 
     // Reset
