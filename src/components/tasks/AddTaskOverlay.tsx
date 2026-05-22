@@ -64,16 +64,14 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       const result = parseNLP(titulo);
       setNlpData(result);
       
-      if (result.dueDate) {
-         const newDate = new Date(result.dueDate);
-         if (result.reminderTime) {
-            const [h, m] = result.reminderTime.split(':').map(Number);
-            newDate.setHours(h, m, 0, 0);
-         }
+      if (result?.date) {
+         const newDate = new Date(result.date);
          setVencimento(newDate);
+         
+         if (result.type === 'time') {
+            setLembrete(format(result.date, 'HH:mm'));
+         }
       }
-      if (result.reminderTime) setLembrete(result.reminderTime);
-      if (result.recurrence) setRecurrence(result.recurrence);
     } else {
       setNlpData(null);
     }
