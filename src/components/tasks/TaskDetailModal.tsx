@@ -123,6 +123,13 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
     triggerSave({ hora_vencimento: v || null });
   };
 
+  const handleClearSchedule = () => {
+    setDataExecucao('');
+    setLembrete('');
+    triggerSave({ data_execucao: null, data_vencimento: null, hora_vencimento: null });
+    forceGlobalSync();
+  };
+
   const currentPriority = PRIORITIES.find((p) => p.value === prioridade) || PRIORITIES[3];
 
   return (
