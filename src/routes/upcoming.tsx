@@ -44,27 +44,19 @@ function UpcomingPage() {
       const upcoming = allTasks
         .filter((t: any) => {
           if (t.status_concluido || t.deletado_por_inercia) return false;
-          const dataVenc = t.data_execucao || t.data_vencimento;
-          if (!dataVenc) return false;
           
-          const agora = new Date();
-          const anoStr = String(agora.getFullYear());
-          const mesStr = String(agora.getMonth() + 1).padStart(2, '0');
-          const diaStr = String(agora.getDate()).padStart(2, '0');
-          const hojeNum = parseInt(`${anoStr}${mesStr}${diaStr}`, 10);
-
-          let dataLimpa = dataVenc.split('T')[0].replace(/[-/]/g, '');
-          if (dataLimpa.length === 8 && dataVenc.includes('/')) {
-            dataLimpa = `${dataLimpa.substring(4, 8)}${dataLimpa.substring(2, 4)}${dataLimpa.substring(0, 2)}`;
-          }
-          const tarefaNum = parseInt(dataLimpa, 10);
-
-          return tarefaNum > hojeNum;
+          const dataVenc = t.data_execucao || t.data_vencimento;
+          if (!dataVenc) return true; // Keep tasks with no date for "Data Indefinida"
+          
+          const taskDate = parseISO(dataVenc);
+          const today = startOfToday();
+          
+          return isAfter(taskDate, today);
         })
         .sort((a: any, b: any) => {
-          const dateA = new Date(a.data_execucao).getTime();
-          const dateB = new Date(b.data_execucao).getTime();
-          return dateA - dateB;
+          const dateA = a.data_execucao || a.data_vencimento || '9999-12-31';
+          const dateB = b.data_execucao || b.data_vencimento || '9999-12-31';
+          return dateA.localeCompare(dateB);
         });
 
       setTasks(upcoming);

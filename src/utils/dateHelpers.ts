@@ -49,32 +49,44 @@ export const groupTasksByDate = (tasks: any[]): DateGroup[] => {
   const today = startOfToday();
 
   tasks.forEach((task) => {
-    if (!task.data_execucao) return;
+    // Regra de Blindagem: Se não possuir data_execucao válida ou data_vencimento
+    const rawDate = task.data_execucao || task.data_vencimento;
+    if (!rawDate) {
+      const dateKey = 'indefinida';
+      if (!groups[dateKey]) {
+        groups[dateKey] = {
+          id: dateKey,
+          label: 'DATA INDEFINIDA',
+          dateDisplay: '',
+          tasks: [],
+          isTomorrow: false,
+        };
+      }
+      groups[dateKey].tasks.push(task);
+      return;
+    }
     
-    const taskDate = parseISO(task.data_execucao);
-    const dateKey = task.data_execucao; // YYYY-MM-DD
+    const taskDate = parseISO(rawDate);
+    const dateKey = rawDate.split('T')[0];
 
     if (!groups[dateKey]) {
       let label = '';
-      let dateDisplay = '';
       const tomorrow = addDays(today, 1);
       const nextWeek = addDays(today, 7);
 
       if (isTomorrow(taskDate)) {
         label = 'AMANHÃ';
-        dateDisplay = format(taskDate, 'dd MMM', { locale: ptBR }).toUpperCase();
       } else if (isAfter(taskDate, today) && !isAfter(taskDate, nextWeek)) {
         label = format(taskDate, 'EEEE', { locale: ptBR }).toUpperCase();
-        dateDisplay = format(taskDate, 'dd MMM', { locale: ptBR }).toUpperCase();
       } else {
-        label = format(taskDate, 'MMMM yyyy', { locale: ptBR }).toUpperCase();
-        dateDisplay = format(taskDate, 'dd MMM', { locale: ptBR }).toUpperCase();
+        // Use a lógica solicitada: d 'de' MMMM
+        label = format(taskDate, "d 'de' MMMM", { locale: ptBR }).toUpperCase();
       }
 
       groups[dateKey] = {
         id: dateKey,
         label,
-        dateDisplay,
+        dateDisplay: format(taskDate, 'dd MMM', { locale: ptBR }).toUpperCase(),
         tasks: [],
         isTomorrow: isTomorrow(taskDate),
       };
@@ -83,6 +95,9 @@ export const groupTasksByDate = (tasks: any[]): DateGroup[] => {
     groups[dateKey].tasks.push(task);
   });
 
-  // Sort groups by date key
-  return Object.values(groups).sort((a, b) => a.id.localeCompare(b.id));
+  return Object.values(groups).sort((a, b) => {
+    if (a.id === 'indefinida') return 1;
+    if (b.id === 'indefinida') return -1;
+    return a.id.localeCompare(b.id);
+  });
 };
