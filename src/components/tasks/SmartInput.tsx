@@ -10,37 +10,45 @@ interface SmartInputProps {
 }
 
 export const SmartInput = ({ value, onChange, placeholder, className }: SmartInputProps) => {
-  const [extractedData, setExtractedData] = useState<string | null>(null);
+  const [extracted, setExtracted] = useState<{title: string, badge: string} | null>(null);
 
   useEffect(() => {
-    // A cada tecla digitada, checamos se existe data/hora no texto
     const result = parseNLP(value);
-    
-    // Se encontrou algo e o texto resultante é menor que o original, temos uma extração
-    if (result.detectedData.date && value.length > result.text.length) {
-      setExtractedData(`${result.detectedData.date.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})} ${result.detectedData.time || ''}`);
+    // Se o parser limpou algo, separamos o Título (cinza/branco) do Badge (neon)
+    if (result.detectedData.date) {
+      setExtracted({
+        title: result.text,
+        badge: `${result.detectedData.date.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})} ${result.detectedData.time || ''}`
+      });
     } else {
-      setExtractedData(null);
+      setExtracted(null);
     }
   }, [value]);
 
   return (
-    <div className="relative flex items-center w-full min-h-[40px] bg-zinc-950/50 rounded-lg border border-zinc-800 px-3 overflow-hidden">
-      {/* Input de Texto */}
+    <div className="relative w-full h-12 flex items-center bg-zinc-950 rounded-lg border border-zinc-800 px-3">
+      {/* Camada de Destaque (Visível se houver data) */}
+      {extracted ? (
+        <div className="absolute inset-0 flex items-center px-3 pointer-events-none">
+          <span className="text-white font-black uppercase tracking-tighter mr-2">{extracted.title}</span>
+          <span className="bg-[#00ff41]/20 text-[#00ff41] border border-[#00ff41]/30 text-[10px] font-black uppercase px-2 py-0.5 rounded-full">
+            {extracted.badge}
+          </span>
+        </div>
+      ) : null}
+
+      {/* Input Transparente para Digitação */}
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={cn("bg-transparent w-full focus:outline-none text-white", className)}
+        className={cn(
+          "w-full bg-transparent focus:outline-none text-white z-10",
+          extracted ? "text-transparent caret-white" : "text-white",
+          className
+        )}
       />
-
-      {/* Badge Verde Neon (Ghost Text) */}
-      {extractedData && (
-        <div className="absolute right-2 bg-[#00ff41]/20 text-[#00ff41] border border-[#00ff41]/30 text-[10px] font-black uppercase px-2 py-0.5 rounded-full animate-in slide-in-from-right-2 fade-in">
-          {extractedData}
-        </div>
-      )}
     </div>
   );
 };
