@@ -68,8 +68,8 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
          const newDate = new Date(result.date);
          setVencimento(newDate);
          
-         if (result.type === 'time') {
-            setLembrete(format(result.date, 'HH:mm'));
+         if (result.detectedData.time) {
+            setLembrete(result.detectedData.time);
          }
       }
     } else {
@@ -82,11 +82,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
 
     const result = nlpData || parseNLP(titulo);
     
-    // The actual title is the input value minus the matched token
-    let finalTitle = titulo;
-    if (result) {
-      finalTitle = (titulo.substring(0, result.startIndex) + titulo.substring(result.endIndex)).replace(/\s\s+/g, ' ').trim();
-    }
+    let finalTitle = result ? result.text : titulo;
 
     // Formatting for LocalStorage as requested: due_date: "2026-05-14T17:00:00.000Z"
     const horaVencISO = vencimento.toISOString();
@@ -131,10 +127,12 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
             placeholder="Nome da tarefa"
             className="bg-transparent border-none text-2xl md:text-3xl font-black placeholder:text-zinc-800 focus-visible:ring-0 p-0 h-auto mb-4 relative z-10 uppercase tracking-tighter"
           />
-          {nlpData && (
+          {nlpData && (nlpData.detectedData.date || nlpData.detectedData.time) && (
             <div className="flex flex-wrap gap-1 mb-2">
               <span className="bg-[#00ff41] text-black text-[10px] font-black px-1.5 py-0.5 uppercase tracking-tighter rounded-sm">
-                {nlpData.text}
+                {nlpData.detectedData.date 
+                  ? format(nlpData.detectedData.date, "dd 'de' MMM", { locale: ptBR })
+                  : nlpData.detectedData.time}
               </span>
             </div>
           )}
