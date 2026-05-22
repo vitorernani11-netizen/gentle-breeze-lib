@@ -54,15 +54,21 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
 
     const result = nlpData || parseNLP(inputValue);
     
-    const finalDueDate = selectedDate || result.dueDate || new Date();
+    const finalDueDate = selectedDate || result?.date || new Date();
     
+    // The title is the input value minus the matched token
+    let finalTitle = inputValue;
+    if (result) {
+      finalTitle = (inputValue.substring(0, result.startIndex) + inputValue.substring(result.endIndex)).replace(/\s\s+/g, ' ').trim();
+    }
+
     onAddTask({
-      titulo: result.text,
+      titulo: finalTitle || inputValue,
       vencimento: format(finalDueDate, 'yyyy-MM-dd'),
-      recorrencia: recorrencia !== 'none' ? recorrencia : result.recurrence,
-      recorrencia_semanal: result.recorrencia_semanal,
+      recorrencia: recorrencia,
+      recorrencia_semanal: null,
       prioridade: priority,
-      lembrete: reminder || result.reminderTime
+      lembrete: reminder || (result?.type === 'time' ? format(result.date || new Date(), 'HH:mm') : null)
     });
 
     // Reset
@@ -74,15 +80,13 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
   };
 
   const renderHighlights = () => {
-    if (!nlpData || nlpData.detectedPatterns.length === 0) return null;
+    if (!nlpData) return null;
 
     return (
       <div className="absolute left-3 top-[-24px] flex gap-2 animate-in fade-in slide-in-from-bottom-2">
-        {nlpData.detectedPatterns.map((pattern, idx) => (
-          <span key={idx} className="bg-[#ff00ff] text-white text-[10px] font-black px-2 py-0.5 uppercase tracking-tighter border border-white">
-            {pattern}
-          </span>
-        ))}
+        <span className="bg-[#ff00ff] text-white text-[10px] font-black px-2 py-0.5 uppercase tracking-tighter border border-white">
+          {nlpData.text}
+        </span>
       </div>
     );
   };
