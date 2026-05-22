@@ -56,19 +56,17 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
     
     const finalDueDate = selectedDate || result?.date || new Date();
     
-    // The title is the input value minus the matched token
-    let finalTitle = inputValue;
-    if (result) {
-      finalTitle = (inputValue.substring(0, result.startIndex) + inputValue.substring(result.endIndex)).replace(/\s\s+/g, ' ').trim();
-    }
+    // The title is now provided directly by the parser with terms removed
+    const finalTitle = result?.text || inputValue;
+    const finalDueDate = selectedDate || result?.date || new Date();
 
     onAddTask({
-      titulo: finalTitle || inputValue,
+      titulo: finalTitle,
       vencimento: format(finalDueDate, 'yyyy-MM-dd'),
       recorrencia: recorrencia,
       recorrencia_semanal: null,
       prioridade: priority,
-      lembrete: reminder || (result?.type === 'time' ? format(result.date || new Date(), 'HH:mm') : null)
+      lembrete: reminder || result?.detectedData.time || null
     });
 
     // Reset
@@ -80,12 +78,16 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
   };
 
   const renderHighlights = () => {
-    if (!nlpData) return null;
+    if (!nlpData || (!nlpData.detectedData.date && !nlpData.detectedData.time)) return null;
+
+    const displayTag = nlpData.detectedData.date 
+      ? format(nlpData.detectedData.date, "dd 'de' MMM", { locale: ptBR })
+      : nlpData.detectedData.time;
 
     return (
       <div className="absolute left-3 top-[-24px] flex gap-2 animate-in fade-in slide-in-from-bottom-2">
         <span className="bg-[#ff00ff] text-white text-[10px] font-black px-2 py-0.5 uppercase tracking-tighter border border-white">
-          {nlpData.text}
+          {displayTag}
         </span>
       </div>
     );
