@@ -21,8 +21,8 @@ export const parseNLP = (input: string): NLPResult => {
     dateDetected = true;
   }
 
-  // 2. Detecção de Horário (Regex para 13:30, 13h30, 13h)
-  const timeRegex = /(\d{1,2})[:h](\d{2})?|\b(\d{1,2})h\b/i;
+  // 2. Detecção de Horário (Agora capturando \"as\" ou \"às\" antes do número)
+  const timeRegex = /(?:as|às)?\s?(\d{1,2})[:h](\d{2})?|\b(\d{1,2})h\b/i;
   const timeMatch = text.match(timeRegex);
   
   if (timeMatch) {
@@ -30,6 +30,7 @@ export const parseNLP = (input: string): NLPResult => {
     text = text.replace(timeMatch[0], '').trim();
     
     // Tenta ajustar a hora no finalDate se houver match
+    // Group 1 or 3 for hours, Group 2 for minutes
     const hours = parseInt(timeMatch[1] || timeMatch[3]);
     const mins = timeMatch[2] ? parseInt(timeMatch[2]) : 0;
     if (!isNaN(hours)) {
