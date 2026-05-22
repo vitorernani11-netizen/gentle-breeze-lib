@@ -54,8 +54,6 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
 
     const result = nlpData || parseNLP(inputValue);
     
-    const finalDueDate = selectedDate || result?.date || new Date();
-    
     // The title is now provided directly by the parser with terms removed
     const finalTitle = result?.text || inputValue;
     const finalDueDate = selectedDate || result?.date || new Date();

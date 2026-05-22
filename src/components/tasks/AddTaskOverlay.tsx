@@ -68,8 +68,8 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
          const newDate = new Date(result.date);
          setVencimento(newDate);
          
-         if (result.type === 'time') {
-            setLembrete(format(result.date, 'HH:mm'));
+         if (result.detectedData.time) {
+            setLembrete(result.detectedData.time);
          }
       }
     } else {
@@ -82,11 +82,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
 
     const result = nlpData || parseNLP(titulo);
     
-    // The actual title is the input value minus the matched token
-    let finalTitle = titulo;
-    if (result) {
-      finalTitle = (titulo.substring(0, result.startIndex) + titulo.substring(result.endIndex)).replace(/\s\s+/g, ' ').trim();
-    }
+    let finalTitle = result ? result.text : titulo;
 
     // Formatting for LocalStorage as requested: due_date: "2026-05-14T17:00:00.000Z"
     const horaVencISO = vencimento.toISOString();
