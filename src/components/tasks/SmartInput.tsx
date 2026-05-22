@@ -147,14 +147,24 @@ export const SmartInput: React.FC<SmartInputProps> = ({ onAddTask }) => {
       {renderHighlights()}
       
       <div className="bg-zinc-950 border border-zinc-800 p-1.5 flex flex-col gap-1.5 relative z-10 rounded-xl">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 relative">
+          <div className="absolute inset-0 pointer-events-none px-3 flex items-center overflow-hidden">
+            {nlpData && (nlpData.detectedData.date || nlpData.detectedData.time) && (
+              <span className="bg-[#00ff41]/20 text-[#00ff41] rounded px-1 font-bold whitespace-pre">
+                {inputValue}
+              </span>
+            )}
+          </div>
           <Input
             ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
             placeholder="O que precisa ser feito?"
-            className="bg-transparent border-none text-base font-medium tracking-tight focus-visible:ring-0 placeholder:text-zinc-800 h-10"
+            className={cn(
+              "bg-transparent border-none text-base font-medium tracking-tight focus-visible:ring-0 placeholder:text-zinc-800 h-10 relative z-10",
+              nlpData && (nlpData.detectedData.date || nlpData.detectedData.time) ? "text-transparent caret-white" : "text-white"
+            )}
           />
           <Button 
             onClick={handleAdd}
