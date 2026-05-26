@@ -84,9 +84,10 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   const handleSubmit = () => {
     if (!titulo.trim()) return;
 
-    const result = nlpData || parseNLP(titulo);
-    
-    let finalTitle = result ? result.text : titulo;
+    const result = parseNLP(titulo);
+    // Se temos um vencimento ativo (vindo do NLP ou Selecionado), limpamos o título.
+    // Se o usuário desativou o chip (vencimento === null), mantemos o título bruto.
+    let finalTitle = vencimento ? result.text : titulo;
 
     // Formatting for LocalStorage as requested: due_date: "2026-05-14T17:00:00.000Z"
     const horaVencISO = vencimento ? vencimento.toISOString() : null;
