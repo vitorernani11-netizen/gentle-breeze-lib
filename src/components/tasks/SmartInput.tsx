@@ -25,28 +25,33 @@ export const SmartInput = ({ value, onChange, placeholder, className }: SmartInp
   }, [value]);
 
   return (
-    <div className="relative w-full h-12 flex items-center bg-zinc-950 rounded-lg border border-zinc-800 overflow-hidden">
-      {/* Camada Visual (O que você enxerga) */}
-      <div className="absolute inset-0 flex items-center px-3 pointer-events-none w-full">
-        <span className="text-white font-black uppercase tracking-tighter mr-2 truncate flex-shrink-0">
+    <div className="relative w-full flex items-center">
+      {/* Camada Visual (Copia o estilo exato do input, mas renderiza o badge) */}
+      <div 
+        className={cn("absolute inset-0 flex items-center pointer-events-none overflow-hidden", className)}
+        style={{ backgroundColor: 'transparent', borderColor: 'transparent' }}
+      >
+        <span className={cn("truncate flex-shrink-0 mr-2", !data.title && !value ? "text-zinc-600 font-normal" : "text-white")}>
           {data.title || (value ? "" : placeholder)}
         </span>
         {data.badge && (
-          <span className="bg-[#00ff41]/20 text-[#00ff41] border border-[#00ff41]/30 text-[10px] font-black uppercase px-2 py-0.5 rounded-full flex-shrink-0">
+          <span className="bg-[#00ff41]/20 text-[#00ff41] border border-[#00ff41]/30 text-xs font-black uppercase px-2 py-0.5 rounded-full flex-shrink-0 tracking-widest shadow-lg">
             {data.badge}
           </span>
         )}
       </div>
 
-      {/* Camada de Controle (100% invisível) */}
+      {/* Camada de Controle (Recebe digitação, mas é forçadamente invisível via CSS Inline) */}
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        style={{ color: 'transparent', caretColor: 'white', textShadow: 'none' }}
         className={cn(
-          "w-full h-full bg-transparent border-none outline-none focus:outline-none px-3 font-black uppercase tracking-tighter text-transparent caret-white z-10",
+          "w-full bg-transparent outline-none focus:outline-none z-10 relative",
           className
         )}
+        placeholder=""
       />
     </div>
   );
