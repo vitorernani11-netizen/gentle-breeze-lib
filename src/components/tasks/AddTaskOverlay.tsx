@@ -59,21 +59,12 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
     }
   }, [open]);
 
-  useEffect(() => {
-    if (titulo.trim() === '') {
-      // REGRA DE OURO: Se o campo for zerado manualmente, 
-      // force a limpeza absoluta dos estados para permitir tarefa sem data.
-      setVencimento(null);
-      setLembrete(null);
-    }
-  }, [titulo]);
-
   const handleParsed = (date: Date | null, time: string | null) => {
+    // A MÁGICA DE SINCRONIZAÇÃO: O SmartInput agora é quem manda. 
+    // Se ele enviar uma data, agendamos. Se enviar null (usuário anulou o chip), zeramos na hora!
     if (date) {
       setVencimento(date);
-      if (time) {
-        setLembrete(time);
-      }
+      setLembrete(time || '');
     } else {
       setVencimento(null);
       setLembrete(null);
