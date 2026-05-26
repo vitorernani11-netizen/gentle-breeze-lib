@@ -37,7 +37,7 @@ interface AddTaskOverlayProps {
 export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, onAddTask }) => {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
-  const [vencimento, setVencimento] = useState<Date>(startOfToday());
+  const [vencimento, setVencimento] = useState<Date | null>(null);
   const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
   const [prioridade, setPrioridade] = useState<string>('P4');
   const [lembrete, setLembrete] = useState<string | null>(null);
@@ -51,7 +51,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
     } else {
       setTitulo('');
       setDescricao('');
-      setVencimento(startOfToday());
+      setVencimento(null);
       setRecurrence('none');
       setPrioridade('P4');
       setLembrete(null);
@@ -66,15 +66,19 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       setNlpData(result);
       
       if (result?.date) {
-         const newDate = new Date(result.date);
-         setVencimento(newDate);
-         
-         if (result.detectedData.time) {
-            setLembrete(result.detectedData.time);
-         }
+        setVencimento(new Date(result.date));
+        if (result.detectedData.time) {
+          setLembrete(result.detectedData.time);
+        }
+      } else {
+        // REGRA DE OURO: Se o NLP retornar nulo, force a limpeza absoluta
+        setVencimento(null);
+        setLembrete(null);
       }
     } else {
       setNlpData(null);
+      setVencimento(null);
+      setLembrete(null);
     }
   }, [titulo]);
 
@@ -86,20 +90,20 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
     let finalTitle = result ? result.text : titulo;
 
     // Formatting for LocalStorage as requested: due_date: "2026-05-14T17:00:00.000Z"
-    const horaVencISO = vencimento.toISOString();
+    const horaVencISO = vencimento ? vencimento.toISOString() : null;
 
     console.log('[Task:Create]', { title: finalTitle || titulo, due_date: horaVencISO, recurrence });
 
     onAddTask({
       titulo: finalTitle || titulo,
-      vencimento: format(vencimento, 'yyyy-MM-dd'),
+      vencimento: vencimento ? format(vencimento, 'yyyy-MM-dd') : '',
       recorrencia: recurrence,
       prioridade,
-      lembrete: format(vencimento, 'HH:mm'),
+      lembrete: vencimento ? format(vencimento, 'HH:mm') : null,
       lembretes: reminders,
       reminders: reminders,
       descricao,
-      hora_vencimento: lembrete || format(vencimento, 'HH:mm')
+      hora_vencimento: lembrete || (vencimento ? format(vencimento, 'HH:mm') : null)
     });
     
     onClose();
@@ -139,7 +143,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-zinc-900 pt-4">
           <div className="flex flex-wrap items-center gap-3">
             <CalendarPopover 
-              selectedDate={vencimento} 
+              selectedDate={vencimento || startOfToday()} 
               onSelect={setVencimento}
               recurrence={recurrence}
               onRecurrenceSelect={setRecurrence}
@@ -147,7 +151,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               <Button variant="ghost" className={cn("h-12 px-4 rounded-2xl border border-zinc-900 bg-zinc-900/50 transition-all", vencimento && "text-[#00ff41] border-[#00ff41]/30 bg-[#00ff41]/5")}>
                 <CalendarIcon size={20} />
                 <span className="ml-2 text-xs font-bold uppercase whitespace-nowrap">
-                  {format(vencimento, "dd MMM", { locale: ptBR })}
+                  {vencimento ? format(vencimento, "dd MMM", { locale: ptBR }) : "Agendar"}
                 </span>
               </Button>
             </CalendarPopover>
