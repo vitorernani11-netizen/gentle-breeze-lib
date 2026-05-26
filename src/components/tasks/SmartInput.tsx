@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { parseNLP, NLPResult } from '@/utils/nlpParser';
+import { parseNLP } from '@/utils/nlpParser';
 import { cn } from '@/lib/utils';
 
 interface SmartInputProps {
@@ -10,84 +10,73 @@ interface SmartInputProps {
 }
 
 export const SmartInput = ({ value, onChange, placeholder, className }: SmartInputProps) => {
-  const [nlpResult, setNlpResult] = useState<NLPResult | null>(null);
+  const [tokens, setTokens] = useState<string[]>([]);
   const [showRaw, setShowRaw] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const result = parseNLP(value);
-    setNlpResult(result);
+    setTokens(result.tokens || []);
   }, [value]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (showRaw && (e.key === ' ' || e.key === 'Enter')) {
       setShowRaw(false);
     }
-    if (!showRaw && e.key === 'Backspace' && nlpResult?.tokens.length) {
+    if (!showRaw && e.key === 'Backspace' && tokens.length > 0) {
       setShowRaw(true);
     }
   };
 
   const handleClick = () => {
-    if (nlpResult?.tokens.length) {
-      setShowRaw(true);
-    }
+    if (tokens.length > 0) setShowRaw(true);
   };
 
   const handleBlur = () => {
     setShowRaw(false);
   };
 
-  const renderVisualLayer = () => {
-    if (!value) {
-      return <span className="text-zinc-600 font-normal">{placeholder}</span>;
-    }
-
-    if (!nlpResult || nlpResult.tokens.length === 0) {
-      return <span className="text-white">{value}</span>;
-    }
-
-    // Ordenar tokens por tamanho (maiores primeiro) para evitar que partes de tokens menores sejam capturadas antes
-    const sortedTokens = [...nlpResult.tokens].sort((a, b) => b.length - a.length);
-    // Escapar tokens para uso em Regex e criar padrão de captura
-    const pattern = sortedTokens.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-    const regex = new RegExp(`(${pattern})`, 'gi');
+  // Renderizador Dinâmico: Pinta apenas as palavras reconhecidas, onde elas estiverem
+  const renderText = () => {
+    if (!value) return <span className="text-zinc-600 font-normal">{placeholder}</span>;
     
+    const validTokens = tokens.filter(t => t.trim().length > 0);
+    if (validTokens.length === 0) return <span className="text-white">{value}</span>;
+
+    const escapedTokens = validTokens.map(t => t.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'));
+    const regex = new RegExp(`(${escapedTokens.join('|')})`, 'gi');
     const parts = value.split(regex);
     
     return (
-      <div className="flex items-center flex-wrap">
+      <>
         {parts.map((part, i) => {
-          const isToken = nlpResult.tokens.some(t => t.toLowerCase() === part.toLowerCase());
+          const isToken = validTokens.some(t => t.toLowerCase() === part.toLowerCase());
           if (isToken) {
             return (
-              <span 
-                key={i} 
-                className="bg-[#00ff41]/20 text-[#00ff41] border border-[#00ff41]/30 text-[11px] font-bold uppercase px-1.5 py-0.5 rounded mx-0.5 tracking-tight"
-              >
+              <span key={i} className="bg-[#00ff41]/20 text-[#00ff41] rounded-sm transition-colors duration-200">
                 {part}
               </span>
             );
           }
-          return <span key={i} className="text-white whitespace-pre">{part}</span>;
+          return <span key={i} className="text-white">{part}</span>;
         })}
-      </div>
+      </>
     );
   };
 
   return (
-    <div className="relative w-full flex items-center min-h-[40px] px-3">
-      {/* Camada Visual (Inline Highlights) */}
+    <div className="relative w-full flex items-center">
+      {/* Camada Visual Inline */}
       {!showRaw && (
         <div 
-          className={cn("absolute inset-0 flex items-center pointer-events-none overflow-hidden px-3", className)}
+          className={cn("absolute inset-0 flex items-center pointer-events-none whitespace-pre", className)}
           style={{ backgroundColor: 'transparent', borderColor: 'transparent' }}
         >
-          {renderVisualLayer()}
+          {renderText()}
         </div>
       )}
 
-      {/* Camada de Controle */}
+      {/* Camada de Digitação Transparente */}
       <input
         ref={inputRef}
         type="text"
@@ -98,7 +87,7 @@ export const SmartInput = ({ value, onChange, placeholder, className }: SmartInp
         onBlur={handleBlur}
         style={showRaw ? {} : { color: 'transparent', textShadow: 'none' }}
         className={cn(
-          "w-full h-full bg-transparent outline-none focus:outline-none z-10 relative caret-white font-medium",
+          "w-full bg-transparent outline-none focus:outline-none z-10 relative caret-white",
           !showRaw && "selection:bg-white/20 selection:text-transparent",
           showRaw && "text-white",
           className
