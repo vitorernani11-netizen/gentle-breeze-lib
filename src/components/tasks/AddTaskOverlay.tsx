@@ -56,7 +56,6 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       setPrioridade('P4');
       setLembrete(null);
       setReminders([]);
-      setNlpData(null);
     }
   }, [open]);
 
