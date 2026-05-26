@@ -42,7 +42,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   const [prioridade, setPrioridade] = useState<string>('P4');
   const [lembrete, setLembrete] = useState<string | null>(null);
   const [reminders, setReminders] = useState<any[]>([]);
-  const [nlpData, setNlpData] = useState<NLPResult | null>(null);
+  
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
