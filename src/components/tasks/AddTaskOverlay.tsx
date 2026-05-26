@@ -61,26 +61,25 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   }, [open]);
 
   useEffect(() => {
-    if (titulo.trim()) {
-      const result = parseNLP(titulo);
-      setNlpData(result);
-      
-      if (result?.date) {
-        setVencimento(new Date(result.date));
-        if (result.detectedData.time) {
-          setLembrete(result.detectedData.time);
-        }
-      } else {
-        // REGRA DE OURO: Se o NLP retornar nulo, force a limpeza absoluta
-        setVencimento(null);
-        setLembrete(null);
-      }
-    } else {
-      setNlpData(null);
+    if (titulo.trim() === '') {
+      // REGRA DE OURO: Se o campo for zerado manualmente, 
+      // force a limpeza absoluta dos estados para permitir tarefa sem data.
       setVencimento(null);
       setLembrete(null);
     }
   }, [titulo]);
+
+  const handleParsed = (date: Date | null, time: string | null) => {
+    if (date) {
+      setVencimento(date);
+      if (time) {
+        setLembrete(time);
+      }
+    } else {
+      setVencimento(null);
+      setLembrete(null);
+    }
+  };
 
   const handleSubmit = () => {
     if (!titulo.trim()) return;
