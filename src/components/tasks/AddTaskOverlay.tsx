@@ -42,7 +42,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   const [prioridade, setPrioridade] = useState<string>('P4');
   const [lembrete, setLembrete] = useState<string | null>(null);
   const [reminders, setReminders] = useState<any[]>([]);
-  const [nlpData, setNlpData] = useState<NLPResult | null>(null);
+  
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -56,38 +56,37 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       setPrioridade('P4');
       setLembrete(null);
       setReminders([]);
-      setNlpData(null);
     }
   }, [open]);
 
   useEffect(() => {
-    if (titulo.trim()) {
-      const result = parseNLP(titulo);
-      setNlpData(result);
-      
-      if (result?.date) {
-        setVencimento(new Date(result.date));
-        if (result.detectedData.time) {
-          setLembrete(result.detectedData.time);
-        }
-      } else {
-        // REGRA DE OURO: Se o NLP retornar nulo, force a limpeza absoluta
-        setVencimento(null);
-        setLembrete(null);
-      }
-    } else {
-      setNlpData(null);
+    if (titulo.trim() === '') {
+      // REGRA DE OURO: Se o campo for zerado manualmente, 
+      // force a limpeza absoluta dos estados para permitir tarefa sem data.
       setVencimento(null);
       setLembrete(null);
     }
   }, [titulo]);
 
+  const handleParsed = (date: Date | null, time: string | null) => {
+    if (date) {
+      setVencimento(date);
+      if (time) {
+        setLembrete(time);
+      }
+    } else {
+      setVencimento(null);
+      setLembrete(null);
+    }
+  };
+
   const handleSubmit = () => {
     if (!titulo.trim()) return;
 
-    const result = nlpData || parseNLP(titulo);
-    
-    let finalTitle = result ? result.text : titulo;
+    const result = parseNLP(titulo);
+    // Se temos um vencimento ativo (vindo do NLP ou Selecionado), limpamos o título.
+    // Se o usuário desativou o chip (vencimento === null), mantemos o título bruto.
+    let finalTitle = vencimento ? result.text : titulo;
 
     // Formatting for LocalStorage as requested: due_date: "2026-05-14T17:00:00.000Z"
     const horaVencISO = vencimento ? vencimento.toISOString() : null;
@@ -128,6 +127,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
           <SmartInput
             value={titulo}
             onChange={(val) => setTitulo(val)}
+            onParsed={handleParsed}
             placeholder="Nova tarefa... (ex: reunião amanhã as 14h)"
             className="bg-transparent border-none text-xl md:text-3xl font-black uppercase text-white placeholder:text-zinc-700 w-full focus:outline-none"
           />
