@@ -127,6 +127,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
           <SmartInput
             value={titulo}
             onChange={(val) => setTitulo(val)}
+            onParsed={handleParsed}
             placeholder="Nova tarefa... (ex: reunião amanhã as 14h)"
             className="bg-transparent border-none text-xl md:text-3xl font-black uppercase text-white placeholder:text-zinc-700 w-full focus:outline-none"
           />
