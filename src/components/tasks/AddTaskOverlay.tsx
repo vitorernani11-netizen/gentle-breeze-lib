@@ -59,41 +59,25 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
     }
   }, [open]);
 
-  const handleParsed = (date: Date | null, time: string | null) => {
-    // A MÁGICA DE SINCRONIZAÇÃO: O SmartInput agora é quem manda. 
-    // Se ele enviar uma data, agendamos. Se enviar null (usuário anulou o chip), zeramos na hora!
-    if (date) {
-      setVencimento(date);
-      setLembrete(time || '');
-    } else {
-      setVencimento(null);
-      setLembrete(null);
-    }
-  };
-
   const handleSubmit = () => {
     if (!titulo.trim()) return;
 
+    // Se o usuário clicar no verde para anular, o titulo puro será salvo.
+    // Se o verde estiver ativo, nós limpamos o título (ex: "Teste hoje" vira "Teste")
     const result = parseNLP(titulo);
-    // Se temos um vencimento ativo (vindo do NLP ou Selecionado), limpamos o título.
-    // Se o usuário desativou o chip (vencimento === null), mantemos o título bruto.
-    let finalTitle = vencimento ? result.text : titulo;
-
-    // Formatting for LocalStorage as requested: due_date: "2026-05-14T17:00:00.000Z"
-    const horaVencISO = vencimento ? vencimento.toISOString() : null;
-
-    console.log('[Task:Create]', { title: finalTitle || titulo, due_date: horaVencISO, recurrence });
+    const hasActiveChip = result.date !== null;
+    const finalTitle = hasActiveChip ? result.text : titulo;
 
     onAddTask({
       titulo: finalTitle || titulo,
-      vencimento: vencimento ? format(vencimento, 'yyyy-MM-dd') : '',
+      vencimento: format(vencimento || startOfToday(), 'yyyy-MM-dd'),
       recorrencia: recurrence,
       prioridade,
-      lembrete: vencimento ? format(vencimento, 'HH:mm') : null,
+      lembrete: lembrete, // Agora pega exatamente o que o SmartInput ou o reloginho disser
       lembretes: reminders,
       reminders: reminders,
       descricao,
-      hora_vencimento: lembrete || (vencimento ? format(vencimento, 'HH:mm') : null)
+      hora_vencimento: lembrete
     });
     
     onClose();
@@ -118,9 +102,18 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
           <SmartInput
             value={titulo}
             onChange={(val) => setTitulo(val)}
-            onParsed={handleParsed}
             placeholder="Nova tarefa... (ex: reunião amanhã as 14h)"
             className="bg-transparent border-none text-xl md:text-3xl font-black uppercase text-white placeholder:text-zinc-700 w-full focus:outline-none"
+            onParsed={(date, time) => {
+              if (date) {
+                setVencimento(date);
+                setLembrete(time || null);
+              } else {
+                // Se anulou, volta pra Hoje sem horário
+                setVencimento(startOfToday());
+                setLembrete(null);
+              }
+            }}
           />
         </div>
         
