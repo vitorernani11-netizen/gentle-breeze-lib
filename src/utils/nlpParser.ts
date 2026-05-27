@@ -102,6 +102,8 @@ export const parseNLP = (input: string): NLPResult => {
       date: finalDate || undefined,
       time: finalTime || undefined
     },
-    tokens
+    tokens,
+    dateToken,
+    timeToken
   };
 };
