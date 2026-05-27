@@ -139,20 +139,6 @@ export const SmartInput = ({
 
   return (
     <div className="relative w-full">
-      <div
-        ref={highlightRef}
-        aria-hidden
-        className={cn(
-          'absolute inset-0 pointer-events-none whitespace-pre-wrap break-words overflow-hidden',
-          className
-        )}
-        style={{ backgroundColor: 'transparent', borderColor: 'transparent' }}
-      >
-        {renderText()}
-        {/* trailing space para o cursor encostar no fim da linha */}
-        {'\u200b'}
-      </div>
-
       <textarea
         ref={textareaRef}
         value={value}
@@ -167,12 +153,25 @@ export const SmartInput = ({
           overflow: 'hidden',
         }}
         className={cn(
-          'w-full bg-transparent outline-none focus:outline-none relative whitespace-pre-wrap break-words',
+          'w-full bg-transparent outline-none focus:outline-none block whitespace-pre-wrap break-words',
           'selection:bg-white/20 selection:text-transparent',
           className
         )}
         placeholder=""
       />
+
+      <div
+        ref={highlightRef}
+        aria-hidden
+        className={cn(
+          'absolute inset-0 pointer-events-none whitespace-pre-wrap break-words overflow-hidden',
+          className
+        )}
+        style={{ backgroundColor: 'transparent', borderColor: 'transparent' }}
+      >
+        {renderText()}
+        {'\u200b'}
+      </div>
     </div>
   );
 };

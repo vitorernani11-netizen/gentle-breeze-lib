@@ -150,11 +150,19 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         <div className="flex flex-col overflow-y-auto flex-grow p-6 sm:p-8 space-y-6">
           {/* 1. Título */}
           <div>
-            <Input
+            <Textarea
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Título da tarefa"
-              className="border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900 break-all"
+              rows={1}
+              className="border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 min-h-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900 break-words whitespace-pre-wrap resize-none overflow-hidden leading-tight"
+              style={{ height: 'auto' }}
+              ref={(el) => {
+                if (el) {
+                  el.style.height = 'auto';
+                  el.style.height = `${el.scrollHeight}px`;
+                }
+              }}
             />
           </div>
 
@@ -169,16 +177,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                   placeholder="Descrição da tarefa..."
                   className="border border-zinc-800 bg-zinc-900/50 rounded-xl text-base text-zinc-300 p-4 min-h-[150px] shadow-none focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 resize-none leading-relaxed placeholder:text-zinc-700 break-all whitespace-pre-wrap overflow-hidden w-full"
                 />
-                <div className="flex gap-2 justify-end">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setIsEditingDesc(false)}
-                    className="text-zinc-400 hover:text-white"
-                  >
-                    Concluir Edição
-                  </Button>
-                </div>
               </div>
             ) : (
               <div
@@ -373,29 +371,37 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
         {/* Footer */}
         <div className="border-t border-zinc-900 px-6 py-4 flex items-center justify-end bg-black shrink-0">
-          {isDirty && (
-            <button
-              onClick={() => {
-                persistToHardware();
-                setIsDirty(false);
-                if (typeof onUpdate === 'function') {
-                  try {
-                    (onUpdate as any)();
-                  } catch (e) {
-                    if (task?.id) onUpdate(task.id, {});
-                  }
-                } else if (typeof (window as any).onRefresh === 'function') {
+          <button
+            onClick={() => {
+              // Persiste qualquer alteração pendente e força sync
+              if (task?.id) {
+                triggerSave({
+                  titulo,
+                  descricao,
+                  prioridade,
+                  data_execucao: dataExecucao || null,
+                  data_vencimento: dataExecucao || null,
+                  hora_vencimento: lembrete || null,
+                  lembretes: lembretesState,
+                  sub_tasks: subTasks,
+                });
+              }
+              persistToHardware();
+              setIsDirty(false);
+              setIsEditingDesc(false);
+              try {
+                window.dispatchEvent(new Event('storage_update'));
+                if (typeof (window as any).onRefresh === 'function') {
                   (window as any).onRefresh();
-                } else {
-                  window.location.reload();
                 }
-              }}
-              className="w-full sm:w-auto bg-[#00ff41] text-black font-black px-8 py-4 rounded-2xl border-b-4 border-black shadow-2xl active:translate-y-1 active:border-b-0 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm italic"
-            >
-              <Save size={20} strokeWidth={3} />
-              Confirmar Alterações
-            </button>
-          )}
+              } catch (e) {}
+              onClose();
+            }}
+            className="w-full sm:w-auto bg-[#00ff41] text-black font-black px-8 py-4 rounded-2xl border-b-4 border-black shadow-2xl active:translate-y-1 active:border-b-0 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm italic"
+          >
+            <Save size={20} strokeWidth={3} />
+            Salvar
+          </button>
         </div>
       </DialogContent>
     </Dialog>
