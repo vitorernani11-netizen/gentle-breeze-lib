@@ -107,13 +107,8 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
             placeholder="Nome da tarefa"
             className="bg-transparent border-none text-xl md:text-3xl font-black text-white placeholder:text-zinc-700 w-full focus:outline-none leading-snug"
             onParsed={(date, time) => {
-              if (date) {
-                setVencimento(date);
-                setLembrete(time || null);
-              } else {
-                setVencimento(null);
-                setLembrete(null);
-              }
+              setVencimento(date);
+              setLembrete(time);
             }}
           />
         </div>
@@ -147,7 +142,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
                 ? "text-[#00ff41] border-[#00ff41]/30 bg-[#00ff41]/5"
                 : "border-zinc-900 text-white"
             )}>
-              <Clock size={20} />
+              <Clock size={24} />
               <input
                 type="time"
                 value={lembrete || ''}
@@ -156,23 +151,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               />
             </div>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  className={cn(
-                    "h-12 px-4 rounded-2xl border border-zinc-900 bg-zinc-900/50 transition-all", 
-                    reminders.length > 0 && "text-[#00ff41] border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.2)] bg-[#00ff41]/5"
-                  )}
-                >
-                  <Clock size={20} />
-                  {reminders.length > 0 && <span className="ml-2 text-xs font-black tracking-tighter">{reminders.length}</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 bg-black border-2 border-white p-6 z-[150] shadow-[0_20px_50px_rgba(0,0,0,1)] rounded-3xl" align="start">
-                <ReminderManager reminders={reminders} onUpdate={setReminders} />
-              </PopoverContent>
-            </Popover>
+
 
             <Popover>
               <PopoverTrigger asChild>
