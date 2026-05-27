@@ -98,6 +98,13 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       >
         <div className="flex justify-between items-center mb-6">
           <span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-600">Nova Tarefa</span>
+          <button
+            onClick={onClose}
+            aria-label="Fechar"
+            className="text-zinc-500 hover:text-white transition-colors p-1 rounded-lg hover:bg-zinc-900"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <div className="relative group mb-4">
