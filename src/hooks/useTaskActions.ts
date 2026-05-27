@@ -212,9 +212,9 @@ export const useTaskActions = (onSuccess?: () => void) => {
   };
 
   const addTask = (taskData: any) => {
-    // Sync Check: Validação de campos obrigatórios
-    if (!taskData.titulo || !taskData.data_execucao) {
-      toast.error('Erro de integridade: Dados obrigatórios ausentes.');
+    // Sync Check: Validação de campos obrigatórios (data é opcional — tarefas sem data vão para Entrada)
+    if (!taskData.titulo) {
+      toast.error('Erro de integridade: Título obrigatório.');
       return null;
     }
 
