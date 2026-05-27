@@ -4,7 +4,8 @@ import {
   Clock,
   Flag,
   Send,
-  X
+  X,
+  Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,8 +16,9 @@ import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { parseNLP, NLPResult } from '@/utils/nlpParser';
 import { CalendarPopover } from './CalendarPopover';
-import { type Reminder } from './ReminderManager';
+import { ReminderManager, type Reminder } from './ReminderManager';
 import { SmartInput } from './SmartInput';
+import { TimePickerPopover } from './TimePickerPopover';
 
 interface AddTaskOverlayProps {
   open: boolean;
