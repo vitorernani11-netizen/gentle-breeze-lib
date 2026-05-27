@@ -89,7 +89,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-2xl bg-zinc-950 border-t border-x border-white/10 rounded-t-[2.5rem] p-8 pb-12 shadow-[0_-20px_60px_rgba(0,0,0,0.9)] animate-in slide-in-from-bottom-full duration-500 ease-out"
+        className="w-full max-w-2xl bg-zinc-950 border-t border-x border-white/10 rounded-t-[2.5rem] p-8 pb-12 shadow-[0_-20px_60px_rgba(0,0,0,0.9)] animate-in slide-in-from-bottom-full duration-500 ease-out max-h-[90vh] overflow-y-auto overscroll-contain"
         onKeyDown={(e) => {
           if (e.key === 'Escape') onClose();
           if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit();
