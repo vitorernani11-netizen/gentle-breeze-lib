@@ -14,7 +14,7 @@ import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { parseNLP, NLPResult } from '@/utils/nlpParser';
 import { CalendarPopover } from './CalendarPopover';
-import { ReminderManager, type Reminder } from './ReminderManager';
+import { type Reminder } from './ReminderManager';
 import { SmartInput } from './SmartInput';
 
 interface AddTaskOverlayProps {
