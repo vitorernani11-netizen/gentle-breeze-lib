@@ -203,10 +203,10 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             ) : (
               <div
                 onClick={() => setIsEditingDesc(true)}
-                className="cursor-pointer group rounded-xl hover:bg-zinc-900/30 p-2 -ml-2 transition-colors"
+                className="cursor-pointer group rounded-xl hover:bg-zinc-900/30 p-2 -ml-2 transition-colors min-w-0 w-full"
               >
                 {descricao ? (
-                  <p className="text-zinc-400 text-sm leading-relaxed line-clamp-3 overflow-hidden text-ellipsis whitespace-pre-wrap break-words">
+                  <p className="text-zinc-400 text-sm leading-relaxed line-clamp-3 overflow-hidden text-ellipsis whitespace-pre-wrap [overflow-wrap:anywhere] break-all">
                     {descricao}
                   </p>
                 ) : (
@@ -217,7 +217,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           </div>
 
           {/* 3. Metadados (Data, Hora, Prioridade) - Linha Única */}
-          <div className="flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/80">
+          <div className="relative z-10 flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/80 bg-black">
             {/* Vencimento (Data) */}
             <div className="relative group">
               <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-1.5 focus-within:border-zinc-500 transition-colors">
