@@ -62,18 +62,20 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   const handleSubmit = () => {
     if (!titulo.trim()) return;
 
-    // Se o usuário clicar no verde para anular, o titulo puro será salvo.
-    // Se o verde estiver ativo, nós limpamos o título (ex: "Teste hoje" vira "Teste")
-    const result = parseNLP(titulo);
-    const hasActiveChip = result.date !== null;
-    const finalTitle = hasActiveChip ? result.text : titulo;
+    // Se o chip de data está ativo (vencimento != null), parseamos para limpar o token do título.
+    // Se o usuário anulou (vencimento == null), o título vai cru — como no Todoist.
+    let finalTitle = titulo;
+    if (vencimento) {
+      const result = parseNLP(titulo);
+      finalTitle = result.text || titulo;
+    }
 
     onAddTask({
-      titulo: finalTitle || titulo,
-      vencimento: format(vencimento || startOfToday(), 'yyyy-MM-dd'),
+      titulo: finalTitle,
+      vencimento: vencimento ? format(vencimento, 'yyyy-MM-dd') : '',
       recorrencia: recurrence,
       prioridade,
-      lembrete: lembrete, // Agora pega exatamente o que o SmartInput ou o reloginho disser
+      lembrete: lembrete,
       lembretes: reminders,
       reminders: reminders,
       descricao,
@@ -109,8 +111,8 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
                 setVencimento(date);
                 setLembrete(time || null);
               } else {
-                // Se anulou, volta pra Hoje sem horário
-                setVencimento(startOfToday());
+                // Se anulou o chip, zera tudo — Todoist-style (sem data, sem hora)
+                setVencimento(null);
                 setLembrete(null);
               }
             }}
