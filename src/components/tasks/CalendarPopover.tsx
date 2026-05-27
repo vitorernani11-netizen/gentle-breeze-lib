@@ -63,8 +63,11 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
         {children}
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[280px] bg-black border-2 border-white p-0 z-[150] shadow-[0_10px_40px_rgba(0,0,0,0.9)] overflow-hidden"
+        className="w-[280px] max-h-[80vh] overflow-y-auto bg-black border-2 border-white p-0 z-[150] shadow-[0_10px_40px_rgba(0,0,0,0.9)]"
         align="start"
+        side="top"
+        sideOffset={8}
+        collisionPadding={16}
       >
         {view === 'main' ? (
           <div className="flex flex-col">
