@@ -3,7 +3,8 @@ import {
   Calendar as CalendarIcon, 
   Clock,
   Flag,
-  Send
+  Send,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -97,6 +98,13 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       >
         <div className="flex justify-between items-center mb-6">
           <span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-600">Nova Tarefa</span>
+          <button
+            onClick={onClose}
+            aria-label="Fechar"
+            className="text-zinc-500 hover:text-white transition-colors p-1 rounded-lg hover:bg-zinc-900"
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <div className="relative group mb-4">
@@ -142,12 +150,12 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
                 ? "text-[#00ff41] border-[#00ff41]/30 bg-[#00ff41]/5"
                 : "border-zinc-900 text-white"
             )}>
-              <Clock size={24} />
+              <Clock size={20} />
               <input
                 type="time"
                 value={lembrete || ''}
                 onChange={(e) => setLembrete(e.target.value || null)}
-                className="bg-transparent border-none text-xs font-bold uppercase focus:ring-0 p-0 w-16 text-current [color-scheme:dark]"
+                className="bg-transparent border-none text-xs font-bold uppercase focus:ring-0 p-0 w-16 text-current [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
               />
             </div>
 
