@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Calendar as CalendarIcon, 
   Clock,
-  Flag, 
-  Target,
+  Flag,
   Send
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -97,21 +96,21 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
         }}
       >
         <div className="flex justify-between items-center mb-6">
-          <span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-600">Nova Captura</span>
+          <span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-600">Nova Tarefa</span>
         </div>
 
         <div className="relative group mb-4">
           <SmartInput
             value={titulo}
             onChange={(val) => setTitulo(val)}
-            placeholder="Nova tarefa... (ex: reunião amanhã as 14h)"
-            className="bg-transparent border-none text-xl md:text-3xl font-black uppercase text-white placeholder:text-zinc-700 w-full focus:outline-none"
+            onSubmit={handleSubmit}
+            placeholder="Nome da tarefa"
+            className="bg-transparent border-none text-xl md:text-3xl font-black text-white placeholder:text-zinc-700 w-full focus:outline-none leading-snug"
             onParsed={(date, time) => {
               if (date) {
                 setVencimento(date);
                 setLembrete(time || null);
               } else {
-                // Se anulou o chip, zera tudo — Todoist-style (sem data, sem hora)
                 setVencimento(null);
                 setLembrete(null);
               }
@@ -205,9 +204,6 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               </PopoverContent>
             </Popover>
 
-            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl border border-zinc-900 bg-zinc-900/50 text-zinc-700">
-              <Target size={20} />
-            </Button>
           </div>
 
           <Button 
