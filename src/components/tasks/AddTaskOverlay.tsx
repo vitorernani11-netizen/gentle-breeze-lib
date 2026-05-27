@@ -150,12 +150,12 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
                 ? "text-[#00ff41] border-[#00ff41]/30 bg-[#00ff41]/5"
                 : "border-zinc-900 text-white"
             )}>
-              <Clock size={24} />
+              <Clock size={20} />
               <input
                 type="time"
                 value={lembrete || ''}
                 onChange={(e) => setLembrete(e.target.value || null)}
-                className="bg-transparent border-none text-xs font-bold uppercase focus:ring-0 p-0 w-16 text-current [color-scheme:dark]"
+                className="bg-transparent border-none text-xs font-bold uppercase focus:ring-0 p-0 w-16 text-current [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
               />
             </div>
 
