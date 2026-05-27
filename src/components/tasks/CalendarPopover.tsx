@@ -118,27 +118,21 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
               />
             </div>
 
-            <div className="border-t border-zinc-900 p-1 flex items-center justify-between">
-              <Button 
-                variant="ghost" 
-                className="h-9 px-3 text-[10px] font-black uppercase text-zinc-400 hover:text-white"
-                onClick={() => setView('time')}
-              >
-                <Clock size={14} className="mr-2" />
-                {format(selectedDate, 'HH:mm')}
-              </Button>
-              <Button 
-                variant="ghost" 
-                className={cn(
-                  "h-9 px-3 text-[10px] font-black uppercase transition-all",
-                  recurrence !== 'none' ? "text-[#00ff41]" : "text-zinc-400 hover:text-white"
-                )}
-                onClick={() => setView('repeat')}
-              >
-                <Repeat size={14} className="mr-2" />
-                {recurrence === 'none' ? 'Repetir' : recurrence.toUpperCase()}
-              </Button>
-            </div>
+            {onRecurrenceSelect && (
+              <div className="border-t border-zinc-900 p-1 flex items-center justify-end">
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "h-9 px-3 text-[10px] font-black uppercase transition-all",
+                    recurrence !== 'none' ? "text-[#00ff41]" : "text-zinc-400 hover:text-white"
+                  )}
+                  onClick={() => setView('repeat')}
+                >
+                  <Repeat size={14} className="mr-2" />
+                  {recurrence === 'none' ? 'Repetir' : recurrence.toUpperCase()}
+                </Button>
+              </div>
+            )}
           </div>
         ) : view === 'time' ? (
           <div className="p-4 space-y-4 animate-in slide-in-from-right-2 duration-200">
