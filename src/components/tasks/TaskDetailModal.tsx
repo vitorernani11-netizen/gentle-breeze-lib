@@ -149,18 +149,22 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         </div>
 
 
-        {/* Body: Single Column Todoist-Style */}
-        <div className="flex flex-col overflow-y-auto flex-grow min-h-0 p-6 sm:p-8 space-y-6">
+        {/* Body: Single Column Todoist-Style Linear Flow */}
+        <div className="flex flex-col overflow-y-auto flex-grow min-h-0 p-6 sm:p-8 space-y-6 w-full">
 
           {/* 1. Título */}
-          <div>
+          <div className="w-full block">
             <Textarea
               value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
+              onChange={(e) => {
+                setTitulo(e.target.value);
+                const el = e.target as HTMLTextAreaElement;
+                el.style.height = 'auto';
+                el.style.height = `${el.scrollHeight}px`;
+              }}
               placeholder="Título da tarefa"
               rows={1}
-              className="border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 min-h-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900 break-words whitespace-pre-wrap resize-none overflow-hidden leading-tight"
-              style={{ height: 'auto' }}
+              className="w-full border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 min-h-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900 [overflow-wrap:anywhere] break-all whitespace-pre-wrap resize-none overflow-hidden leading-tight block"
               ref={(el) => {
                 if (el) {
                   el.style.height = 'auto';
@@ -171,9 +175,9 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           </div>
 
           {/* 2. Descrição Colapsável */}
-          <div className="min-h-[60px]">
+          <div className="w-full block min-h-[40px]">
             {isEditingDesc ? (
-              <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+              <div className="space-y-3 block">
                 <Textarea
                   autoFocus
                   value={descricao}
@@ -190,16 +194,26 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                     }
                   }}
                   placeholder="Descrição da tarefa..."
-                  className="border border-zinc-800 bg-zinc-900/50 rounded-xl text-base text-zinc-300 p-4 min-h-[150px] shadow-none focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 resize-none leading-relaxed placeholder:text-zinc-700 break-words whitespace-pre-wrap w-full"
+                  className="w-full border border-zinc-800 bg-zinc-900/50 rounded-xl text-sm text-zinc-300 p-4 min-h-[120px] focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 resize-none leading-relaxed placeholder:text-zinc-700 [overflow-wrap:anywhere] break-all whitespace-pre-wrap block"
                 />
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setIsEditingDesc(false)}
+                    className="text-zinc-400 hover:text-white text-xs font-bold uppercase"
+                  >
+                    Concluir Edição
+                  </Button>
+                </div>
               </div>
             ) : (
               <div
                 onClick={() => setIsEditingDesc(true)}
-                className="cursor-pointer group rounded-xl hover:bg-zinc-900/30 p-2 -ml-2 transition-colors min-w-0 w-full"
+                className="cursor-pointer group rounded-xl hover:bg-zinc-900/20 p-2 -ml-2 transition-all block"
               >
                 {descricao ? (
-                  <p className="text-zinc-400 text-sm leading-relaxed line-clamp-3 overflow-hidden text-ellipsis whitespace-pre-wrap [overflow-wrap:anywhere] break-all">
+                  <p className="text-zinc-400 text-sm leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere] break-all">
                     {descricao}
                   </p>
                 ) : (
@@ -209,38 +223,35 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             )}
           </div>
 
-          {/* 3. Metadados (Data, Hora, Prioridade) - Linha Única */}
-          <div className="relative z-10 flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/80 bg-black">
-            {/* Vencimento (Data) */}
-            <div className="relative group">
-              <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-1.5 focus-within:border-zinc-500 transition-colors">
-                <Calendar size={14} className="text-zinc-500" />
-                <input
-                  type="date"
-                  value={dataExecucao}
-                  onChange={(e) => handleDate(e.target.value)}
-                  onBlur={forceGlobalSync}
-                  className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[120px]"
-                />
-              </div>
+          {/* 3. Metadados (Data, Hora, Prioridade) - Linha única nativa */}
+          <div className="flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/60 w-full">
+            {/* Data */}
+            <div className="flex items-center gap-2 bg-zinc-900/40 border border-zinc-800/80 rounded-xl px-3 py-2 text-sm font-bold text-white shrink-0">
+              <Calendar size={14} className="text-zinc-500" />
+              <input
+                type="date"
+                value={dataExecucao}
+                onChange={(e) => handleDate(e.target.value)}
+                onBlur={forceGlobalSync}
+                className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[110px]"
+              />
             </div>
 
-            {/* Horário Fixo */}
-            <div className="relative group">
-              <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-1.5 focus-within:border-zinc-500 transition-colors">
-                <Clock size={14} className="text-zinc-500" />
-                <input
-
-                  type="time"
-                  value={lembrete}
-                  onChange={(e) => handleLembrete(e.target.value)}
-                  onBlur={forceGlobalSync}
-                  className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[80px]"
-                />
-              </div>
+            {/* Hora */}
+            <div className="flex items-center gap-2 bg-zinc-900/40 border border-zinc-800/80 rounded-xl px-3 py-2 text-sm font-bold text-white shrink-0">
+              <Clock size={14} className="text-zinc-500" />
+              <input
+                type="time"
+                value={lembrete || ''}
+                onChange={(e) => handleLembrete(e.target.value)}
+                onBlur={forceGlobalSync}
+                className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[70px]"
+              />
             </div>
 
+            {/* Prioridade */}
             <button
+              type="button"
               onClick={() => {
                 const priorities = ['P4', 'P1', 'P2', 'P3'];
                 const currentIndex = priorities.indexOf(prioridade);
@@ -248,12 +259,11 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 handlePriority(nextPriority);
               }}
               className={cn(
-                'flex items-center gap-2 px-3 py-1.5 border rounded-lg transition-all active:scale-95 font-black text-xs uppercase',
-                currentPriority.color,
-                'bg-zinc-900/30 border-zinc-800 hover:border-current'
+                'flex items-center gap-2 px-3 py-2 border rounded-xl transition-all active:scale-95 font-black text-xs uppercase bg-zinc-900/30 border-zinc-800 hover:border-current shrink-0',
+                currentPriority.color
               )}
             >
-              <Flag size={14} className={currentPriority.color.split(' ')[0]} />
+              <Flag size={14} />
               {prioridade}
             </button>
           </div>
