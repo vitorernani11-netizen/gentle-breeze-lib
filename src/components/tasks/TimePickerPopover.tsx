@@ -1,7 +1,5 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useEffect, useRef } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TimePickerPopoverProps {
@@ -10,47 +8,94 @@ interface TimePickerPopoverProps {
   children: React.ReactNode;
 }
 
-export const TimePickerPopover: React.FC<TimePickerPopoverProps> = ({ 
-  selectedTime, 
-  onSelect, 
-  children 
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
+
+export const TimePickerPopover: React.FC<TimePickerPopoverProps> = ({
+  selectedTime,
+  onSelect,
+  children,
 }) => {
-  const times = ['09:00', '12:00', '15:00', '18:00', '21:00'];
+  const [h, m] = (selectedTime || ':').split(':');
+  const hourRef = useRef<HTMLDivElement>(null);
+  const minRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      const hEl = hourRef.current?.querySelector('[data-active="true"]') as HTMLElement | null;
+      const mEl = minRef.current?.querySelector('[data-active="true"]') as HTMLElement | null;
+      hEl?.scrollIntoView({ block: 'center' });
+      mEl?.scrollIntoView({ block: 'center' });
+    }, 50);
+  }, [selectedTime]);
+
+  const update = (newH: string, newM: string) => {
+    onSelect(`${newH}:${newM}`);
+  };
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        {children}
-      </PopoverTrigger>
-      <PopoverContent 
-        className="w-48 bg-black border-2 border-zinc-800 p-2 z-[150] shadow-[0_10px_40px_rgba(0,0,0,0.9)]"
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent
+        className="w-64 bg-zinc-950 border-2 border-zinc-800 p-3 z-[150] shadow-[0_10px_40px_rgba(0,0,0,0.9)]"
         align="start"
       >
-        <div className="grid grid-cols-1 gap-1">
-          <div className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2 px-2">
-            Horário de Execução
-          </div>
-          {times.map((time) => (
-            <Button
-              key={time}
-              variant="ghost"
-              className={cn(
-                "w-full justify-start font-black text-sm h-10 rounded-none border-b border-transparent hover:border-white hover:bg-zinc-900 transition-all",
-                selectedTime === time ? "text-[#00ff41] bg-zinc-900" : "text-white"
-              )}
-              onClick={() => onSelect(time)}
-            >
-              {time}
-            </Button>
-          ))}
-          <Button
-            variant="ghost"
-            className="w-full justify-start font-black text-sm h-10 rounded-none border-t border-zinc-900 mt-1 text-[#ff0000] hover:text-white hover:bg-red-950 transition-all"
-            onClick={() => onSelect(null)}
-          >
-            LIMPAR
-          </Button>
+        <div className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2 px-1">
+          Selecionar Horário
         </div>
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <div className="text-[9px] font-bold uppercase text-zinc-600 mb-1 text-center">Hora</div>
+            <div
+              ref={hourRef}
+              className="h-48 overflow-y-auto rounded-lg border border-zinc-900 bg-black scrollbar-thin"
+            >
+              {HOURS.map((hh) => (
+                <button
+                  key={hh}
+                  type="button"
+                  data-active={h === hh}
+                  onClick={() => update(hh, m || '00')}
+                  className={cn(
+                    'w-full py-2 text-sm font-black transition-colors',
+                    h === hh ? 'bg-[#00ff41] text-black' : 'text-white hover:bg-zinc-900',
+                  )}
+                >
+                  {hh}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex-1">
+            <div className="text-[9px] font-bold uppercase text-zinc-600 mb-1 text-center">Min</div>
+            <div
+              ref={minRef}
+              className="h-48 overflow-y-auto rounded-lg border border-zinc-900 bg-black scrollbar-thin"
+            >
+              {MINUTES.map((mm) => (
+                <button
+                  key={mm}
+                  type="button"
+                  data-active={m === mm}
+                  onClick={() => update(h || '09', mm)}
+                  className={cn(
+                    'w-full py-2 text-sm font-black transition-colors',
+                    m === mm ? 'bg-[#00ff41] text-black' : 'text-white hover:bg-zinc-900',
+                  )}
+                >
+                  {mm}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => onSelect(null)}
+          className="mt-3 w-full py-2 text-xs font-black uppercase text-red-500 hover:bg-red-950/40 rounded-lg transition-colors"
+        >
+          Limpar
+        </button>
       </PopoverContent>
     </Popover>
   );

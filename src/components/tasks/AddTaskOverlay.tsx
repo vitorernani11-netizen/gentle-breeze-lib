@@ -4,7 +4,8 @@ import {
   Clock,
   Flag,
   Send,
-  X
+  X,
+  Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,8 +16,9 @@ import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { parseNLP, NLPResult } from '@/utils/nlpParser';
 import { CalendarPopover } from './CalendarPopover';
-import { type Reminder } from './ReminderManager';
+import { ReminderManager, type Reminder } from './ReminderManager';
 import { SmartInput } from './SmartInput';
+import { TimePickerPopover } from './TimePickerPopover';
 
 interface AddTaskOverlayProps {
   open: boolean;
@@ -144,22 +146,22 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               </Button>
             </CalendarPopover>
 
-            <div className={cn(
-              "flex items-center gap-2 h-12 px-4 rounded-2xl border bg-zinc-900/50 transition-all",
-              lembrete
-                ? "text-[#00ff41] border-[#00ff41]/30 bg-[#00ff41]/5"
-                : "border-zinc-900 text-white"
-            )}>
-              <Clock size={20} />
-              <input
-                type="time"
-                value={lembrete || ''}
-                onChange={(e) => setLembrete(e.target.value || null)}
-                className="bg-transparent border-none text-xs font-bold uppercase focus:ring-0 p-0 w-16 text-current [color-scheme:dark] [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-              />
-            </div>
-
-
+            <TimePickerPopover selectedTime={lembrete} onSelect={setLembrete}>
+              <button
+                type="button"
+                className={cn(
+                  "flex items-center gap-2 h-12 px-4 rounded-2xl border bg-zinc-900/50 transition-all active:scale-95",
+                  lembrete
+                    ? "text-[#00ff41] border-[#00ff41]/30 bg-[#00ff41]/5"
+                    : "border-zinc-900 text-white"
+                )}
+              >
+                <Clock size={20} />
+                <span className="text-xs font-bold uppercase whitespace-nowrap">
+                  {lembrete || '--:--'}
+                </span>
+              </button>
+            </TimePickerPopover>
 
             <Popover>
               <PopoverTrigger asChild>
@@ -188,6 +190,33 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
                     {p}
                   </Button>
                 ))}
+              </PopoverContent>
+            </Popover>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-12 w-12 rounded-2xl border border-zinc-900 bg-zinc-900/50",
+                    reminders.length > 0 && "text-[#00ff41] border-[#00ff41]/30 bg-[#00ff41]/5"
+                  )}
+                  aria-label="Lembretes"
+                >
+                  <Bell size={18} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 bg-zinc-950 border-zinc-900 p-4 z-[110]">
+                <ReminderManager
+                  reminders={reminders}
+                  onUpdate={(r) => {
+                    setReminders(r);
+                    if (r.length > reminders.length && 'Notification' in window && Notification.permission === 'default') {
+                      Notification.requestPermission();
+                    }
+                  }}
+                />
               </PopoverContent>
             </Popover>
 
