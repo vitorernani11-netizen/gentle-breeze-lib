@@ -5,7 +5,10 @@ export interface NLPResult {
   text: string;
   detectedData: { date?: Date, time?: string };
   tokens: string[];
+  dateToken: string;
+  timeToken: string;
 }
+
 
 export const parseNLP = (input: string): NLPResult => {
   let finalDate: Date | null = null;
