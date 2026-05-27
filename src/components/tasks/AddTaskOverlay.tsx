@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Calendar as CalendarIcon, 
   Clock,
-  Flag, 
-  Target,
+  Flag,
   Send
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
