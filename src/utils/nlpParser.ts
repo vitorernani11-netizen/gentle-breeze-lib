@@ -64,7 +64,7 @@ export const parseNLP = (input: string): NLPResult => {
   }
 
   if (finalDate && finalTime) {
-    const [h, m] = finalTime.replace('h', '').split(':');
+    const [h, m] = finalTime.split(':');
     finalDate.setHours(parseInt(h), parseInt(m), 0, 0);
   }
 
