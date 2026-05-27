@@ -55,7 +55,7 @@ export const parseNLP = (input: string): NLPResult => {
     if (extractTime) {
       const hour = extractTime[1].padStart(2, '0');
       const min = extractTime[2] ? extractTime[2] : '00';
-      finalTime = `${hour}:${min}h`;
+      finalTime = `${hour}:${min}`;
     }
   }
 
