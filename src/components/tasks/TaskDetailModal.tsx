@@ -136,15 +136,23 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
-        className="max-w-3xl w-full sm:w-[95vw] h-[100dvh] sm:h-auto sm:max-h-[90vh] p-0 bg-black border-0 sm:border-2 border-white rounded-none sm:rounded-3xl overflow-hidden gap-0 flex flex-col"
+        className="max-w-3xl w-full sm:w-[95vw] h-[100dvh] sm:h-auto sm:max-h-[90vh] p-0 bg-black border-0 sm:border-2 border-white rounded-none sm:rounded-3xl overflow-hidden gap-0 flex flex-col z-[200]"
         onInteractOutside={onClose}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-900 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-zinc-900 px-6 py-4 shrink-0">
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-zinc-600">
             <span>Entrada / Detalhes</span>
           </div>
+          <button
+            onClick={onClose}
+            className="text-zinc-500 hover:text-white transition-colors p-1 rounded-lg hover:bg-zinc-900"
+            aria-label="Fechar"
+          >
+            <X size={20} />
+          </button>
         </div>
+
 
         {/* Body: Single Column Todoist-Style */}
         <div className="flex flex-col overflow-y-auto flex-grow p-6 sm:p-8 space-y-6">
