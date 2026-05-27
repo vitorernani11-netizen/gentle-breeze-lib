@@ -37,10 +37,6 @@ export const SmartInput = ({
     const allTokens = result.tokens || [];
     setTokens(allTokens);
 
-    // Filtra tokens que o usuário cancelou. Se TODOS os tokens detectados foram cancelados,
-    // não envia data/hora. Caso contrário, envia normalmente.
-    const activeTokens = allTokens.filter((t) => !cancelled.has(t.toLowerCase()));
-
     // Limpa do set tokens que sumiram do texto (usuário apagou a palavra)
     if (cancelled.size > 0) {
       const valueLower = value.toLowerCase();
@@ -55,13 +51,27 @@ export const SmartInput = ({
     }
 
     if (onParsed) {
-      if (activeTokens.length === 0 && allTokens.length > 0) {
+      const dateCancelled = result.dateToken
+        ? cancelled.has(result.dateToken.toLowerCase())
+        : false;
+      const timeCancelled = result.timeToken
+        ? cancelled.has(result.timeToken.toLowerCase())
+        : false;
+
+      const emittedDate = dateCancelled ? null : result.date;
+      const emittedTime = timeCancelled ? null : result.detectedData?.time || null;
+
+      // Se só havia data e ela foi cancelada, também limpa hora derivada
+      if (dateCancelled && !result.timeToken) {
+        onParsed(null, null);
+      } else if (timeCancelled && !result.dateToken) {
         onParsed(null, null);
       } else {
-        onParsed(result.date, result.detectedData?.time || null);
+        onParsed(emittedDate, emittedTime);
       }
     }
   }, [value, cancelled]);
+
 
   const toggleToken = (token: string) => {
     const key = token.toLowerCase();
