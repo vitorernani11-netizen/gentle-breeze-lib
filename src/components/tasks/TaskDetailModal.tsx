@@ -371,29 +371,37 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
         {/* Footer */}
         <div className="border-t border-zinc-900 px-6 py-4 flex items-center justify-end bg-black shrink-0">
-          {isDirty && (
-            <button
-              onClick={() => {
-                persistToHardware();
-                setIsDirty(false);
-                if (typeof onUpdate === 'function') {
-                  try {
-                    (onUpdate as any)();
-                  } catch (e) {
-                    if (task?.id) onUpdate(task.id, {});
-                  }
-                } else if (typeof (window as any).onRefresh === 'function') {
+          <button
+            onClick={() => {
+              // Persiste qualquer alteração pendente e força sync
+              if (task?.id) {
+                triggerSave({
+                  titulo,
+                  descricao,
+                  prioridade,
+                  data_execucao: dataExecucao || null,
+                  data_vencimento: dataExecucao || null,
+                  hora_vencimento: lembrete || null,
+                  lembretes: lembretesState,
+                  sub_tasks: subTasks,
+                });
+              }
+              persistToHardware();
+              setIsDirty(false);
+              setIsEditingDesc(false);
+              try {
+                window.dispatchEvent(new Event('storage_update'));
+                if (typeof (window as any).onRefresh === 'function') {
                   (window as any).onRefresh();
-                } else {
-                  window.location.reload();
                 }
-              }}
-              className="w-full sm:w-auto bg-[#00ff41] text-black font-black px-8 py-4 rounded-2xl border-b-4 border-black shadow-2xl active:translate-y-1 active:border-b-0 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm italic"
-            >
-              <Save size={20} strokeWidth={3} />
-              Confirmar Alterações
-            </button>
-          )}
+              } catch (e) {}
+              onClose();
+            }}
+            className="w-full sm:w-auto bg-[#00ff41] text-black font-black px-8 py-4 rounded-2xl border-b-4 border-black shadow-2xl active:translate-y-1 active:border-b-0 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm italic"
+          >
+            <Save size={20} strokeWidth={3} />
+            Salvar
+          </button>
         </div>
       </DialogContent>
     </Dialog>
