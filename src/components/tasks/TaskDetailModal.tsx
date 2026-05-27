@@ -146,13 +146,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-zinc-600">
             <span>Entrada / Detalhes</span>
           </div>
-          <button
-            onClick={onClose}
-            className="text-zinc-500 hover:text-white transition-colors p-1 rounded-lg hover:bg-zinc-900"
-            aria-label="Fechar"
-          >
-            <X size={20} />
-          </button>
         </div>
 
 
