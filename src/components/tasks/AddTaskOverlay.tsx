@@ -111,8 +111,8 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
                 setVencimento(date);
                 setLembrete(time || null);
               } else {
-                // Se anulou, volta pra Hoje sem horário
-                setVencimento(startOfToday());
+                // Se anulou o chip, zera tudo — Todoist-style (sem data, sem hora)
+                setVencimento(null);
                 setLembrete(null);
               }
             }}
