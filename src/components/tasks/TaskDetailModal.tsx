@@ -155,7 +155,8 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
 
         {/* Body: Single Column Todoist-Style */}
-        <div className="flex flex-col overflow-y-auto flex-grow p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col overflow-y-auto flex-grow min-h-0 p-6 sm:p-8 space-y-6">
+
           {/* 1. Título */}
           <div>
             <Textarea
