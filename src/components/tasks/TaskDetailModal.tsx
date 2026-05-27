@@ -150,11 +150,19 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         <div className="flex flex-col overflow-y-auto flex-grow p-6 sm:p-8 space-y-6">
           {/* 1. Título */}
           <div>
-            <Input
+            <Textarea
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Título da tarefa"
-              className="border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900 break-all"
+              rows={1}
+              className="border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 min-h-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900 break-words whitespace-pre-wrap resize-none overflow-hidden leading-tight"
+              style={{ height: 'auto' }}
+              ref={(el) => {
+                if (el) {
+                  el.style.height = 'auto';
+                  el.style.height = `${el.scrollHeight}px`;
+                }
+              }}
             />
           </div>
 
