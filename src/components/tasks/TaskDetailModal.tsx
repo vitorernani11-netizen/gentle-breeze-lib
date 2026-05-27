@@ -233,7 +233,9 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             {/* Horário Fixo */}
             <div className="relative group">
               <div className="flex items-center gap-2 bg-zinc-900/50 border border-zinc-800 rounded-lg px-3 py-1.5 focus-within:border-zinc-500 transition-colors">
+                <Clock size={14} className="text-zinc-500" />
                 <input
+
                   type="time"
                   value={lembrete}
                   onChange={(e) => handleLembrete(e.target.value)}
