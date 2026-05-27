@@ -173,9 +173,20 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 <Textarea
                   autoFocus
                   value={descricao}
-                  onChange={(e) => setDescricao(e.target.value)}
+                  onChange={(e) => {
+                    setDescricao(e.target.value);
+                    const el = e.target as HTMLTextAreaElement;
+                    el.style.height = 'auto';
+                    el.style.height = `${el.scrollHeight}px`;
+                  }}
+                  ref={(el) => {
+                    if (el) {
+                      el.style.height = 'auto';
+                      el.style.height = `${el.scrollHeight}px`;
+                    }
+                  }}
                   placeholder="Descrição da tarefa..."
-                  className="border border-zinc-800 bg-zinc-900/50 rounded-xl text-base text-zinc-300 p-4 min-h-[150px] shadow-none focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 resize-none leading-relaxed placeholder:text-zinc-700 break-all whitespace-pre-wrap overflow-hidden w-full"
+                  className="border border-zinc-800 bg-zinc-900/50 rounded-xl text-base text-zinc-300 p-4 min-h-[150px] shadow-none focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 resize-none leading-relaxed placeholder:text-zinc-700 break-words whitespace-pre-wrap w-full"
                 />
               </div>
             ) : (

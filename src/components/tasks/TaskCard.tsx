@@ -164,6 +164,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             </div>
           )}
 
+          {isOverdue && (
+            <span className="bg-red-900/80 text-red-200 text-[9px] px-2 py-0.5 rounded font-black border border-red-600 animate-pulse uppercase">
+              ATRASADA
+            </span>
+          )}
+
           {/* 4. Pipeline Restaurada (Alinhada à direita com ml-auto) */}
           <div className="ml-auto flex items-center gap-1 text-[10px] font-bold text-zinc-700">
             {[1, 2, 3, 4].map((stage, idx) => (
@@ -196,20 +202,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             onKeyDown={(e) => { if (e.key === 'Enter') onClick(task); }}
             className="flex flex-col flex-grow items-start justify-start w-full min-w-0 text-left cursor-pointer"
           >
-            <h3 className="font-black text-base md:text-xl uppercase tracking-tight leading-tight flex items-center flex-wrap gap-2 text-white break-all">
-              {task.titulo}
+            <h3 className="font-black text-base md:text-xl uppercase tracking-tight leading-tight flex items-center flex-wrap gap-2 text-white break-words">
+              <span className="break-words whitespace-pre-wrap">{task.titulo}</span>
               {(task.recorrencia_semanal || (task.repeticao && task.repeticao !== 'none')) && (
                 <RefreshCw className="w-4 h-4 text-[#00ff41] animate-none" />
               )}
-              {isOverdue && (
-                <span className="bg-red-900/80 text-red-200 text-[9px] px-2 py-0.5 rounded font-black border border-red-600 animate-pulse uppercase">
-                  ATRASADA
-                </span>
-              )}
             </h3>
-            
+
             {task.descricao && (
-              <p className="w-full text-left break-all text-zinc-400 text-xs font-medium uppercase opacity-80 leading-relaxed mt-1 line-clamp-2 overflow-hidden text-ellipsis">
+              <p className="w-full text-left break-words whitespace-pre-wrap text-zinc-400 text-xs font-medium uppercase opacity-80 leading-relaxed mt-1 line-clamp-3 overflow-hidden text-ellipsis">
                 {task.descricao}
               </p>
             )}
