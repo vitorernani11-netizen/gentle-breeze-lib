@@ -66,6 +66,10 @@ export const parseNLP = (input: string): NLPResult => {
   if (finalDate && finalTime) {
     const [h, m] = finalTime.split(':');
     finalDate.setHours(parseInt(h), parseInt(m), 0, 0);
+    // Todoist: se só foi digitado horário (sem data textual) e ele já passou, joga para amanhã
+    if (!dateToken && finalDate.getTime() < Date.now()) {
+      finalDate = addDays(finalDate, 1);
+    }
   }
 
   // 3. Renderização: Apenas a data final e hora final são enviadas para brilhar verde neon!

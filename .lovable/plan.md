@@ -1,28 +1,29 @@
-## Objetivo
-Fazer o `AddTaskOverlay` se comportar como o Todoist:
-1. Iniciar **sem data** e sem hora (chip "Agendar" cinza, não "27 MAI" verde).
-2. Quando o usuário clica no chip verde dentro do título (ex: "hoje"), a palavra vira texto puro **e** o chip de data lá embaixo é desativado.
-3. Ao enviar, o título salvo deve ser exatamente o que está visível — se o usuário anulou o chip, "teste hoje" é salvo como "teste hoje" (não "teste").
+## Mudanças no `AddTaskOverlay` e `SmartInput`
 
-## Mudanças
+### 1. Anulação do chip não persiste ao apertar espaço (`SmartInput.tsx`)
+Hoje, ao apertar espaço, `setShowRaw(false)` reativa o destaque verde e o `useEffect` re-emite a data. Solução:
+- Manter um estado `cancelledTokens: Set<string>` (em lowercase) com as palavras que o usuário clicou para anular.
+- No `useEffect`, se o token atual de data/hora estiver em `cancelledTokens`, emitir `onParsed(null, null)` e não destacar o token no `renderText()`.
+- Quando o usuário digita um token NOVO/diferente (ex: troca "hoje" por "amanhã"), aquele token novo não está no set, então volta a destacar normalmente.
+- Remover o toggle `showRaw` baseado em espaço — ele será derivado de "o token atual está cancelado?".
 
-### 1. `src/components/tasks/AddTaskOverlay.tsx`
-- **Chip de data**: já está usando `vencimento || startOfToday()` para exibir e enviar. Mudar para:
-  - Label do botão: se `vencimento` for `null`, mostrar `"Agendar"` (cinza), só ficar verde quando o usuário digitar uma data ou escolher uma.
-  - No `handleSubmit`, se `vencimento` for `null`, enviar `vencimento: null` (ou string vazia) em vez de hoje. Verificar a assinatura de `onAddTask` e como `useTaskActions` trata `vencimento` vazio — provavelmente já aceita "sem data" como entrada no inbox.
-- **`onParsed` do SmartInput**: quando o usuário anula o chip (`date === null`), hoje o código força `setVencimento(startOfToday())`. Trocar para `setVencimento(null)` e `setLembrete(null)`. Assim o chip de data lá embaixo também volta ao estado cinza, espelhando o título.
-- **`handleSubmit` — preservar título literal quando o chip foi anulado**: hoje sempre chama `parseNLP(titulo)` e usa `result.text` se houver data detectada. Isso ignora se o usuário clicou para anular. Solução: usar como condição `vencimento !== null` (estado real do chip) em vez de re-parsear. Se `vencimento` é null → salvar `titulo` cru. Se tem data → salvar `result.text` (título sem o token).
+### 2. Quebra de linha de textos longos (`SmartInput.tsx` + `AddTaskOverlay.tsx`)
+Trocar o `<input type="text">` por um `<textarea>` com auto-resize (igual Todoist), e a overlay de highlight passa a usar `white-space: pre-wrap` + `word-break: break-word` em vez de `whitespace-pre`. Isso elimina o "bug" da sobreposição em uma linha só e permite quebra natural.
+- Enter continua fazendo submit (interceptar `Enter` sem Shift).
+- Manter sincronia de altura entre o textarea real e a div de highlight.
 
-### 2. `src/components/tasks/SmartInput.tsx`
-- Já emite `onParsed(null, null)` quando `showRaw` é true. Confirmar que isso continua funcionando após a mudança acima.
+### 3. Remover CAPSLOCK forçado (`AddTaskOverlay.tsx`)
+Remover `uppercase` da className do `SmartInput` (linha ~108). O texto fica como o usuário digitar.
 
-### 3. Verificar `useTaskActions` / lista de tarefas
-- Confirmar rapidamente que salvar uma task com `vencimento` nulo/vazio não quebra a Inbox. Se quebrar, fallback para `startOfToday()` apenas no insert (mas exibir "Sem data" na UI do overlay).
+### 4. Remover ícone Alvo (anexo 4)
+Remover o `<Button>` com `<Target size={20} />` no final da barra de ações.
 
-## Detalhes técnicos
-- Tipo do estado `vencimento` já é `Date | null` ✔.
-- Label do botão de data: `{vencimento ? format(vencimento, "dd MMM", { locale: ptBR }) : "Agendar"}` ✔ (já está assim, só ajustar o `cn` para só pintar verde quando `vencimento` existir — já está assim também). O único ponto faltante é parar de forçar `startOfToday()` no onParsed e no submit.
-- Nenhuma mudança no `nlpParser` necessária.
+### 5. Placeholder e título (anexo 5)
+- Trocar "NOVA CAPTURA" por "Nova Tarefa" no header.
+- Trocar placeholder `"Nova tarefa... (ex: reunião amanhã as 14h)"` por algo curto como `"Nome da tarefa"` (ou simplesmente vazio).
+
+### 6. Hora já passada vira amanhã (`nlpParser.ts`)
+Após definir `finalDate` + `finalTime`, se nenhuma data textual foi digitada (`dateToken` vazio) e o `finalDate` resultante for anterior a `new Date()`, adicionar 1 dia (`addDays(finalDate, 1)`). Assim "15h" às 15:17 vira amanhã 15:00. O comportamento de clicar para anular já passa a funcionar via a correção #1.
 
 ## Fora de escopo
-- Mudar visual dos chips, mexer em prioridade/lembretes, ou alterar a renderização do card final na lista.
+- Visual dos chips inferiores, lógica de prioridade/lembretes, persistência no banco.
