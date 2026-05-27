@@ -231,7 +231,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
         titulo: taskData.titulo,
         descricao: taskData.descricao || '',
         prioridade: taskData.prioridade || 'P4',
-        data_execucao: taskData.data_execucao,
+        data_execucao: taskData.data_execucao || null,
         repeticao: taskData.repeticao || 'none',
         recorrencia_semanal: taskData.recorrencia_semanal || null,
         ultimo_processamento: null,
