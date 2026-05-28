@@ -197,16 +197,6 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                   placeholder="Descrição da tarefa..."
                   className="w-full border border-zinc-800 bg-zinc-900/50 rounded-xl text-sm text-zinc-300 p-4 min-h-[120px] focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 resize-none leading-relaxed placeholder:text-zinc-700 [overflow-wrap:anywhere] break-all whitespace-pre-wrap block"
                 />
-                <div className="flex gap-2 justify-end">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setIsEditingDesc(false)}
-                    className="text-zinc-400 hover:text-white text-xs font-bold uppercase"
-                  >
-                    Concluir Edição
-                  </Button>
-                </div>
               </div>
             ) : (
               <div
