@@ -158,19 +158,25 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               value={titulo}
               onChange={(e) => {
                 setTitulo(e.target.value);
-                // Truque matemático para auto-resize baseado na digitação
-                e.target.style.height = 'auto';
-                e.target.style.height = e.target.scrollHeight + 'px';
+                const el = e.target;
+                el.style.height = 'auto';
+                el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+              }}
+              ref={(el) => {
+                if (el) {
+                  el.style.height = 'auto';
+                  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+                }
               }}
               placeholder="Título da tarefa"
               rows={1}
-              className="w-full bg-transparent border-none text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 focus:outline-none focus:ring-0 placeholder:text-zinc-800 break-words resize-none"
+              className="w-full bg-transparent border-none text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 focus:outline-none focus:ring-0 placeholder:text-zinc-800 break-words resize-none block"
               style={{
                 minHeight: '40px',
-                maxHeight: '110px', // Exatamente 3 linhas (36px de line-height cada)
+                maxHeight: '110px',
+                height: '40px',
                 lineHeight: '36px',
                 overflowY: 'auto',
-                fieldSizing: 'content' // Recurso nativo do CSS moderno para auto-resize
               }}
             />
           </div>
