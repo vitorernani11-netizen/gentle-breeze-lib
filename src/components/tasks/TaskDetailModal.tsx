@@ -192,16 +192,17 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                     setDescricao(e.target.value);
                     const el = e.target as HTMLTextAreaElement;
                     el.style.height = 'auto';
-                    el.style.height = `${el.scrollHeight}px`;
+                    el.style.height = Math.min(el.scrollHeight, 180) + 'px';
                   }}
                   ref={(el) => {
                     if (el) {
                       el.style.height = 'auto';
-                      el.style.height = `${el.scrollHeight}px`;
+                      el.style.height = Math.min(el.scrollHeight, 180) + 'px';
                     }
                   }}
                   placeholder="Descrição da tarefa..."
-                  className="w-full border border-zinc-800 bg-zinc-900/50 rounded-xl text-sm text-zinc-300 p-4 min-h-[120px] focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 resize-none leading-relaxed placeholder:text-zinc-700 [overflow-wrap:anywhere] break-all whitespace-pre-wrap block"
+                  className="w-full border border-zinc-800 bg-zinc-900/50 rounded-xl text-sm text-zinc-300 p-4 focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 resize-none leading-relaxed placeholder:text-zinc-700 [overflow-wrap:anywhere] break-all whitespace-pre-wrap block"
+                  style={{ minHeight: '120px', maxHeight: '180px', overflowY: 'auto' }}
                 />
               </div>
             ) : (
