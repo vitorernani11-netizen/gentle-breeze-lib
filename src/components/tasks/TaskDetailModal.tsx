@@ -152,24 +152,25 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
         {/* Body: Single Column Todoist-Style Linear Flow */}
         <div className="flex flex-col overflow-y-auto flex-grow min-h-0 p-6 sm:p-8 space-y-6 w-full">
 
-          {/* 1. Título */}
-          <div className="w-full block">
-            <Textarea
+          {/* 1. Bloco Isolado do Título (Limite de 3 Linhas) */}
+          <div className="w-full block relative">
+            <textarea
               value={titulo}
               onChange={(e) => {
                 setTitulo(e.target.value);
-                const el = e.target as HTMLTextAreaElement;
-                el.style.height = 'auto';
-                el.style.height = `${el.scrollHeight}px`;
+                // Truque matemático para auto-resize baseado na digitação
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
               }}
               placeholder="Título da tarefa"
               rows={1}
-              className="w-full border-0 bg-transparent text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 min-h-0 h-auto shadow-none focus-visible:ring-0 placeholder:text-zinc-900 [overflow-wrap:anywhere] break-all whitespace-pre-wrap resize-none overflow-hidden leading-tight block"
-              ref={(el) => {
-                if (el) {
-                  el.style.height = 'auto';
-                  el.style.height = `${el.scrollHeight}px`;
-                }
+              className="w-full bg-transparent border-none text-2xl md:text-3xl font-black uppercase tracking-tighter text-white p-0 focus:outline-none focus:ring-0 placeholder:text-zinc-800 break-words resize-none"
+              style={{
+                minHeight: '40px',
+                maxHeight: '110px', // Exatamente 3 linhas (36px de line-height cada)
+                lineHeight: '36px',
+                overflowY: 'auto',
+                fieldSizing: 'content' // Recurso nativo do CSS moderno para auto-resize
               }}
             />
           </div>
