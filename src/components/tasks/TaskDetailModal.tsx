@@ -181,35 +181,22 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             />
           </div>
 
-          {/* 2. Descrição Colapsável */}
-          <div className="w-full block min-h-[40px]">
+          {/* 2. Descrição fixa com rolagem interna */}
+          <div className="w-full block">
             {isEditingDesc ? (
-              <div className="space-y-3 block">
+              <div className="h-[180px] w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 block">
                 <Textarea
                   autoFocus
                   value={descricao}
-                  onChange={(e) => {
-                    setDescricao(e.target.value);
-                    const el = e.target as HTMLTextAreaElement;
-                    el.style.height = 'auto';
-                    el.style.height = Math.min(el.scrollHeight, 180) + 'px';
-                  }}
-                  ref={(el) => {
-                    if (el) {
-                      el.style.height = 'auto';
-                      el.style.height = Math.min(el.scrollHeight, 180) + 'px';
-                    }
-                  }}
+                  onChange={(e) => setDescricao(e.target.value)}
                   placeholder="Descrição da tarefa..."
-                  className="w-full border border-zinc-800 bg-zinc-900/50 rounded-xl text-sm text-zinc-300 p-4 focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 resize-none leading-relaxed placeholder:text-zinc-700 [overflow-wrap:anywhere] break-all whitespace-pre-wrap block"
-                  style={{ minHeight: '120px', maxHeight: '180px', overflowY: 'auto' }}
+                  className="h-full min-h-0 w-full border-0 bg-transparent text-sm text-zinc-300 p-4 focus-visible:ring-0 resize-none leading-relaxed placeholder:text-zinc-700 [overflow-wrap:anywhere] break-all whitespace-pre-wrap block overflow-y-auto"
                 />
               </div>
             ) : (
               <div
                 onClick={() => setIsEditingDesc(true)}
-                className="cursor-pointer group rounded-xl hover:bg-zinc-900/20 p-2 -ml-2 transition-all block"
-                style={{ maxHeight: '180px', overflowY: 'auto' }}
+                className="h-[180px] w-full cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 transition-all hover:border-zinc-700 block overflow-y-auto"
               >
                 {descricao ? (
                   <p className="text-zinc-400 text-sm leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere] break-all">
@@ -223,7 +210,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           </div>
 
           {/* 3. Metadados (Data, Hora, Prioridade) - Linha única nativa */}
-          <div className="flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/60 w-full">
+          <div className="relative z-10 flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/60 w-full bg-black">
             {/* Data */}
             <div className="flex items-center gap-2 bg-zinc-900/40 border border-zinc-800/80 rounded-xl px-3 py-2 text-sm font-bold text-white shrink-0">
               <Calendar size={14} className="text-zinc-500" />
