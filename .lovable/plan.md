@@ -1,7 +1,14 @@
-Plano para corrigir a aba **ENTRADA / DETALHES**:
+Vou corrigir especificamente o modal **ENTRADA / DETALHES** para impedir que Data, Hora e Prioridade fiquem por cima do texto da descrição.
 
-1. Ajustar o bloco da **descrição** para virar um quadrado/caixa de altura fixa acima dos cards de data, hora e prioridade.
-2. Remover o auto-resize da descrição, porque ele ainda está deixando o texto crescer e invadir a linha de data/hora.
-3. Aplicar rolagem interna dentro da descrição (`overflow-y-auto`) para textos grandes, mantendo o layout do modal intacto.
-4. Garantir que o bloco de metadados fique sempre abaixo da descrição no fluxo normal, sem `absolute`, `fixed` ou margem negativa.
-5. Manter o título com o limite atual de 3 linhas, sem alterar o restante do modal.
+Plano de correção:
+
+1. Transformar a área de descrição em um bloco fixo de altura controlada, como na segunda imagem.
+2. Remover o auto-redimensionamento da descrição, porque ele ainda está empurrando/atravessando o layout visual.
+3. Colocar Data, Hora e Prioridade dentro do fluxo normal abaixo da descrição, sem sobreposição visual.
+4. Garantir que a descrição tenha rolagem interna própria quando o texto for grande.
+5. Ajustar o layout mobile para que o bloco fique acima de **SUB-TAREFAS** e não invada os cards.
+
+Detalhe técnico:
+- A mudança será em `src/components/tasks/TaskDetailModal.tsx`.
+- A descrição deixará de usar altura dinâmica e passará a usar um container fixo com `overflow-y-auto`.
+- Os metadados ficarão fora da área rolável interna da descrição, separados por espaçamento real no layout.
