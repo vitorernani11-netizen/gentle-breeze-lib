@@ -182,9 +182,9 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           </div>
 
           {/* 2. Descrição fixa com rolagem interna */}
-          <div className="w-full block">
+          <div className="w-full h-[180px] shrink-0 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 isolate">
             {isEditingDesc ? (
-              <div className="h-[180px] w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 block">
+              <div className="h-full w-full overflow-hidden block">
                 <Textarea
                   autoFocus
                   value={descricao}
@@ -196,7 +196,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             ) : (
               <div
                 onClick={() => setIsEditingDesc(true)}
-                className="h-[180px] w-full cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 transition-all hover:border-zinc-700 block overflow-y-auto"
+                className="h-full w-full cursor-pointer p-4 transition-all block overflow-y-auto overscroll-contain"
               >
                 {descricao ? (
                   <p className="text-zinc-400 text-sm leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere] break-all">
@@ -210,7 +210,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           </div>
 
           {/* 3. Metadados (Data, Hora, Prioridade) - Linha única nativa */}
-          <div className="relative z-10 flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/60 w-full bg-black">
+          <div className="relative z-10 flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/60 w-full bg-black shrink-0 clear-both">
             {/* Data */}
             <div className="flex items-center gap-2 bg-zinc-900/40 border border-zinc-800/80 rounded-xl px-3 py-2 text-sm font-bold text-white shrink-0">
               <Calendar size={14} className="text-zinc-500" />
