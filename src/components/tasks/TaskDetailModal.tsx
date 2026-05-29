@@ -209,6 +209,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
               <div
                 onClick={() => setIsEditingDesc(true)}
                 className="cursor-pointer group rounded-xl hover:bg-zinc-900/20 p-2 -ml-2 transition-all block"
+                style={{ maxHeight: '180px', overflowY: 'auto' }}
               >
                 {descricao ? (
                   <p className="text-zinc-400 text-sm leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere] break-all">
