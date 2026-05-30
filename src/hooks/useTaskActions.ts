@@ -1,9 +1,10 @@
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { toast } from 'sonner';
 import { getWeekdayString, getNextWeekdayDate, getTodayStr } from '@/utils/dateHelpers';
+import { computeRecurrenceDate, Recurrence } from '@/utils/nlpParser';
 import { format } from 'date-fns';
 
-const TASKS_KEY = 'hardware_humano_data'; // Unificando conforme instrução de persistência local
+const TASKS_KEY = 'hardware_humano_data';
 
 export const useTaskActions = (onSuccess?: () => void) => {
   const completeTask = (task: any) => {
