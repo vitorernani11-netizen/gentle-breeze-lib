@@ -210,6 +210,16 @@ function Routines() {
               Padrões
             </Button>
           )}
+          {routines.length > 0 && (
+            <Button
+              onClick={() => setResetOpen(true)}
+              variant="outline"
+              aria-label="Resetar check-ins de hoje"
+              className="rounded-xl border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 h-10 w-10 p-0 transition-none"
+            >
+              <RefreshCw size={16} />
+            </Button>
+          )}
           <Button
             onClick={() => setCreateOpen(true)}
             className="rounded-xl bg-green-500 hover:bg-green-400 text-black text-[10px] font-black uppercase h-10 px-4 gap-1.5 transition-none"
