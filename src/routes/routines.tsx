@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { RotateCcw, CheckCircle2, Plus, Trash2, X } from 'lucide-react';
+import { RotateCcw, CheckCircle2, Plus, Trash2, X, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 
@@ -44,6 +44,17 @@ function Routines() {
 
   // Confirmação de exclusão
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [resetOpen, setResetOpen] = useState(false);
+
+  const resetDaily = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const history = loadFromLocal(COMPLETIONS_KEY) || [];
+    const cleaned = history.filter((c: any) => c.data !== today);
+    saveToLocal(COMPLETIONS_KEY, cleaned);
+    setCompletions({});
+    setResetOpen(false);
+    toast.success('Check-ins de hoje resetados');
+  };
 
   useEffect(() => {
     fetchData();
@@ -197,6 +208,16 @@ function Routines() {
               className="rounded-xl border-zinc-800 text-[10px] font-black uppercase h-10 transition-none"
             >
               Padrões
+            </Button>
+          )}
+          {routines.length > 0 && (
+            <Button
+              onClick={() => setResetOpen(true)}
+              variant="outline"
+              aria-label="Resetar check-ins de hoje"
+              className="rounded-xl border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 h-10 w-10 p-0 transition-none"
+            >
+              <RefreshCw size={16} />
             </Button>
           )}
           <Button
@@ -399,6 +420,31 @@ function Routines() {
               className="bg-red-500 hover:bg-red-400 text-white text-xs font-black uppercase rounded-xl"
             >
               Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmação de reset diário */}
+      <AlertDialog open={resetOpen} onOpenChange={setResetOpen}>
+        <AlertDialogContent className="bg-zinc-950 border-zinc-900 text-white rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-black uppercase tracking-tight">
+              Resetar check-ins de hoje?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400 text-sm">
+              Todos os itens marcados hoje serão desmarcados. As rotinas continuam intactas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800 text-white text-xs font-black uppercase rounded-xl">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={resetDaily}
+              className="bg-green-500 hover:bg-green-400 text-black text-xs font-black uppercase rounded-xl"
+            >
+              Resetar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
