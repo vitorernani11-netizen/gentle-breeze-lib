@@ -424,6 +424,31 @@ function Routines() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Confirmação de reset diário */}
+      <AlertDialog open={resetOpen} onOpenChange={setResetOpen}>
+        <AlertDialogContent className="bg-zinc-950 border-zinc-900 text-white rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-black uppercase tracking-tight">
+              Resetar check-ins de hoje?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400 text-sm">
+              Todos os itens marcados hoje serão desmarcados. As rotinas continuam intactas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-zinc-900 border-zinc-800 hover:bg-zinc-800 text-white text-xs font-black uppercase rounded-xl">
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={resetDaily}
+              className="bg-green-500 hover:bg-green-400 text-black text-xs font-black uppercase rounded-xl"
+            >
+              Resetar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
