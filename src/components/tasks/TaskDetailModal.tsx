@@ -262,8 +262,8 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             {subTasks.length > 0 && (
               <div className="space-y-1.5 ml-2 border-l border-zinc-900 pl-4 mb-3">
                 {subTasks.map((sub) => (
-                  <div key={sub.id} className="flex items-center justify-between group py-1 border-b border-zinc-950">
-                    <div className="flex items-center gap-3 min-w-0 flex-grow">
+                  <div key={sub.id} className="flex items-start justify-between gap-2 group py-2 border-b border-zinc-950">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
                       <button
                         onClick={() => {
                           const updated = subTasks.map(s => s.id === sub.id ? { ...s, status_concluido: !s.status_concluido } : s);
@@ -272,7 +272,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                           forceGlobalSync();
                         }}
                         className={cn(
-                          "w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0",
+                          "w-4 h-4 mt-0.5 rounded-full border flex items-center justify-center transition-all shrink-0",
                           sub.status_concluido 
                             ? "bg-[#00ff41] border-[#00ff41] text-black" 
                             : "border-zinc-800 hover:border-[#00ff41]"
@@ -281,7 +281,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                         {sub.status_concluido && <span className="text-[10px] font-bold">✓</span>}
                       </button>
                       <span className={cn(
-                        "text-sm font-medium truncate pr-4 uppercase tracking-tight",
+                        "min-w-0 flex-1 text-sm font-medium pr-2 uppercase tracking-tight leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]",
                         sub.status_concluido ? "line-through text-zinc-600 italic" : "text-zinc-300"
                       )}>
                         {sub.titulo}
