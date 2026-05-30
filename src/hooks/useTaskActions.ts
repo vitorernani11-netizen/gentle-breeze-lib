@@ -25,7 +25,13 @@ export const useTaskActions = (onSuccess?: () => void) => {
               type: t.recorrencia_tipo,
               weekdays: t.recorrencia_dias || undefined,
             };
-            const nextDate = computeRecurrenceDate(rec, true);
+            // Baseline = data atual da tarefa (parse local sem timezone shift)
+            let baseline = new Date();
+            if (t.data_execucao && typeof t.data_execucao === 'string') {
+              const [y, mo, d] = t.data_execucao.split('T')[0].split('-').map(Number);
+              if (y && mo && d) baseline = new Date(y, mo - 1, d);
+            }
+            const nextDate = computeRecurrenceDate(rec, baseline, true);
             const nextStr = format(nextDate, 'yyyy-MM-dd');
             toast.success(`Rotina: próxima execução ${format(nextDate, 'dd/MM')}`);
             return {
