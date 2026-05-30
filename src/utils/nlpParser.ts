@@ -33,10 +33,10 @@ const WEEKDAY_TO_NUM: Record<string, number> = {
   'quinta': 4, 'sexta': 5, 'sábado': 6,
 };
 
-const getNextDateForWeekdays = (weekdays: string[], fromTomorrow = false): Date => {
+const getNextDateForWeekdays = (weekdays: string[], baseDate: Date, advance = false): Date => {
   const nums = weekdays.map(w => WEEKDAY_TO_NUM[w]).filter(n => n !== undefined);
-  if (nums.length === 0) return new Date();
-  const start = fromTomorrow ? addDays(new Date(), 1) : new Date();
+  if (nums.length === 0) return baseDate;
+  const start = advance ? addDays(baseDate, 1) : baseDate;
   for (let i = 0; i < 14; i++) {
     const candidate = addDays(start, i);
     if (nums.includes(candidate.getDay())) return candidate;
@@ -59,7 +59,6 @@ const parseRecurrence = (input: string): { recurrence: Recurrence | null, token:
     if (m) return { recurrence: rec, token: m[0] };
   }
 
-  // "toda quarta", "todas as quartas", "toda segunda e sexta", "toda quarta, sexta e sábado"
   const dayWord = '(?:segunda|terça|terca|quarta|quinta|sexta|sábado|sabado|domingo)s?(?:-feira)?';
   const multiRe = new RegExp(
     `\\btodas?\\s+(?:as\\s+|os\\s+)?(${dayWord}(?:\\s*(?:,|\\se\\s)\\s*${dayWord})*)\\b`,
@@ -73,7 +72,6 @@ const parseRecurrence = (input: string): { recurrence: Recurrence | null, token:
       .map(p => WEEKDAY_NORMALIZE[p])
       .filter(Boolean);
     if (weekdays.length > 0) {
-      // dedupe preservando ordem
       const seen = new Set<string>();
       const uniq = weekdays.filter(w => (seen.has(w) ? false : (seen.add(w), true)));
       return { recurrence: { type: 'weekdays', weekdays: uniq }, token: mm[0] };
@@ -83,19 +81,23 @@ const parseRecurrence = (input: string): { recurrence: Recurrence | null, token:
   return { recurrence: null, token: '' };
 };
 
-export const computeRecurrenceDate = (rec: Recurrence, fromTomorrow = false): Date => {
+export const computeRecurrenceDate = (
+  rec: Recurrence,
+  baseDate: Date = new Date(),
+  advance = false,
+): Date => {
   switch (rec.type) {
     case 'daily':
-      return fromTomorrow ? addDays(new Date(), 1) : new Date();
+      return advance ? addDays(baseDate, 1) : new Date(baseDate);
     case 'weekly':
-      return fromTomorrow ? addDays(new Date(), 7) : new Date();
+      return advance ? addDays(baseDate, 7) : new Date(baseDate);
     case 'monthly': {
-      const d = new Date();
-      if (fromTomorrow) d.setMonth(d.getMonth() + 1);
+      const d = new Date(baseDate);
+      if (advance) d.setMonth(d.getMonth() + 1);
       return d;
     }
     case 'weekdays':
-      return getNextDateForWeekdays(rec.weekdays || [], fromTomorrow);
+      return getNextDateForWeekdays(rec.weekdays || [], baseDate, advance);
   }
 };
 
@@ -144,7 +146,7 @@ export const parseNLP = (input: string): NLPResult => {
     }
   } else if (recurrence) {
     // Sem data explícita, mas com recorrência → primeira ocorrência
-    finalDate = computeRecurrenceDate(recurrence, false);
+    finalDate = computeRecurrenceDate(recurrence, new Date(), false);
   }
 
   // 2. Horários
