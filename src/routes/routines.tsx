@@ -230,10 +230,10 @@ function Routines() {
 
               <div className="bg-zinc-900/30 px-6 py-4 space-y-4">
                 {routine.itens?.map((item: any) => (
-                  <div key={item.id} className="flex items-center gap-4 group">
+                  <div key={item.id} className="flex items-start gap-4 group">
                     <div
                       onClick={() => toggleItem(routine.id, item.id)}
-                      className={`h-6 w-6 rounded-lg border-2 flex items-center justify-center cursor-pointer transition-all shrink-0 ${
+                      className={`h-6 w-6 rounded-lg border-2 flex items-center justify-center cursor-pointer transition-all shrink-0 mt-0.5 ${
                         completions[routine.id]?.includes(item.id)
                           ? 'bg-green-500 border-green-500'
                           : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
@@ -244,7 +244,7 @@ function Routines() {
                       )}
                     </div>
                     <span
-                      className={`text-sm font-bold transition-all break-words ${
+                      className={`text-sm font-bold transition-all min-w-0 flex-1 whitespace-pre-wrap break-words [overflow-wrap:anywhere] leading-relaxed ${
                         completions[routine.id]?.includes(item.id)
                           ? 'text-zinc-600 line-through'
                           : 'text-zinc-300'
