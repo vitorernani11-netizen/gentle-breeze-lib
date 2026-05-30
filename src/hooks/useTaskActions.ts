@@ -253,6 +253,8 @@ export const useTaskActions = (onSuccess?: () => void) => {
         data_execucao: taskData.data_execucao || null,
         repeticao: taskData.repeticao || 'none',
         recorrencia_semanal: taskData.recorrencia_semanal || null,
+        recorrencia_tipo: taskData.recorrencia_tipo || null,
+        recorrencia_dias: taskData.recorrencia_dias || null,
         ultimo_processamento: null,
         lembrete: taskData.lembrete || null,
         lembretes: taskData.lembretes || [],
