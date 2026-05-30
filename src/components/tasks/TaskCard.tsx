@@ -104,6 +104,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onUpdateStage,
   onUpdatePriority
 }) => {
+  const { updateTask } = useTaskActions();
   const isOverdue = !task.status_concluido && isTaskOverdue(
     task.data_execucao || task.data_vencimento, 
     task.hora_vencimento || task.lembrete
