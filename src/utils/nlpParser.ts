@@ -146,7 +146,7 @@ export const parseNLP = (input: string): NLPResult => {
     }
   } else if (recurrence) {
     // Sem data explícita, mas com recorrência → primeira ocorrência
-    finalDate = computeRecurrenceDate(recurrence, false);
+    finalDate = computeRecurrenceDate(recurrence, new Date(), false);
   }
 
   // 2. Horários
