@@ -21,7 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { RotateCcw, CheckCircle2, Plus, Trash2, X } from 'lucide-react';
+import { RotateCcw, CheckCircle2, Plus, Trash2, X, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 
