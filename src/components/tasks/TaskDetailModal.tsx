@@ -306,14 +306,16 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
             {/* Formulário Inline para Criar Sub-tarefa */}
             {isAddingSub ? (
               <div className="space-y-3 ml-2 border-l border-zinc-800 pl-4 animate-in fade-in slide-in-from-top-1">
-                <Input
+                <Textarea
                   autoFocus
+                  rows={3}
                   value={newSubTitulo}
                   onChange={(e) => setNewSubTitulo(e.target.value)}
                   placeholder="O que precisa ser feito?"
-                  className="bg-zinc-900/40 border-zinc-800 rounded-xl text-sm text-white h-10 focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 placeholder:text-zinc-700 uppercase font-bold"
+                  className="bg-zinc-900/40 border-zinc-800 rounded-xl text-sm text-white min-h-[80px] max-h-[200px] overflow-y-auto focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 placeholder:text-zinc-700 uppercase font-bold whitespace-pre-wrap break-words [overflow-wrap:anywhere] resize-none"
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && newSubTitulo.trim()) {
+                    if (e.key === 'Enter' && !e.shiftKey && newSubTitulo.trim()) {
+                      e.preventDefault();
                       const newSub = { id: Math.random().toString(36).substring(2, 11), titulo: newSubTitulo.trim(), status_concluido: false };
                       const updated = [...subTasks, newSub];
                       setSubTasks(updated);
