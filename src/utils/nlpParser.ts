@@ -1,5 +1,12 @@
 import { addDays, nextDay } from 'date-fns';
 
+export type RecurrenceType = 'daily' | 'weekly' | 'monthly' | 'weekdays';
+
+export interface Recurrence {
+  type: RecurrenceType;
+  weekdays?: string[]; // ex: ['quarta','sábado']
+}
+
 export interface NLPResult {
   date: Date | null;
   text: string;
@@ -7,8 +14,90 @@ export interface NLPResult {
   tokens: string[];
   dateToken: string;
   timeToken: string;
+  recurrence: Recurrence | null;
+  recurrenceToken: string;
 }
 
+const WEEKDAY_NORMALIZE: Record<string, string> = {
+  'domingo': 'domingo',
+  'segunda': 'segunda',
+  'terça': 'terça', 'terca': 'terça',
+  'quarta': 'quarta',
+  'quinta': 'quinta',
+  'sexta': 'sexta',
+  'sábado': 'sábado', 'sabado': 'sábado',
+};
+
+const WEEKDAY_TO_NUM: Record<string, number> = {
+  'domingo': 0, 'segunda': 1, 'terça': 2, 'quarta': 3,
+  'quinta': 4, 'sexta': 5, 'sábado': 6,
+};
+
+const getNextDateForWeekdays = (weekdays: string[], fromTomorrow = false): Date => {
+  const nums = weekdays.map(w => WEEKDAY_TO_NUM[w]).filter(n => n !== undefined);
+  if (nums.length === 0) return new Date();
+  const start = fromTomorrow ? addDays(new Date(), 1) : new Date();
+  for (let i = 0; i < 14; i++) {
+    const candidate = addDays(start, i);
+    if (nums.includes(candidate.getDay())) return candidate;
+  }
+  return start;
+};
+
+const parseRecurrence = (input: string): { recurrence: Recurrence | null, token: string } => {
+  // Patterns simples (sem dias específicos)
+  const simplePatterns: Array<{ re: RegExp, rec: Recurrence }> = [
+    { re: /\b(todos os dias|todo[s]? dia|diariamente|diário|diaria|diária)\b/i, rec: { type: 'daily' } },
+    { re: /\b(toda[s]? (?:as )?semanas?|semanalmente|semanal)\b/i, rec: { type: 'weekly' } },
+    { re: /\b(todo[s]? (?:os )?m[eê]s(?:es)?|mensalmente|mensal)\b/i, rec: { type: 'monthly' } },
+    { re: /\bdias [úu]teis\b/i, rec: { type: 'weekdays', weekdays: ['segunda','terça','quarta','quinta','sexta'] } },
+    { re: /\b(fim de semana|fins de semana|finais de semana)\b/i, rec: { type: 'weekdays', weekdays: ['sábado','domingo'] } },
+  ];
+
+  for (const { re, rec } of simplePatterns) {
+    const m = input.match(re);
+    if (m) return { recurrence: rec, token: m[0] };
+  }
+
+  // "toda quarta", "todas as quartas", "toda segunda e sexta", "toda quarta, sexta e sábado"
+  const dayWord = '(?:segunda|terça|terca|quarta|quinta|sexta|sábado|sabado|domingo)s?(?:-feira)?';
+  const multiRe = new RegExp(
+    `\\btodas?\\s+(?:as\\s+|os\\s+)?(${dayWord}(?:\\s*(?:,|\\se\\s)\\s*${dayWord})*)\\b`,
+    'i'
+  );
+  const mm = input.match(multiRe);
+  if (mm) {
+    const piece = mm[1].toLowerCase();
+    const parts = piece.split(/\s*,\s*|\s+e\s+/).map(p => p.replace(/-feira/g, '').replace(/s$/, '').trim());
+    const weekdays = parts
+      .map(p => WEEKDAY_NORMALIZE[p])
+      .filter(Boolean);
+    if (weekdays.length > 0) {
+      // dedupe preservando ordem
+      const seen = new Set<string>();
+      const uniq = weekdays.filter(w => (seen.has(w) ? false : (seen.add(w), true)));
+      return { recurrence: { type: 'weekdays', weekdays: uniq }, token: mm[0] };
+    }
+  }
+
+  return { recurrence: null, token: '' };
+};
+
+export const computeRecurrenceDate = (rec: Recurrence, fromTomorrow = false): Date => {
+  switch (rec.type) {
+    case 'daily':
+      return fromTomorrow ? addDays(new Date(), 1) : new Date();
+    case 'weekly':
+      return fromTomorrow ? addDays(new Date(), 7) : new Date();
+    case 'monthly': {
+      const d = new Date();
+      if (fromTomorrow) d.setMonth(d.getMonth() + 1);
+      return d;
+    }
+    case 'weekdays':
+      return getNextDateForWeekdays(rec.weekdays || [], fromTomorrow);
+  }
+};
 
 export const parseNLP = (input: string): NLPResult => {
   let finalDate: Date | null = null;
@@ -16,18 +105,26 @@ export const parseNLP = (input: string): NLPResult => {
   let dateToken = '';
   let timeToken = '';
 
-  // 1. Extrair TODAS as datas na string (vence a última ocorrência)
+  // 0. Extrair recorrência primeiro — para não confundir com data
+  const { recurrence, token: recurrenceToken } = parseRecurrence(input);
+
+  // 1. Datas
   const dateRegex = /\b(hoje|amanhã|domingo|segunda|terça|quarta|quinta|sexta|sábado)(?:-feira)?\b|\b\d{1,2}\/\d{1,2}\b|\bdia \d{1,2} de (?:janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\b/gi;
-  const dateMatches = [...input.matchAll(dateRegex)];
-  
+
+  // Remove o trecho de recorrência do input só para detecção de data — evita capturar "quarta" dentro de "toda quarta"
+  const inputSemRecorrencia = recurrenceToken
+    ? input.replace(recurrenceToken, ' '.repeat(recurrenceToken.length))
+    : input;
+
+  const dateMatches = [...inputSemRecorrencia.matchAll(dateRegex)];
+
   if (dateMatches.length > 0) {
-    // Todoist Rule: A ÚLTIMA data digitada sobrescreve as anteriores
     dateToken = dateMatches[dateMatches.length - 1][0];
     const lowerToken = dateToken.toLowerCase();
     finalDate = new Date();
 
     if (lowerToken.includes('hoje')) {
-      // hoje (mantém o date instanciado)
+      // mantém
     } else if (lowerToken.includes('amanhã')) {
       finalDate = addDays(new Date(), 1);
     } else if (lowerToken.match(/\b(domingo|segunda|terça|quarta|quinta|sexta|sábado)/)) {
@@ -45,14 +142,16 @@ export const parseNLP = (input: string): NLPResult => {
         if (mesIndex > -1) finalDate = new Date(new Date().getFullYear(), mesIndex, parseInt(dateParts[1]));
       }
     }
+  } else if (recurrence) {
+    // Sem data explícita, mas com recorrência → primeira ocorrência
+    finalDate = computeRecurrenceDate(recurrence, false);
   }
 
-  // 2. Extrair TODOS os horários na string (vence a última ocorrência)
+  // 2. Horários
   const timeRegex = /(?:as|às)?\s?(\d{1,2})[:h](\d{2})?/gi;
   const timeMatches = [...input.matchAll(timeRegex)];
-  
+
   if (timeMatches.length > 0) {
-    // Todoist Rule: O ÚLTIMO horário digitado sobrescreve os anteriores
     timeToken = timeMatches[timeMatches.length - 1][0];
     const extractTime = timeToken.match(/(\d{1,2})[:h](\d{2})?/i);
     if (extractTime) {
@@ -63,37 +162,33 @@ export const parseNLP = (input: string): NLPResult => {
   }
 
   if (timeToken && !finalDate) {
-    finalDate = new Date(); // Horário sem data assume "hoje"
+    finalDate = new Date();
   }
 
   if (finalDate && finalTime) {
     const [h, m] = finalTime.split(':');
     finalDate.setHours(parseInt(h), parseInt(m), 0, 0);
-    // Todoist: se só foi digitado horário (sem data textual) e ele já passou, joga para amanhã
-    if (!dateToken && finalDate.getTime() < Date.now()) {
+    if (!dateToken && !recurrence && finalDate.getTime() < Date.now()) {
       finalDate = addDays(finalDate, 1);
     }
   }
 
-  // 3. Renderização: Apenas a data final e hora final são enviadas para brilhar verde neon!
+  // 3. Tokens para highlight
   const tokens: string[] = [];
+  if (recurrenceToken) tokens.push(recurrenceToken);
   if (dateToken) tokens.push(dateToken);
   if (timeToken) tokens.push(timeToken);
 
-  // 4. Limpeza: O título perde APENAS as palavras que venceram. O que perdeu fica como texto puro.
+  // 4. Limpeza do título
   let text = input;
-  if (timeToken) {
-    const lastIndex = text.lastIndexOf(timeToken);
-    if (lastIndex !== -1) {
-      text = text.substring(0, lastIndex) + text.substring(lastIndex + timeToken.length);
-    }
-  }
-  if (dateToken) {
-    const lastIndex = text.lastIndexOf(dateToken);
-    if (lastIndex !== -1) {
-      text = text.substring(0, lastIndex) + text.substring(lastIndex + dateToken.length);
-    }
-  }
+  const stripLast = (t: string) => {
+    if (!t) return;
+    const idx = text.lastIndexOf(t);
+    if (idx !== -1) text = text.substring(0, idx) + text.substring(idx + t.length);
+  };
+  stripLast(timeToken);
+  stripLast(dateToken);
+  stripLast(recurrenceToken);
 
   return {
     date: finalDate,
@@ -104,6 +199,8 @@ export const parseNLP = (input: string): NLPResult => {
     },
     tokens,
     dateToken,
-    timeToken
+    timeToken,
+    recurrence,
+    recurrenceToken,
   };
 };
