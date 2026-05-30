@@ -174,15 +174,6 @@ function Routines() {
           <h1 className="text-4xl font-black tracking-tighter uppercase leading-none">Rotinas</h1>
         </div>
         <div className="flex gap-2">
-          {routines.length === 0 && (
-            <Button
-              onClick={createDefaultRoutines}
-              variant="outline"
-              className="rounded-xl border-zinc-800 text-[10px] font-black uppercase h-10 transition-none"
-            >
-              Padrões
-            </Button>
-          )}
           {routines.length > 0 && (
             <Button
               onClick={() => setResetOpen(true)}
