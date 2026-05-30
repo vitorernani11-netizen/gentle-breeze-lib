@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { format, startOfToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { parseNLP, NLPResult } from '@/utils/nlpParser';
+import { parseNLP, NLPResult, Recurrence } from '@/utils/nlpParser';
 import { CalendarPopover } from './CalendarPopover';
 import { ReminderManager, type Reminder } from './ReminderManager';
 import { SmartInput } from './SmartInput';
@@ -33,6 +33,8 @@ interface AddTaskOverlayProps {
     reminders: any[];
     descricao?: string;
     hora_vencimento?: string | null;
+    recorrencia_tipo?: string | null;
+    recorrencia_dias?: string[] | null;
   }) => void;
 }
 
@@ -41,6 +43,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   const [descricao, setDescricao] = useState('');
   const [vencimento, setVencimento] = useState<Date | null>(null);
   const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
+  const [nlpRecurrence, setNlpRecurrence] = useState<Recurrence | null>(null);
   const [prioridade, setPrioridade] = useState<string>('P4');
   const [lembrete, setLembrete] = useState<string | null>(null);
   const [reminders, setReminders] = useState<any[]>([]);
@@ -55,6 +58,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       setDescricao('');
       setVencimento(null);
       setRecurrence('none');
+      setNlpRecurrence(null);
       setPrioridade('P4');
       setLembrete(null);
       setReminders([]);
@@ -64,26 +68,32 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
   const handleSubmit = () => {
     if (!titulo.trim()) return;
 
-    // Se o chip de data está ativo (vencimento != null), parseamos para limpar o token do título.
-    // Se o usuário anulou (vencimento == null), o título vai cru — como no Todoist.
+    // Sempre limpa tokens NLP do título quando há data OU recorrência detectada
     let finalTitle = titulo;
-    if (vencimento) {
+    if (vencimento || nlpRecurrence) {
       const result = parseNLP(titulo);
       finalTitle = result.text || titulo;
     }
 
+    // Recorrência efetiva: NLP tem prioridade sobre o seletor manual
+    const effectiveRecurrence = nlpRecurrence
+      ? (nlpRecurrence.type === 'weekdays' ? 'weekdays' : nlpRecurrence.type)
+      : recurrence;
+
     onAddTask({
       titulo: finalTitle,
       vencimento: vencimento ? format(vencimento, 'yyyy-MM-dd') : '',
-      recorrencia: recurrence,
+      recorrencia: effectiveRecurrence,
       prioridade,
       lembrete: lembrete,
       lembretes: reminders,
       reminders: reminders,
       descricao,
-      hora_vencimento: lembrete
+      hora_vencimento: lembrete,
+      recorrencia_tipo: nlpRecurrence ? nlpRecurrence.type : null,
+      recorrencia_dias: nlpRecurrence?.weekdays || null,
     });
-    
+
     onClose();
   };
 
@@ -116,9 +126,13 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
             onSubmit={handleSubmit}
             placeholder="Nome da tarefa"
             className="bg-transparent border-none text-xl md:text-3xl font-black text-white placeholder:text-zinc-700 w-full focus:outline-none leading-snug"
-            onParsed={(date, time) => {
+            onParsed={(date, time, rec) => {
               setVencimento(date);
               setLembrete(time);
+              setNlpRecurrence(rec);
+              if (rec) {
+                setRecurrence(rec.type === 'weekdays' ? 'weekly' : rec.type);
+              }
             }}
           />
         </div>

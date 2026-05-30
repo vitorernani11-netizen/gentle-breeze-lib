@@ -1,9 +1,10 @@
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { toast } from 'sonner';
 import { getWeekdayString, getNextWeekdayDate, getTodayStr } from '@/utils/dateHelpers';
+import { computeRecurrenceDate, Recurrence } from '@/utils/nlpParser';
 import { format } from 'date-fns';
 
-const TASKS_KEY = 'hardware_humano_data'; // Unificando conforme instrução de persistência local
+const TASKS_KEY = 'hardware_humano_data';
 
 export const useTaskActions = (onSuccess?: () => void) => {
   const completeTask = (task: any) => {
@@ -18,17 +19,35 @@ export const useTaskActions = (onSuccess?: () => void) => {
       
       const updatedTasks = allTasks.map((t: any) => {
         if (t.id === task.id) {
-          // Lógica de Recorrência (Nova Fase)
+          // 1) Novo modelo: recorrencia_tipo + recorrencia_dias
+          if (t.recorrencia_tipo) {
+            const rec: Recurrence = {
+              type: t.recorrencia_tipo,
+              weekdays: t.recorrencia_dias || undefined,
+            };
+            const nextDate = computeRecurrenceDate(rec, true);
+            const nextStr = format(nextDate, 'yyyy-MM-dd');
+            toast.success(`Rotina: próxima execução ${format(nextDate, 'dd/MM')}`);
+            return {
+              ...t,
+              data_execucao: nextStr,
+              ultimo_processamento: todayStr,
+              status_concluido: false,
+            };
+          }
+
+          // 2) Legado: recorrencia_semanal (string única)
           if (t.recorrencia_semanal) {
             const nextDate = getNextWeekdayDate(t.recorrencia_semanal);
             toast.success(`Rotina agendada para: ${nextDate}`);
-            return { 
-              ...t, 
-              data_execucao: nextDate, 
+            return {
+              ...t,
+              data_execucao: nextDate,
               ultimo_processamento: todayStr,
-              status_concluido: false 
+              status_concluido: false,
             };
           }
+
           
           // Lógica de Repetição Antiga (Mantendo por compatibilidade)
           if (t.repeticao && t.repeticao !== 'none') {
@@ -234,6 +253,8 @@ export const useTaskActions = (onSuccess?: () => void) => {
         data_execucao: taskData.data_execucao || null,
         repeticao: taskData.repeticao || 'none',
         recorrencia_semanal: taskData.recorrencia_semanal || null,
+        recorrencia_tipo: taskData.recorrencia_tipo || null,
+        recorrencia_dias: taskData.recorrencia_dias || null,
         ultimo_processamento: null,
         lembrete: taskData.lembrete || null,
         lembretes: taskData.lembretes || [],

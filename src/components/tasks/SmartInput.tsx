@@ -1,11 +1,11 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { parseNLP } from '@/utils/nlpParser';
+import { parseNLP, Recurrence } from '@/utils/nlpParser';
 import { cn } from '@/lib/utils';
 
 interface SmartInputProps {
   value: string;
   onChange: (val: string) => void;
-  onParsed?: (date: Date | null, time: string | null) => void;
+  onParsed?: (date: Date | null, time: string | null, recurrence: Recurrence | null) => void;
   onSubmit?: () => void;
   placeholder?: string;
   className?: string;
@@ -57,18 +57,15 @@ export const SmartInput = ({
       const timeCancelled = result.timeToken
         ? cancelled.has(result.timeToken.toLowerCase())
         : false;
+      const recCancelled = result.recurrenceToken
+        ? cancelled.has(result.recurrenceToken.toLowerCase())
+        : false;
 
       const emittedDate = dateCancelled ? null : result.date;
       const emittedTime = timeCancelled ? null : result.detectedData?.time || null;
+      const emittedRec = recCancelled ? null : result.recurrence;
 
-      // Se só havia data e ela foi cancelada, também limpa hora derivada
-      if (dateCancelled && !result.timeToken) {
-        onParsed(null, null);
-      } else if (timeCancelled && !result.dateToken) {
-        onParsed(null, null);
-      } else {
-        onParsed(emittedDate, emittedTime);
-      }
+      onParsed(emittedDate, emittedTime, emittedRec);
     }
   }, [value, cancelled]);
 

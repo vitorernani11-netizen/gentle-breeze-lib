@@ -65,9 +65,11 @@ export const GlobalAddTask: React.FC = () => {
     reminders: any[];
     descricao?: string;
     hora_vencimento?: string | null;
+    recorrencia_tipo?: string | null;
+    recorrencia_dias?: string[] | null;
   }) => {
     const today = new Date().toISOString().split('T')[0];
-    const status = 'Entrada'; // Novas tarefas sempre fluem para a Entrada/Classificação conforme instrução de estabilização
+    const status = 'Entrada';
 
     const task = addTask({
       titulo: taskData.titulo,
@@ -79,7 +81,9 @@ export const GlobalAddTask: React.FC = () => {
       lembrete: taskData.lembrete,
       lembretes: taskData.lembretes || [],
       reminders: taskData.reminders || [],
-      hora_vencimento: taskData.hora_vencimento
+      hora_vencimento: taskData.hora_vencimento,
+      recorrencia_tipo: taskData.recorrencia_tipo || null,
+      recorrencia_dias: taskData.recorrencia_dias || null,
     });
 
     if (task) {
