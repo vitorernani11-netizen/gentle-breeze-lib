@@ -307,8 +307,8 @@ function Routines() {
               </label>
               <div className="space-y-2">
                 {newItems.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <Input
+                  <div key={idx} className="flex items-start gap-2">
+                    <Textarea
                       value={item}
                       onChange={(e) => {
                         const arr = [...newItems];
@@ -316,13 +316,14 @@ function Routines() {
                         setNewItems(arr);
                       }}
                       placeholder={`Item ${idx + 1}`}
-                      className="bg-zinc-900/40 border-zinc-800 rounded-xl h-10 text-sm text-white placeholder:text-zinc-700 focus-visible:ring-1 focus-visible:ring-green-500/50"
+                      rows={2}
+                      className="bg-zinc-900/40 border-zinc-800 rounded-xl min-h-[44px] max-h-[160px] overflow-y-auto text-sm text-white placeholder:text-zinc-700 focus-visible:ring-1 focus-visible:ring-green-500/50 whitespace-pre-wrap break-words [overflow-wrap:anywhere] resize-none"
                     />
                     {newItems.length > 1 && (
                       <button
                         type="button"
                         onClick={() => setNewItems(newItems.filter((_, i) => i !== idx))}
-                        className="h-10 w-10 rounded-xl bg-zinc-900 hover:bg-red-500/10 border border-zinc-800 hover:border-red-500/40 flex items-center justify-center text-zinc-500 hover:text-red-400 shrink-0"
+                        className="h-11 w-11 rounded-xl bg-zinc-900 hover:bg-red-500/10 border border-zinc-800 hover:border-red-500/40 flex items-center justify-center text-zinc-500 hover:text-red-400 shrink-0"
                         aria-label="Remover item"
                       >
                         <X size={14} />
