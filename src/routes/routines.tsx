@@ -158,33 +158,6 @@ function Routines() {
     toast.success('Rotina removida');
   };
 
-  const createDefaultRoutines = () => {
-    const defaults = [
-      {
-        id: '1',
-        titulo: 'Rotina Matinal',
-        itens: [
-          { id: '1', label: 'Beber 500ml de água' },
-          { id: '2', label: '10 min de meditação' },
-          { id: '3', label: 'Arrumar a cama' },
-          { id: '4', label: 'Banho gelado' },
-        ],
-      },
-      {
-        id: '2',
-        titulo: 'Antes de Dormir',
-        itens: [
-          { id: '5', label: 'Planejar o dia seguinte' },
-          { id: '6', label: 'Ler 10 páginas' },
-          { id: '7', label: 'Higiene do sono' },
-        ],
-      },
-    ];
-
-    saveToLocal(ROUTINES_KEY, defaults);
-    setRoutines(defaults);
-    toast.success('Rotinas iniciais criadas!');
-  };
 
   if (loading) return null;
 
@@ -201,15 +174,6 @@ function Routines() {
           <h1 className="text-4xl font-black tracking-tighter uppercase leading-none">Rotinas</h1>
         </div>
         <div className="flex gap-2">
-          {routines.length === 0 && (
-            <Button
-              onClick={createDefaultRoutines}
-              variant="outline"
-              className="rounded-xl border-zinc-800 text-[10px] font-black uppercase h-10 transition-none"
-            >
-              Padrões
-            </Button>
-          )}
           {routines.length > 0 && (
             <Button
               onClick={() => setResetOpen(true)}
