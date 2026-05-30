@@ -206,46 +206,46 @@ function Routines() {
               key={routine.id}
               className="p-0 bg-zinc-950 border-zinc-900 rounded-3xl overflow-hidden transition-none"
             >
-              <div className="p-6 pb-4">
-                <div className="flex justify-between items-center mb-4 gap-3">
-                  <h3 className="text-xl font-black uppercase tracking-tight flex-1 min-w-0 break-words">
+              <div className="p-4 pb-3">
+                <div className="flex justify-between items-center mb-3 gap-2">
+                  <h3 className="text-sm font-black uppercase tracking-tight flex-1 min-w-0 break-words [overflow-wrap:anywhere] leading-snug">
                     {routine.titulo}
                   </h3>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div className="h-10 w-10 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800">
-                      <span className="text-xs font-black">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="h-7 px-2 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800">
+                      <span className="text-[10px] font-black">
                         {completed}/{total}
                       </span>
                     </div>
                     <button
                       onClick={() => setDeleteId(routine.id)}
                       aria-label="Remover rotina"
-                      className="h-10 w-10 rounded-full bg-zinc-900 hover:bg-red-500/10 border border-zinc-800 hover:border-red-500/40 flex items-center justify-center text-zinc-500 hover:text-red-400 transition-colors"
+                      className="h-7 w-7 rounded-full bg-zinc-900 hover:bg-red-500/10 border border-zinc-800 hover:border-red-500/40 flex items-center justify-center text-zinc-500 hover:text-red-400 transition-colors"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={12} />
                     </button>
                   </div>
                 </div>
-                <Progress value={progress} className="h-2 bg-zinc-900" />
+                <Progress value={progress} className="h-1.5 bg-zinc-900" />
               </div>
 
-              <div className="bg-zinc-900/30 px-6 py-4 space-y-4">
+              <div className="bg-zinc-900/30 px-4 py-3 space-y-2">
                 {routine.itens?.map((item: any) => (
-                  <div key={item.id} className="flex items-start gap-4 group">
+                  <div key={item.id} className="flex items-start gap-2.5 group">
                     <div
                       onClick={() => toggleItem(routine.id, item.id)}
-                      className={`h-6 w-6 rounded-lg border-2 flex items-center justify-center cursor-pointer transition-all shrink-0 mt-0.5 ${
+                      className={`h-4 w-4 rounded border-2 flex items-center justify-center cursor-pointer transition-all shrink-0 mt-0.5 ${
                         completions[routine.id]?.includes(item.id)
                           ? 'bg-green-500 border-green-500'
                           : 'border-zinc-800 bg-zinc-950 hover:border-zinc-700'
                       }`}
                     >
                       {completions[routine.id]?.includes(item.id) && (
-                        <CheckCircle2 size={14} className="text-black" />
+                        <CheckCircle2 size={10} className="text-black" />
                       )}
                     </div>
                     <span
-                      className={`text-sm font-bold transition-all min-w-0 flex-1 whitespace-pre-wrap break-words [overflow-wrap:anywhere] leading-relaxed ${
+                      className={`text-xs font-medium transition-all min-w-0 flex-1 whitespace-pre-wrap break-words [overflow-wrap:anywhere] leading-snug ${
                         completions[routine.id]?.includes(item.id)
                           ? 'text-zinc-600 line-through'
                           : 'text-zinc-300'
