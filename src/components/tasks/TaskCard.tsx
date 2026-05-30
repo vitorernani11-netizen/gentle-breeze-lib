@@ -1,9 +1,29 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Trash2, RefreshCw, Bell, Calendar, Check } from 'lucide-react';
+import { Clock, Trash2, RefreshCw, Bell, Calendar, Check, X } from 'lucide-react';
+import { useTaskActions } from '@/hooks/useTaskActions';
 
 import { cn } from '@/lib/utils';
+
+const WEEKDAY_SHORT: Record<string, string> = {
+  'domingo': 'DOM', 'segunda': 'SEG', 'terça': 'TER',
+  'quarta': 'QUA', 'quinta': 'QUI', 'sexta': 'SEX', 'sábado': 'SÁB',
+};
+
+const recurrenceLabel = (task: any): string | null => {
+  if (task.recorrencia_tipo === 'weekdays' && Array.isArray(task.recorrencia_dias)) {
+    return task.recorrencia_dias.map((d: string) => WEEKDAY_SHORT[d] || d.slice(0,3).toUpperCase()).join(' ');
+  }
+  if (task.recorrencia_tipo === 'daily') return 'DIÁRIO';
+  if (task.recorrencia_tipo === 'weekly') return 'SEMANAL';
+  if (task.recorrencia_tipo === 'monthly') return 'MENSAL';
+  if (task.recorrencia_semanal) return WEEKDAY_SHORT[task.recorrencia_semanal] || task.recorrencia_semanal.toUpperCase();
+  if (task.repeticao === 'daily') return 'DIÁRIO';
+  if (task.repeticao === 'weekly') return 'SEMANAL';
+  if (task.repeticao === 'monthly') return 'MENSAL';
+  return null;
+};
 
 interface TaskCardProps {
   task: any;
@@ -206,9 +226,35 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               <h3 className="flex-1 min-w-0 font-black text-base md:text-xl uppercase tracking-tight leading-tight text-white [overflow-wrap:anywhere] break-all line-clamp-3 overflow-hidden">
                 {task.titulo}
               </h3>
-              {(task.recorrencia_semanal || (task.repeticao && task.repeticao !== 'none')) && (
-                <RefreshCw className="w-4 h-4 text-[#00ff41] shrink-0 mt-1" />
-              )}
+              {(() => {
+                const recLabel = recurrenceLabel(task);
+                if (!recLabel) return null;
+                return (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateTask(task.id, {
+                        recorrencia_tipo: null,
+                        recorrencia_dias: null,
+                        recorrencia_semanal: null,
+                        repeticao: 'none',
+                      });
+                    }}
+                    aria-label="Remover rotina"
+                    title="Remover rotina (manter como tarefa comum)"
+                    className="group/rec shrink-0 mt-0.5 flex flex-col items-center gap-0.5 px-1.5 py-0.5 rounded-md hover:bg-orange-500/10 transition-colors"
+                  >
+                    <div className="relative">
+                      <RefreshCw className="w-4 h-4 text-[#00ff41] group-hover/rec:opacity-0 transition-opacity" />
+                      <X className="w-4 h-4 text-orange-400 absolute inset-0 opacity-0 group-hover/rec:opacity-100 transition-opacity" />
+                    </div>
+                    <span className="text-[8px] font-black tracking-wider text-orange-400 leading-none">
+                      {recLabel}
+                    </span>
+                  </button>
+                );
+              })()}
             </div>
 
             {task.descricao && (
