@@ -60,14 +60,19 @@ const parseRecurrence = (input: string): { recurrence: Recurrence | null, token:
   }
 
   const dayWord = '(?:segunda|terça|terca|quarta|quinta|sexta|sábado|sabado|domingo)s?(?:-feira)?';
+  // Separadores aceitos entre dias: ", ", " e ", ou apenas espaço (ex: "toda quinta sexta sábado")
+  const sep = `(?:\\s*,\\s*|\\s+e\\s+|\\s+)`;
   const multiRe = new RegExp(
-    `\\btodas?\\s+(?:as\\s+|os\\s+)?(${dayWord}(?:\\s*(?:,|\\se\\s)\\s*${dayWord})*)\\b`,
+    `\\btodas?\\s+(?:as\\s+|os\\s+)?(${dayWord}(?:${sep}${dayWord})*)\\b`,
     'i'
   );
   const mm = input.match(multiRe);
   if (mm) {
     const piece = mm[1].toLowerCase();
-    const parts = piece.split(/\s*,\s*|\s+e\s+/).map(p => p.replace(/-feira/g, '').replace(/s$/, '').trim());
+    const parts = piece
+      .split(/\s*,\s*|\s+e\s+|\s+/)
+      .map(p => p.replace(/-feira/g, '').replace(/s$/, '').trim())
+      .filter(Boolean);
     const weekdays = parts
       .map(p => WEEKDAY_NORMALIZE[p])
       .filter(Boolean);
@@ -77,6 +82,7 @@ const parseRecurrence = (input: string): { recurrence: Recurrence | null, token:
       return { recurrence: { type: 'weekdays', weekdays: uniq }, token: mm[0] };
     }
   }
+
 
   return { recurrence: null, token: '' };
 };
