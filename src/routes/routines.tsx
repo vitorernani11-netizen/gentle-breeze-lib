@@ -44,6 +44,17 @@ function Routines() {
 
   // Confirmação de exclusão
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [resetOpen, setResetOpen] = useState(false);
+
+  const resetDaily = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const history = loadFromLocal(COMPLETIONS_KEY) || [];
+    const cleaned = history.filter((c: any) => c.data !== today);
+    saveToLocal(COMPLETIONS_KEY, cleaned);
+    setCompletions({});
+    setResetOpen(false);
+    toast.success('Check-ins de hoje resetados');
+  };
 
   useEffect(() => {
     fetchData();
