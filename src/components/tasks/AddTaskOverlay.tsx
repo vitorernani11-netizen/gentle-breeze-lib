@@ -151,6 +151,8 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
               onSelect={setVencimento}
               recurrence={recurrence}
               onRecurrenceSelect={setRecurrence}
+              nlpRecurrence={nlpRecurrence}
+              onNlpRecurrenceSelect={setNlpRecurrence}
             >
               <Button variant="ghost" className={cn("h-12 px-4 rounded-2xl border border-zinc-900 bg-zinc-900/50 transition-all", vencimento && "text-[#00ff41] border-[#00ff41]/30 bg-[#00ff41]/5")}>
                 <CalendarIcon size={20} />
