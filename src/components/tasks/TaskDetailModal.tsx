@@ -494,6 +494,8 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                   hora_vencimento: lembrete || null,
                   lembretes: lembretesState,
                   sub_tasks: subTasks,
+                  recorrencia_tipo: nlpRecurrence ? nlpRecurrence.type : (recurrence !== 'none' ? recurrence : null),
+                  recorrencia_dias: nlpRecurrence?.weekdays || null,
                 });
               }
               persistToHardware();
