@@ -4,17 +4,29 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { ReminderManager, type Reminder } from './ReminderManager';
+import { CalendarPopover } from './CalendarPopover';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import type { Recurrence } from '@/utils/nlpParser';
 
 import {
   Calendar,
   Clock,
   Flag,
+  Repeat,
   Save,
   X
 } from 'lucide-react';
 
 import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
 import { cn } from '@/lib/utils';
+
+type SimpleRec = 'none' | 'daily' | 'weekly' | 'monthly';
+
+const WD_ABBR: Record<string, string> = {
+  domingo: 'DOM', segunda: 'SEG', 'terça': 'TER', quarta: 'QUA',
+  quinta: 'QUI', sexta: 'SEX', 'sábado': 'SAB',
+};
 
 interface TaskDetailModalProps {
   task: any | null;
@@ -40,6 +52,8 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const [subTasks, setSubTasks] = useState<any[]>([]);
   const [isAddingSub, setIsAddingSub] = useState(false);
   const [newSubTitulo, setNewSubTitulo] = useState('');
+  const [recurrence, setRecurrence] = useState<SimpleRec>('none');
+  const [nlpRecurrence, setNlpRecurrence] = useState<Recurrence | null>(null);
   
   const [isDirty, setIsDirty] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -58,6 +72,19 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
       setLembrete(t.substring(0, 5));
       setLembretesState(task.lembretes || []);
       setSubTasks(task.sub_tasks || []);
+      // Recorrência
+      const tipo = task.recorrencia_tipo;
+      const dias = task.recorrencia_dias;
+      if (tipo === 'weekdays' && Array.isArray(dias) && dias.length > 0) {
+        setRecurrence('weekly');
+        setNlpRecurrence({ type: 'weekdays', weekdays: dias });
+      } else if (tipo === 'daily' || tipo === 'weekly' || tipo === 'monthly') {
+        setRecurrence(tipo);
+        setNlpRecurrence({ type: tipo });
+      } else {
+        setRecurrence('none');
+        setNlpRecurrence(null);
+      }
       // mark as initialized after state apply
       setTimeout(() => { initRef.current = true; }, 0);
     }
@@ -211,17 +238,85 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
           {/* 3. Metadados (Data, Hora, Prioridade) - Linha única nativa */}
           <div className="relative z-10 flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/60 w-full bg-black shrink-0 clear-both">
-            {/* Data */}
-            <div className="flex items-center gap-2 bg-zinc-900/40 border border-zinc-800/80 rounded-xl px-3 py-2 text-sm font-bold text-white shrink-0">
-              <Calendar size={14} className="text-zinc-500" />
-              <input
-                type="date"
-                value={dataExecucao}
-                onChange={(e) => handleDate(e.target.value)}
-                onBlur={forceGlobalSync}
-                className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[110px]"
-              />
-            </div>
+            {/* Data + Recorrência (popover) */}
+            <CalendarPopover
+              selectedDate={(() => {
+                try {
+                  return dataExecucao ? parseISO(dataExecucao) : new Date();
+                } catch {
+                  return new Date();
+                }
+              })()}
+              onSelect={(d) => {
+                const iso = format(d, 'yyyy-MM-dd');
+                handleDate(iso);
+                forceGlobalSync();
+              }}
+              recurrence={recurrence}
+              onRecurrenceSelect={(r) => {
+                setRecurrence(r);
+                if (r === 'none') {
+                  setNlpRecurrence(null);
+                  triggerSave({ recorrencia_tipo: null, recorrencia_dias: null });
+                } else if (nlpRecurrence?.weekdays && r === 'weekly') {
+                  // mantém os weekdays já configurados
+                } else {
+                  setNlpRecurrence({ type: r });
+                  triggerSave({ recorrencia_tipo: r, recorrencia_dias: null });
+                }
+                forceGlobalSync();
+              }}
+              nlpRecurrence={nlpRecurrence}
+              onNlpRecurrenceSelect={(rec) => {
+                setNlpRecurrence(rec);
+                triggerSave({
+                  recorrencia_tipo: rec?.type || null,
+                  recorrencia_dias: rec?.weekdays || null,
+                });
+                forceGlobalSync();
+              }}
+            >
+              <button
+                type="button"
+                className="flex items-center gap-2 bg-zinc-900/40 border border-zinc-800/80 rounded-xl px-3 py-2 text-sm font-bold text-white shrink-0 hover:border-zinc-700 transition-all"
+              >
+                <Calendar size={14} className="text-zinc-500" />
+                <span>
+                  {dataExecucao
+                    ? format(parseISO(dataExecucao), "dd MMM", { locale: ptBR })
+                    : 'Sem data'}
+                </span>
+                {(nlpRecurrence?.weekdays && nlpRecurrence.weekdays.length > 0) ? (
+                  <span className="flex items-center gap-1 ml-1 pl-2 border-l border-zinc-800 text-[10px] font-black uppercase tracking-wider text-orange-400">
+                    <Repeat size={11} />
+                    {nlpRecurrence.weekdays.map((w) => WD_ABBR[w] || w.slice(0,3).toUpperCase()).join(' ')}
+                  </span>
+                ) : recurrence !== 'none' ? (
+                  <span className="flex items-center gap-1 ml-1 pl-2 border-l border-zinc-800 text-[10px] font-black uppercase tracking-wider text-[#00ff41]">
+                    <Repeat size={11} />
+                    {recurrence === 'daily' ? 'DIA' : recurrence === 'weekly' ? 'SEM' : 'MÊS'}
+                  </span>
+                ) : null}
+              </button>
+            </CalendarPopover>
+
+            {/* Botão slim para remover a rotina */}
+            {(nlpRecurrence || recurrence !== 'none') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setRecurrence('none');
+                  setNlpRecurrence(null);
+                  triggerSave({ recorrencia_tipo: null, recorrencia_dias: null });
+                  forceGlobalSync();
+                }}
+                className="flex items-center gap-1 bg-transparent border border-zinc-800/80 rounded-xl px-2 py-2 text-[10px] font-black uppercase tracking-wider text-zinc-500 hover:text-orange-400 hover:border-orange-400/40 transition-all shrink-0"
+                title="Remover rotina"
+              >
+                <X size={12} />
+                Rotina
+              </button>
+            )}
 
             {/* Hora */}
             <div className="flex items-center gap-2 bg-zinc-900/40 border border-zinc-800/80 rounded-xl px-3 py-2 text-sm font-bold text-white shrink-0">
@@ -399,6 +494,8 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                   hora_vencimento: lembrete || null,
                   lembretes: lembretesState,
                   sub_tasks: subTasks,
+                  recorrencia_tipo: nlpRecurrence ? nlpRecurrence.type : (recurrence !== 'none' ? recurrence : null),
+                  recorrencia_dias: nlpRecurrence?.weekdays || null,
                 });
               }
               persistToHardware();
