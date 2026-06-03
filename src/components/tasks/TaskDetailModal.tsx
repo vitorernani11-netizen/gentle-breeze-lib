@@ -52,6 +52,8 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const [subTasks, setSubTasks] = useState<any[]>([]);
   const [isAddingSub, setIsAddingSub] = useState(false);
   const [newSubTitulo, setNewSubTitulo] = useState('');
+  const [recurrence, setRecurrence] = useState<SimpleRec>('none');
+  const [nlpRecurrence, setNlpRecurrence] = useState<Recurrence | null>(null);
   
   const [isDirty, setIsDirty] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -70,6 +72,19 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
       setLembrete(t.substring(0, 5));
       setLembretesState(task.lembretes || []);
       setSubTasks(task.sub_tasks || []);
+      // Recorrência
+      const tipo = task.recorrencia_tipo;
+      const dias = task.recorrencia_dias;
+      if (tipo === 'weekdays' && Array.isArray(dias) && dias.length > 0) {
+        setRecurrence('weekly');
+        setNlpRecurrence({ type: 'weekdays', weekdays: dias });
+      } else if (tipo === 'daily' || tipo === 'weekly' || tipo === 'monthly') {
+        setRecurrence(tipo);
+        setNlpRecurrence({ type: tipo });
+      } else {
+        setRecurrence('none');
+        setNlpRecurrence(null);
+      }
       // mark as initialized after state apply
       setTimeout(() => { initRef.current = true; }, 0);
     }
