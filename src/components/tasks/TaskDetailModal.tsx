@@ -4,17 +4,29 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { ReminderManager, type Reminder } from './ReminderManager';
+import { CalendarPopover } from './CalendarPopover';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import type { Recurrence } from '@/utils/nlpParser';
 
 import {
   Calendar,
   Clock,
   Flag,
+  Repeat,
   Save,
   X
 } from 'lucide-react';
 
 import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
 import { cn } from '@/lib/utils';
+
+type SimpleRec = 'none' | 'daily' | 'weekly' | 'monthly';
+
+const WD_ABBR: Record<string, string> = {
+  domingo: 'DOM', segunda: 'SEG', 'terça': 'TER', quarta: 'QUA',
+  quinta: 'QUI', sexta: 'SEX', 'sábado': 'SAB',
+};
 
 interface TaskDetailModalProps {
   task: any | null;
