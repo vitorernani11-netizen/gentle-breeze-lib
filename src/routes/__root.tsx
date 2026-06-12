@@ -14,6 +14,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { GlobalAddTask } from "@/components/tasks/GlobalAddTask";
 import { useTaskActions } from "@/hooks/useTaskActions";
 import { useNotificationSync } from "@/hooks/useNotificationSync";
+import { usePWARegister } from "@/hooks/usePWARegister";
 import { hasUnsavedChanges } from "@/lib/storage";
 import {
   initSyncEngine,
@@ -110,6 +111,9 @@ function RootComponent() {
   const { checkAndRouteRecurringTasks } = useTaskActions();
   const [isDirty, setIsDirty] = useState(false);
 
+  // Registra o Service Worker manualmente (necessário para SSR com TanStack Start)
+  usePWARegister();
+
   useEffect(() => {
     const checkAuth = async () => {
       setHasSession(true);
@@ -142,18 +146,18 @@ function RootComponent() {
     };
   }, []);
 
-  // ─── Notification Engine via Service Worker ──────────────────────────────────
+  // ─── Notification Engine via Service Worker ─────────────────────────────────
   const { initNotifications } = useNotificationSync();
 
   useEffect(() => {
     if (!hasSession) return;
-    // Inicia permissões + Periodic Background Sync + sincroniza schedules com SW
-    const timer = setTimeout(() => {
-      initNotifications().then(() => {
-        if (Notification.permission === 'granted') {
-          toast.success('Notificações ativadas! O app vai notificar mesmo em background.');
-        }
-      });
+    const timer = setTimeout(async () => {
+      const wasGranted = Notification.permission === 'granted';
+      await initNotifications();
+      // Toast apenas na primeira vez que a permissão é concedida
+      if (!wasGranted && Notification.permission === 'granted') {
+        toast.success('Notificações ativadas! O app vai notificar mesmo em background.');
+      }
     }, 2000);
     return () => clearTimeout(timer);
   }, [hasSession, initNotifications]);

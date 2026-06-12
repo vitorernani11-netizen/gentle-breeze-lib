@@ -51,6 +51,7 @@ const COLLECTION_TO_TABLE: Record<string, string> = {
 let isOnline = navigator.onLine;
 let isSyncing = false;
 let syncListeners: Array<(status: SyncStatus) => void> = [];
+let periodicSyncTimer: ReturnType<typeof setInterval> | null = null;
 
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'offline' | 'error';
 let currentStatus: SyncStatus = isOnline ? 'idle' : 'offline';
@@ -294,6 +295,76 @@ function setupConnectivityListeners(): void {
   });
 }
 
+// ─── Sync periódico: puxa da nuvem a cada 60s para sincronizar entre dispositivos ─
+function startPeriodicSync(): void {
+  if (periodicSyncTimer) return; // Já iniciado
+  periodicSyncTimer = setInterval(async () => {
+    if (!isOnline) return;
+    console.log('[SyncEngine] Sync periódico — baixando da nuvem...');
+    const synced = await pullFromCloud();
+    if (synced) {
+      window.dispatchEvent(new Event('storage'));
+    }
+  }, 60_000); // 60 segundos
+  console.log('[SyncEngine] Sync periódico iniciado (60s).');
+}
+
+// ─── Realtime: escuta mudanças de outros dispositivos via Supabase ────────────
+function setupRealtimeSync(): void {
+  try {
+    const channel = supabase
+      .channel('focus-realtime-sync')
+      .on(
+        'postgres_changes' as any,
+        {
+          event: '*',
+          schema: 'public',
+          filter: `user_id=eq.${CLOUD_USER_ID}`,
+        } as any,
+        async (payload: any) => {
+          console.log('[SyncEngine] Realtime: mudança detectada em', payload.table);
+          // Mapeia tabela → coleção localStorage
+          const tableToCollection = Object.fromEntries(
+            Object.entries(COLLECTION_TO_TABLE).map(([k, v]) => [v, k])
+          );
+          const collection = tableToCollection[payload.table];
+          if (!collection) return;
+
+          const localKey = `hardware_humano_${collection}`;
+          let localItems: any[] = [];
+          try {
+            localItems = JSON.parse(localStorage.getItem(localKey) || '[]');
+            if (!Array.isArray(localItems)) localItems = [];
+          } catch { localItems = []; }
+
+          if (payload.eventType === 'DELETE') {
+            const filtered = localItems.filter((i: any) => i.id !== payload.old?.id);
+            localStorage.setItem(localKey, JSON.stringify(filtered));
+          } else if (payload.new) {
+            // INSERT ou UPDATE: merge com o item mais recente vencendo
+            const idx = localItems.findIndex((i: any) => i.id === payload.new.id);
+            if (idx >= 0) {
+              const cloudTime = new Date(payload.new.updated_at || payload.new.created_at || 0).getTime();
+              const localTime = new Date(localItems[idx].updated_at || localItems[idx].created_at || 0).getTime();
+              if (cloudTime >= localTime) localItems[idx] = payload.new;
+            } else {
+              localItems.unshift(payload.new);
+            }
+            localStorage.setItem(localKey, JSON.stringify(localItems));
+          }
+          window.dispatchEvent(new Event('storage'));
+        }
+      )
+      .subscribe((status) => {
+        console.log('[SyncEngine] Realtime status:', status);
+      });
+
+    console.log('[SyncEngine] Realtime channel inscrito:', channel.topic);
+  } catch (err) {
+    console.warn('[SyncEngine] Realtime não disponível:', err);
+  }
+}
+
 // ─── Inicialização ────────────────────────────────────────────────────────────
 export async function initSyncEngine(): Promise<void> {
   setupConnectivityListeners();
@@ -303,6 +374,14 @@ export async function initSyncEngine(): Promise<void> {
   if (isOnline && getQueue().length > 0) {
     console.log('[SyncEngine] Itens pendentes da sessão anterior encontrados. Sincronizando...');
     await drainQueue();
+  }
+
+  // Inicia sync periódico entre dispositivos (60s)
+  startPeriodicSync();
+
+  // Inicia Realtime para sync instantâneo entre dispositivos
+  if (isOnline) {
+    setupRealtimeSync();
   }
 
   console.log('[SyncEngine] Inicializado. Online:', isOnline);
