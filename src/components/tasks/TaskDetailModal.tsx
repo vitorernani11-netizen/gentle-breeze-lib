@@ -4,11 +4,16 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { ReminderManager, type Reminder } from './ReminderManager';
+import { CalendarPopover } from './CalendarPopover';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import type { Recurrence } from '@/utils/nlpParser';
 
 import {
   Calendar,
   Clock,
   Flag,
+  Repeat,
   Save,
   X,
   Trash2
@@ -16,10 +21,13 @@ import {
 
 import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
 import { cn } from '@/lib/utils';
-import { CalendarPopover } from './CalendarPopover';
-import { Recurrence } from '@/utils/nlpParser';
-import { format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+
+type SimpleRec = 'none' | 'daily' | 'weekly' | 'monthly';
+
+const WD_ABBR: Record<string, string> = {
+  domingo: 'DOM', segunda: 'SEG', 'terça': 'TER', quarta: 'QUA',
+  quinta: 'QUI', sexta: 'SEX', 'sábado': 'SAB',
+};
 
 interface TaskDetailModalProps {
   task: any | null;
@@ -47,7 +55,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const [newSubTitulo, setNewSubTitulo] = useState('');
   const [editingSubId, setEditingSubId] = useState<string | null>(null);
   const [editingSubTitulo, setEditingSubTitulo] = useState('');
-  const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
+  const [recurrence, setRecurrence] = useState<SimpleRec>('none');
   const [nlpRecurrence, setNlpRecurrence] = useState<Recurrence | null>(null);
   
   const [isDirty, setIsDirty] = useState(false);
@@ -290,7 +298,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
 
           {/* 3. Metadados (Data, Hora, Prioridade) - Linha única nativa */}
           <div className="relative z-10 flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/60 w-full bg-black shrink-0 clear-both">
-            {/* Data */}
+            {/* Data + Recorrência (popover) */}
             <CalendarPopover
               selectedDate={dataExecucao ? new Date(dataExecucao + 'T12:00:00') : new Date()}
               onSelect={handleDateSelect}
@@ -306,9 +314,20 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 <Calendar size={14} className="text-zinc-500" />
                 <span>
                   {dataExecucao
-                    ? format(new Date(dataExecucao + 'T12:00:00'), 'dd/MM/yyyy')
+                    ? format(parseISO(dataExecucao), "dd MMM", { locale: ptBR })
                     : 'Sem data'}
                 </span>
+                {(nlpRecurrence?.weekdays && nlpRecurrence.weekdays.length > 0) ? (
+                  <span className="flex items-center gap-1 ml-1 pl-2 border-l border-zinc-800 text-[10px] font-black uppercase tracking-wider text-orange-400">
+                    <Repeat size={11} />
+                    {nlpRecurrence.weekdays.map((w) => WD_ABBR[w] || w.slice(0,3).toUpperCase()).join(' ')}
+                  </span>
+                ) : recurrence !== 'none' ? (
+                  <span className="flex items-center gap-1 ml-1 pl-2 border-l border-zinc-800 text-[10px] font-black uppercase tracking-wider text-[#00ff41]">
+                    <Repeat size={11} />
+                    {recurrence === 'daily' ? 'DIA' : recurrence === 'weekly' ? 'SEM' : 'MÊS'}
+                  </span>
+                ) : null}
                 {dataExecucao && (
                   <span
                     onClick={(e) => {
@@ -323,6 +342,29 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 )}
               </button>
             </CalendarPopover>
+
+            {/* Botão slim para remover a rotina */}
+            {(nlpRecurrence || recurrence !== 'none') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setRecurrence('none');
+                  setNlpRecurrence(null);
+                  triggerSave({ 
+                    recorrencia_tipo: null, 
+                    recorrencia_dias: null,
+                    recorrencia_custom_texto: null,
+                    repeticao: 'none'
+                  });
+                  forceGlobalSync();
+                }}
+                className="flex items-center gap-1 bg-transparent border border-zinc-800/80 rounded-xl px-2 py-2 text-[10px] font-black uppercase tracking-wider text-zinc-500 hover:text-orange-400 hover:border-orange-400/40 transition-all shrink-0"
+                title="Remover rotina"
+              >
+                <X size={12} />
+                Rotina
+              </button>
+            )}
 
             {/* Hora */}
             <div className="flex items-center gap-2 bg-zinc-900/40 border border-zinc-800/80 rounded-xl px-3 py-2 text-sm font-bold text-white shrink-0">
@@ -518,7 +560,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                 triggerSave({ lembretes: newReminders });
                 if (newReminders.length > (lembretesState.length || 0)) {
                   if ('Notification' in window && Notification.permission === 'default') {
-                    Notification.requestPermission();
+                     Notification.requestPermission();
                   }
                 }
               }}
@@ -541,7 +583,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                   hora_vencimento: lembrete || null,
                   lembretes: lembretesState,
                   sub_tasks: subTasks,
-                  recorrencia_tipo: nlpRecurrence ? nlpRecurrence.type : null,
+                  recorrencia_tipo: nlpRecurrence ? nlpRecurrence.type : (recurrence !== 'none' ? recurrence : null),
                   recorrencia_dias: nlpRecurrence?.weekdays || null,
                   recorrencia_custom_texto: nlpRecurrence?.type === 'custom' ? nlpRecurrence.customText : null,
                   repeticao: recurrence || 'none',
