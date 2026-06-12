@@ -12,6 +12,9 @@ const WEEKDAY_SHORT: Record<string, string> = {
 };
 
 const recurrenceLabel = (task: any): string | null => {
+  if (task.recorrencia_tipo === 'custom' && task.recorrencia_custom_texto) {
+    return task.recorrencia_custom_texto.toUpperCase();
+  }
   if (task.recorrencia_tipo === 'weekdays' && Array.isArray(task.recorrencia_dias)) {
     return task.recorrencia_dias.map((d: string) => WEEKDAY_SHORT[d] || d.slice(0,3).toUpperCase()).join(' ');
   }
@@ -239,6 +242,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                         recorrencia_tipo: null,
                         recorrencia_dias: null,
                         recorrencia_semanal: null,
+                        recorrencia_custom_texto: null,
                         repeticao: 'none',
                       });
                     }}

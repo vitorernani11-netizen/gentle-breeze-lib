@@ -39,6 +39,8 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLin
 import { cn } from '@/lib/utils';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { EisenhowerMatrix } from '@/components/dashboard/EisenhowerMatrix';
+import { generateUUID } from '@/utils/uuid';
+
 
 import { TaskCard } from '@/components/tasks/TaskCard';
 import { AddTaskOverlay } from '@/components/tasks/AddTaskOverlay';
@@ -157,7 +159,7 @@ function Dashboard() {
   
   const [detailTask, setDetailTask] = useState<any | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [filterMode, setFilterMode] = useState<'ALL' | 'INTERVAL' | 'POST18' | 'DELAYED'>('ALL');
+  const [filterMode, setFilterMode] = useState<'ALL' | 'INTERVAL' | 'POST18' | 'MORNING' | 'DELAYED'>('ALL');
 
   const [tasks, setTasks] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
@@ -216,7 +218,7 @@ function Dashboard() {
     
     try {
       const dumps = loadFromLocal(ANXIETY_KEY) || [];
-      dumps.push({ id: crypto.randomUUID(), conteudo: anxietyContent, created_at: new Date().toISOString() });
+      dumps.push({ id: generateUUID(), conteudo: anxietyContent, created_at: new Date().toISOString() });
       saveToLocal(ANXIETY_KEY, dumps);
       
       setAnxietyContent('');
@@ -344,7 +346,7 @@ function Dashboard() {
       saveToLocal('hardware_humano_silence', targetDate.toISOString());
       
       const events = loadFromLocal(SLEEP_EVENTS_KEY) || [];
-      events.push({ id: crypto.randomUUID(), inicio_sono: new Date().toISOString() });
+      events.push({ id: generateUUID(), inicio_sono: new Date().toISOString() });
       saveToLocal(SLEEP_EVENTS_KEY, events);
 
       setIsSilenced(true);
@@ -415,10 +417,7 @@ function Dashboard() {
       "min-h-screen p-4 pt-12 pb-16 max-w-xl mx-auto transition-colors duration-1000",
       isRecoveryMode ? "bg-zinc-950 text-zinc-400 grayscale-[0.8]" : "bg-black text-zinc-100"
     )}>
-      <div className="fixed top-4 right-4 flex items-center gap-2 bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800/50 z-50 backdrop-blur-md">
-        <WifiOff size={12} className="text-zinc-500" />
-        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Offline Local</span>
-      </div>
+
 
       {isLocked && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
@@ -445,6 +444,17 @@ function Dashboard() {
             Atrasadas
           </Button>
           <Button
+            onClick={() => setFilterMode('MORNING')}
+            className={cn(
+              "h-8 px-2.5 rounded-lg font-black uppercase text-[10px] tracking-wider transition-all shrink-0 shadow-lg active:scale-95",
+              filterMode === 'MORNING' 
+                ? "bg-[#ffaa00] text-black border-none" 
+                : "bg-zinc-900 text-[#ffaa00] border border-[#ffaa00]/20"
+            )}
+          >
+            Manhã
+          </Button>
+          <Button
             onClick={() => setFilterMode('INTERVAL')}
             className={cn(
               "h-8 px-2.5 rounded-lg font-black uppercase text-[10px] tracking-wider transition-all shrink-0 shadow-lg active:scale-95",
@@ -464,7 +474,7 @@ function Dashboard() {
                 : "bg-zinc-900 text-[#ff00ff] border border-[#ff00ff]/20"
             )}
           >
-            Pós-18h
+            Noite
           </Button>
           <Button
             onClick={() => setFilterMode('ALL')}
@@ -531,12 +541,17 @@ function Dashboard() {
 
             // REGRA 3: Roteamento cirúrgico de faixas de tempo (Para tarefas que NÃO estão atrasadas)
             
+            // ABA MANHÃ: Exclusivamente de 00:01 até as 08:00
+            if (filterMode === 'MORNING') {
+              return (horaTarefa >= 0 && horaTarefa < 8) || (horaTarefa === 8 && minutoTarefa === 0);
+            }
+
             // ABA INTERVALO: Exclusivamente das 12:00 até as 13:59
             if (filterMode === 'INTERVAL') {
               return horaTarefa >= 12 && horaTarefa < 14;
             }
 
-            // ABA PÓS-18H: Exclusivamente das 18:00 até as 23:59
+            // ABA NOITE: Exclusivamente das 18:00 até as 23:59
             if (filterMode === 'POST18') {
               return horaTarefa >= 18 && horaTarefa <= 23;
             }

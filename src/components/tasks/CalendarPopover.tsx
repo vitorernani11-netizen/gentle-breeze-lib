@@ -69,6 +69,9 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
   ];
 
   const recurrenceLabel = () => {
+    if (nlpRecurrence?.type === 'custom' && nlpRecurrence.customText) {
+      return nlpRecurrence.customText.toUpperCase();
+    }
     if (nlpRecurrence?.weekdays && nlpRecurrence.weekdays.length > 0) {
       return formatWeekdays(nlpRecurrence.weekdays);
     }
@@ -94,7 +97,16 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
       setNlpError(false);
       setView('main');
     } else {
-      setNlpError(true);
+      // Se não reconheceu como padrão rígido, aceita como recorrência customizada!
+      const customRec: Recurrence = {
+        type: 'custom',
+        customText: txt
+      };
+      onNlpRecurrenceSelect?.(customRec);
+      onRecurrenceSelect?.('monthly'); // Mantém o popover em estado repetitivo ativo
+      setNlpText('');
+      setNlpError(false);
+      setView('main');
     }
   };
 
@@ -105,7 +117,7 @@ export const CalendarPopover: React.FC<CalendarPopoverProps> = ({
     <Popover onOpenChange={(open) => !open && setView('main')}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
-        className="w-[300px] max-h-[80vh] overflow-y-auto bg-black border-2 border-white p-0 z-[150] shadow-[0_10px_40px_rgba(0,0,0,0.9)]"
+        className="w-[300px] max-h-[80vh] overflow-y-auto bg-black border-2 border-white p-0 z-[250] shadow-[0_10px_40px_rgba(0,0,0,0.9)]"
         align="start"
         side="top"
         sideOffset={8}

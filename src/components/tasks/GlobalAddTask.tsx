@@ -67,6 +67,7 @@ export const GlobalAddTask: React.FC = () => {
     hora_vencimento?: string | null;
     recorrencia_tipo?: string | null;
     recorrencia_dias?: string[] | null;
+    recorrencia_custom_texto?: string | null;
   }) => {
     const today = new Date().toISOString().split('T')[0];
     const status = 'Entrada';
@@ -84,6 +85,7 @@ export const GlobalAddTask: React.FC = () => {
       hora_vencimento: taskData.hora_vencimento,
       recorrencia_tipo: taskData.recorrencia_tipo || null,
       recorrencia_dias: taskData.recorrencia_dias || null,
+      recorrencia_custom_texto: taskData.recorrencia_custom_texto || null,
     });
 
     if (task) {

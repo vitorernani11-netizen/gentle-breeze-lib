@@ -8,8 +8,10 @@ import { toast } from 'sonner';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
+import { generateUUID } from '@/utils/uuid';
 
 const ACADEMIC_KEY = 'hardware_humano_academic';
+
 
 export const Route = createFileRoute('/academic')({
   component: AcademicPage,
@@ -42,7 +44,7 @@ function AcademicPage() {
 
     try {
       const activity = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         nome: newActivity.nome,
         data_entrega: newActivity.data_entrega,
         concluido: false,

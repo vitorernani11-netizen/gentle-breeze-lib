@@ -10,11 +10,16 @@ import {
   Clock,
   Flag,
   Save,
-  X
+  X,
+  Trash2
 } from 'lucide-react';
 
 import { persistToHardware, hasUnsavedChanges } from '@/lib/storage';
 import { cn } from '@/lib/utils';
+import { CalendarPopover } from './CalendarPopover';
+import { Recurrence } from '@/utils/nlpParser';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface TaskDetailModalProps {
   task: any | null;
@@ -40,6 +45,10 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const [subTasks, setSubTasks] = useState<any[]>([]);
   const [isAddingSub, setIsAddingSub] = useState(false);
   const [newSubTitulo, setNewSubTitulo] = useState('');
+  const [editingSubId, setEditingSubId] = useState<string | null>(null);
+  const [editingSubTitulo, setEditingSubTitulo] = useState('');
+  const [recurrence, setRecurrence] = useState<'none' | 'daily' | 'weekly' | 'monthly'>('none');
+  const [nlpRecurrence, setNlpRecurrence] = useState<Recurrence | null>(null);
   
   const [isDirty, setIsDirty] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -58,6 +67,16 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
       setLembrete(t.substring(0, 5));
       setLembretesState(task.lembretes || []);
       setSubTasks(task.sub_tasks || []);
+      setRecurrence(task.repeticao || 'none');
+      if (task.recorrencia_tipo) {
+        setNlpRecurrence({
+          type: task.recorrencia_tipo,
+          weekdays: task.recorrencia_dias || undefined,
+          customText: task.recorrencia_custom_texto || undefined,
+        });
+      } else {
+        setNlpRecurrence(null);
+      }
       // mark as initialized after state apply
       setTimeout(() => { initRef.current = true; }, 0);
     }
@@ -129,7 +148,67 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
   const handleClearSchedule = () => {
     setDataExecucao('');
     setLembrete('');
-    triggerSave({ data_execucao: null, data_vencimento: null, hora_vencimento: null });
+    setRecurrence('none');
+    setNlpRecurrence(null);
+    triggerSave({ 
+      data_execucao: null, 
+      data_vencimento: null, 
+      hora_vencimento: null,
+      recorrencia_tipo: null,
+      recorrencia_dias: null,
+      recorrencia_custom_texto: null,
+      repeticao: 'none'
+    });
+    forceGlobalSync();
+  };
+
+  const handleDateSelect = (date: Date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    setDataExecucao(dateStr);
+    triggerSave({ data_execucao: dateStr, data_vencimento: dateStr });
+    forceGlobalSync();
+  };
+
+  const handleRecurrenceChange = (rec: 'none' | 'daily' | 'weekly' | 'monthly') => {
+    setRecurrence(rec);
+    const updates: Record<string, any> = { repeticao: rec };
+    if (rec === 'none') {
+      updates.recorrencia_tipo = null;
+      updates.recorrencia_dias = null;
+      updates.recorrencia_custom_texto = null;
+    } else {
+      updates.recorrencia_tipo = rec;
+    }
+    triggerSave(updates);
+    forceGlobalSync();
+  };
+
+  const handleNlpRecurrenceChange = (rec: Recurrence | null) => {
+    setNlpRecurrence(rec);
+    const updates: Record<string, any> = {
+      recorrencia_tipo: rec ? rec.type : null,
+      recorrencia_dias: rec?.weekdays || null,
+      recorrencia_custom_texto: rec?.type === 'custom' ? rec.customText : null,
+    };
+    if (rec) {
+      updates.repeticao = rec.type === 'weekdays' ? 'weekly' : (rec.type === 'custom' ? 'monthly' : rec.type);
+    } else {
+      updates.repeticao = 'none';
+    }
+    triggerSave(updates);
+    forceGlobalSync();
+  };
+
+  const handleSaveSubEdit = (id: string) => {
+    const trimmed = editingSubTitulo.trim();
+    if (!trimmed) {
+      setEditingSubId(null);
+      return;
+    }
+    const updated = subTasks.map(s => s.id === id ? { ...s, titulo: trimmed } : s);
+    setSubTasks(updated);
+    triggerSave({ sub_tasks: updated });
+    setEditingSubId(null);
     forceGlobalSync();
   };
 
@@ -212,16 +291,38 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
           {/* 3. Metadados (Data, Hora, Prioridade) - Linha única nativa */}
           <div className="relative z-10 flex flex-wrap items-center gap-3 py-4 border-y border-zinc-900/60 w-full bg-black shrink-0 clear-both">
             {/* Data */}
-            <div className="flex items-center gap-2 bg-zinc-900/40 border border-zinc-800/80 rounded-xl px-3 py-2 text-sm font-bold text-white shrink-0">
-              <Calendar size={14} className="text-zinc-500" />
-              <input
-                type="date"
-                value={dataExecucao}
-                onChange={(e) => handleDate(e.target.value)}
-                onBlur={forceGlobalSync}
-                className="bg-transparent border-0 text-sm font-bold text-white focus:outline-none w-auto min-w-[110px]"
-              />
-            </div>
+            <CalendarPopover
+              selectedDate={dataExecucao ? new Date(dataExecucao + 'T12:00:00') : new Date()}
+              onSelect={handleDateSelect}
+              recurrence={recurrence}
+              onRecurrenceSelect={handleRecurrenceChange}
+              nlpRecurrence={nlpRecurrence}
+              onNlpRecurrenceSelect={handleNlpRecurrenceChange}
+            >
+              <button
+                type="button"
+                className="flex items-center gap-2 bg-zinc-900/40 border border-zinc-800/80 rounded-xl px-3 py-2 text-sm font-bold text-white shrink-0 hover:bg-zinc-900/60 transition-colors"
+              >
+                <Calendar size={14} className="text-zinc-500" />
+                <span>
+                  {dataExecucao
+                    ? format(new Date(dataExecucao + 'T12:00:00'), 'dd/MM/yyyy')
+                    : 'Sem data'}
+                </span>
+                {dataExecucao && (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleClearSchedule();
+                    }}
+                    className="hover:text-red-500 text-zinc-500 ml-1 p-0.5"
+                    title="Limpar data"
+                  >
+                    <X size={12} />
+                  </span>
+                )}
+              </button>
+            </CalendarPopover>
 
             {/* Hora */}
             <div className="flex items-center gap-2 bg-zinc-900/40 border border-zinc-800/80 rounded-xl px-3 py-2 text-sm font-bold text-white shrink-0">
@@ -280,12 +381,52 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                       >
                         {sub.status_concluido && <span className="text-[10px] font-bold">✓</span>}
                       </button>
-                      <span className={cn(
-                        "min-w-0 flex-1 text-sm font-medium pr-2 uppercase tracking-tight leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]",
-                        sub.status_concluido ? "line-through text-zinc-600 italic" : "text-zinc-300"
-                      )}>
-                        {sub.titulo}
-                      </span>
+                      {editingSubId === sub.id ? (
+                        <textarea
+                          autoFocus
+                          value={editingSubTitulo}
+                          onChange={(e) => {
+                            setEditingSubTitulo(e.target.value);
+                            const el = e.target;
+                            el.style.height = 'auto';
+                            el.style.height = el.scrollHeight + 'px';
+                          }}
+                          onBlur={() => handleSaveSubEdit(sub.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSaveSubEdit(sub.id);
+                            }
+                            if (e.key === 'Escape') {
+                              setEditingSubId(null);
+                            }
+                          }}
+                          ref={(el) => {
+                            if (el) {
+                              el.style.height = 'auto';
+                              el.style.height = el.scrollHeight + 'px';
+                            }
+                          }}
+                          className="min-w-0 flex-grow bg-zinc-900 border border-zinc-800 text-sm font-bold tracking-tight text-white px-2 py-1.5 rounded-lg focus:outline-none focus:border-[#00ff41]/50 focus:ring-1 focus:ring-[#00ff41]/50 resize-none overflow-hidden whitespace-pre-wrap break-words [overflow-wrap:anywhere]"
+                          rows={1}
+                        />
+                      ) : (
+                        <span
+                          onClick={() => {
+                            if (!sub.status_concluido) {
+                              setEditingSubId(sub.id);
+                              setEditingSubTitulo(sub.titulo);
+                            }
+                          }}
+                          className={cn(
+                            "min-w-0 flex-1 text-sm font-medium pr-2 tracking-tight leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere] cursor-pointer hover:text-white transition-colors",
+                            sub.status_concluido ? "line-through text-zinc-600 italic cursor-not-allowed hover:text-zinc-600" : "text-zinc-300"
+                          )}
+                          title={sub.status_concluido ? "" : "Clique para editar"}
+                        >
+                          {sub.titulo}
+                        </span>
+                      )}
                     </div>
                     <button
                       onClick={() => {
@@ -294,9 +435,10 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                         triggerSave({ sub_tasks: updated });
                         forceGlobalSync();
                       }}
-                      className="text-zinc-700 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-black uppercase tracking-wider pr-1 shrink-0"
+                      className="text-zinc-600 hover:text-red-500 opacity-40 sm:opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-zinc-900/50 shrink-0"
+                      aria-label="Excluir sub-tarefa"
                     >
-                      Excluir
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 ))}
@@ -312,7 +454,7 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                   value={newSubTitulo}
                   onChange={(e) => setNewSubTitulo(e.target.value)}
                   placeholder="O que precisa ser feito?"
-                  className="bg-zinc-900/40 border-zinc-800 rounded-xl text-sm text-white min-h-[80px] max-h-[200px] overflow-y-auto focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 placeholder:text-zinc-700 uppercase font-bold whitespace-pre-wrap break-words [overflow-wrap:anywhere] resize-none"
+                  className="bg-zinc-900/40 border-zinc-800 rounded-xl text-sm text-white min-h-[80px] max-h-[200px] overflow-y-auto focus-visible:ring-1 focus-visible:ring-[#00ff41]/50 placeholder:text-zinc-700 font-bold whitespace-pre-wrap break-words [overflow-wrap:anywhere] resize-none"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey && newSubTitulo.trim()) {
                       e.preventDefault();
@@ -399,6 +541,10 @@ export function TaskDetailModal({ task, open, onClose, onUpdate }: TaskDetailMod
                   hora_vencimento: lembrete || null,
                   lembretes: lembretesState,
                   sub_tasks: subTasks,
+                  recorrencia_tipo: nlpRecurrence ? nlpRecurrence.type : null,
+                  recorrencia_dias: nlpRecurrence?.weekdays || null,
+                  recorrencia_custom_texto: nlpRecurrence?.type === 'custom' ? nlpRecurrence.customText : null,
+                  repeticao: recurrence || 'none',
                 });
               }
               persistToHardware();

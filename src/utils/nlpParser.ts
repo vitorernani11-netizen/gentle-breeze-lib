@@ -1,10 +1,11 @@
 import { addDays, nextDay } from 'date-fns';
 
-export type RecurrenceType = 'daily' | 'weekly' | 'monthly' | 'weekdays';
+export type RecurrenceType = 'daily' | 'weekly' | 'monthly' | 'weekdays' | 'custom';
 
 export interface Recurrence {
   type: RecurrenceType;
   weekdays?: string[]; // ex: ['quarta','sábado']
+  customText?: string;
 }
 
 export interface NLPResult {
@@ -104,6 +105,28 @@ export const computeRecurrenceDate = (
     }
     case 'weekdays':
       return getNextDateForWeekdays(rec.weekdays || [], baseDate, advance);
+    case 'custom': {
+      const text = (rec.customText || '').toLowerCase();
+      const d = new Date(baseDate);
+      if (!advance) return d;
+      
+      const meses = ['janeiro', 'fevereiro', 'março', 'marco', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+      const hasMonth = meses.some(m => text.includes(m));
+      const isYearly = text.includes('ano') || text.includes('anual') || hasMonth;
+      const isMonthly = text.includes('mês') || text.includes('mes') || text.includes('mensal');
+      const isWeekly = text.includes('semana') || text.includes('semanal') || text.includes('segunda') || text.includes('terça') || text.includes('terca') || text.includes('quarta') || text.includes('quinta') || text.includes('sexta') || text.includes('sábado') || text.includes('sabado') || text.includes('domingo');
+
+      if (isYearly) {
+        d.setFullYear(d.getFullYear() + 1);
+      } else if (isMonthly) {
+        d.setMonth(d.getMonth() + 1);
+      } else if (isWeekly) {
+        d.setDate(d.getDate() + 7);
+      } else {
+        d.setDate(d.getDate() + 1);
+      }
+      return d;
+    }
   }
 };
 

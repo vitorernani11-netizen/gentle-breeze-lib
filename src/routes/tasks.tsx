@@ -231,10 +231,7 @@ function TasksPage() {
 
   return (
     <div className="min-h-screen bg-black text-zinc-100 p-4 sm:p-6 pt-12 pb-20 font-sans">
-      <div className="fixed top-4 right-4 flex items-center gap-2 bg-zinc-900/50 px-4 py-2 rounded-full border border-zinc-800/50 z-50 backdrop-blur-md">
-        <WifiOff size={12} className="text-zinc-500" />
-        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Offline Local</span>
-      </div>
+
 
       <header className="mb-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">

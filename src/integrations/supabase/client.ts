@@ -1,46 +1,20 @@
-// Better mock for Supabase Client to satisfy TypeScript and provide local-user identity
-export const supabase = {
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from './types';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error('[Supabase] VITE_SUPABASE_URL ou VITE_SUPABASE_PUBLISHABLE_KEY não definidos no .env');
+}
+
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    getSession: async () => ({ 
-      data: { 
-        session: { 
-          user: { id: 'local-user', email: 'unico@usuario.app' },
-          access_token: 'local-mock-token'
-        } 
-      }, 
-      error: null 
-    }),
-    getUser: async () => ({ 
-      data: { user: { id: 'local-user', email: 'unico@usuario.app' } }, 
-      error: null 
-    }),
-    onAuthStateChange: (callback: any) => {
-      // Simulate an initial auth event
-      setTimeout(() => {
-        callback('SIGNED_IN', { user: { id: 'local-user', email: 'unico@usuario.app' } });
-      }, 0);
-      return { data: { subscription: { unsubscribe: () => {} } } };
-    },
-    signInWithPassword: async () => ({ data: { session: {} }, error: null }),
-    signUp: async () => ({ data: { user: {}, session: {} }, error: null }),
-    signOut: async () => ({ error: null }),
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
   },
-  from: (table: string) => {
-    const chainable = {
-      select: () => chainable,
-      insert: () => chainable,
-      update: () => chainable,
-      upsert: () => chainable,
-      delete: () => chainable,
-      eq: () => chainable,
-      gte: () => chainable,
-      lte: () => chainable,
-      lt: () => chainable,
-      order: () => chainable,
-      limit: () => chainable,
-      single: () => Promise.resolve({ data: null, error: null, count: 0 }),
-      then: (resolve: any) => resolve({ data: [], error: null, count: 0 }),
-    };
-    return chainable as any;
+  realtime: {
+    params: { eventsPerSecond: 2 },
   },
-} as any;
+});

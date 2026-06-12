@@ -1,5 +1,6 @@
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
 import { toast } from 'sonner';
+import { generateUUID } from '@/utils/uuid';
 
 const VAULT_KEY = 'hardware_humano_vault';
 
@@ -18,7 +19,7 @@ export const useVaultActions = (onSuccess?: () => void) => {
     try {
       const allItems = loadFromLocal(VAULT_KEY) || [];
       const newItem = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         ...itemData,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

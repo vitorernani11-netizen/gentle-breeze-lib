@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, X, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { generateUUID } from '@/utils/uuid';
+
 
 export interface Reminder {
   id: string;
@@ -35,7 +37,7 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({
 
     if (!reminders.some(r => r.minutosAntecendia === mins)) {
       const newReminder: Reminder = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         tipo: 'personalizado',
         minutosAntecendia: mins,
         disparado: false

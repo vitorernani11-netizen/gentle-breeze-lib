@@ -35,6 +35,7 @@ interface AddTaskOverlayProps {
     hora_vencimento?: string | null;
     recorrencia_tipo?: string | null;
     recorrencia_dias?: string[] | null;
+    recorrencia_custom_texto?: string | null;
   }) => void;
 }
 
@@ -92,6 +93,7 @@ export const AddTaskOverlay: React.FC<AddTaskOverlayProps> = ({ open, onClose, o
       hora_vencimento: lembrete,
       recorrencia_tipo: nlpRecurrence ? nlpRecurrence.type : null,
       recorrencia_dias: nlpRecurrence?.weekdays || null,
+      recorrencia_custom_texto: nlpRecurrence?.type === 'custom' ? nlpRecurrence.customText : null,
     });
 
     onClose();

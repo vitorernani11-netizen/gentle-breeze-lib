@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 import { getWeekdayString, getNextWeekdayDate, getTodayStr } from '@/utils/dateHelpers';
 import { computeRecurrenceDate, Recurrence } from '@/utils/nlpParser';
 import { format } from 'date-fns';
+import { generateUUID } from '@/utils/uuid';
+
 
 const TASKS_KEY = 'hardware_humano_data';
 
@@ -24,6 +26,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
             const rec: Recurrence = {
               type: t.recorrencia_tipo,
               weekdays: t.recorrencia_dias || undefined,
+              customText: t.recorrencia_custom_texto || undefined,
             };
             // Baseline = data atual da tarefa (parse local sem timezone shift)
             let baseline = new Date();
@@ -246,7 +249,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
     try {
       const allTasks = loadFromLocal(TASKS_KEY) || [];
       const newTask = {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         status_concluido: false,
@@ -261,6 +264,7 @@ export const useTaskActions = (onSuccess?: () => void) => {
         recorrencia_semanal: taskData.recorrencia_semanal || null,
         recorrencia_tipo: taskData.recorrencia_tipo || null,
         recorrencia_dias: taskData.recorrencia_dias || null,
+        recorrencia_custom_texto: taskData.recorrencia_custom_texto || null,
         ultimo_processamento: null,
         lembrete: taskData.lembrete || null,
         lembretes: taskData.lembretes || [],

@@ -6,9 +6,11 @@ import { Plus, Layers, Folder, MoreVertical, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { saveToLocal, loadFromLocal } from '@/lib/storage';
+import { generateUUID } from '@/utils/uuid';
 
 const PROJECTS_KEY = 'hardware_humano_projects';
 const TASKS_KEY = 'hardware_humano_data';
+
 
 export const Route = createFileRoute('/projects')({
   component: Projects,
@@ -56,7 +58,7 @@ function Projects() {
     
     try {
       const newProject = { 
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         nome: newProjectName, 
         user_id: 'local-user',
         cor: '#' + Math.floor(Math.random()*16777215).toString(16),

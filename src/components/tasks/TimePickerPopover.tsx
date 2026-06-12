@@ -37,7 +37,7 @@ export const TimePickerPopover: React.FC<TimePickerPopoverProps> = ({
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
-        className="w-64 bg-zinc-950 border-2 border-zinc-800 p-3 z-[150] shadow-[0_10px_40px_rgba(0,0,0,0.9)]"
+        className="w-64 bg-zinc-950 border-2 border-zinc-800 p-3 z-[250] shadow-[0_10px_40px_rgba(0,0,0,0.9)]"
         align="start"
       >
         <div className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2 px-1">

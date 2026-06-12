@@ -1,9 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
-  Link,
   createRootRouteWithContext,
-  useRouter,
   HeadContent,
   Scripts,
   useLocation,
@@ -11,13 +9,20 @@ import {
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "@/components/AppSidebar";
 import { BottomNav } from "@/components/BottomNav";
 import { GlobalAddTask } from "@/components/tasks/GlobalAddTask";
 import { useTaskActions } from "@/hooks/useTaskActions";
-import { persistToHardware, hasUnsavedChanges, loadFromLocal, saveToLocal } from "@/lib/storage";
-import { Save, Bell } from "lucide-react";
+import { hasUnsavedChanges, loadFromLocal, saveToLocal } from "@/lib/storage";
+import {
+  initSyncEngine,
+  pullFromCloud,
+  onSyncStatusChange,
+  getSyncStatus,
+  getPendingCount,
+  getLastSyncTime,
+  type SyncStatus,
+} from "@/lib/syncEngine";
 import { toast } from "sonner";
 
 import appCss from "../styles.css?url";
@@ -59,6 +64,42 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ─── Indicador de status do sync ─────────────────────────────────────────────
+function SyncStatusBadge() {
+  const [status, setStatus] = useState<SyncStatus>(getSyncStatus());
+  const [pending, setPending] = useState(getPendingCount());
+  const [lastSync, setLastSync] = useState(getLastSyncTime());
+
+  useEffect(() => {
+    const unsub = onSyncStatusChange((s) => {
+      setStatus(s);
+      setPending(getPendingCount());
+      setLastSync(getLastSyncTime());
+    });
+    return unsub;
+  }, []);
+
+  const config: Record<SyncStatus, { label: string; dot: string; text: string }> = {
+    idle:    { label: 'Nuvem OK',    dot: 'bg-green-500',  text: 'text-green-400' },
+    syncing: { label: 'Sincronizando...', dot: 'bg-yellow-400 animate-pulse', text: 'text-yellow-400' },
+    synced:  { label: 'Sincronizado', dot: 'bg-green-500',  text: 'text-green-400' },
+    offline: { label: `Offline${pending > 0 ? ` (${pending} pend.)` : ''}`, dot: 'bg-zinc-600', text: 'text-zinc-500' },
+    error:   { label: 'Erro no sync', dot: 'bg-red-500',    text: 'text-red-400' },
+  };
+
+  const c = config[status];
+
+  return (
+    <div
+      title={lastSync ? `Último sync: ${new Date(lastSync).toLocaleTimeString('pt-BR')}` : 'Nunca sincronizado'}
+      className="fixed top-2 right-3 z-[90] flex items-center gap-1.5 bg-zinc-950/80 backdrop-blur border border-zinc-800/60 rounded-full px-2.5 py-1 pointer-events-none select-none"
+    >
+      <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${c.dot}`} />
+      <span className={`text-[8px] font-black uppercase tracking-widest ${c.text}`}>{c.label}</span>
+    </div>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const location = useLocation();
@@ -70,10 +111,19 @@ function RootComponent() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      // Forçamos a sessão como true para o único usuário do app
       setHasSession(true);
       setIsAuthChecking(false);
       checkAndRouteRecurringTasks();
+
+      // Inicializa o motor de sync offline-first
+      await initSyncEngine();
+
+      // Baixa dados da nuvem e faz merge com localStorage
+      const synced = await pullFromCloud();
+      if (synced) {
+        // Dispara atualização da UI após merge
+        window.dispatchEvent(new Event('storage'));
+      }
     };
 
     checkAuth();
@@ -188,12 +238,12 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {hasSession && <AppSidebar />}
+      <SyncStatusBadge />
       <div className="flex flex-col min-h-screen pb-16 md:pb-0">
         <Outlet />
       </div>
       {hasSession && <BottomNav />}
       <GlobalAddTask />
-      
 
       <Toaster position="top-center" theme="dark" />
     </QueryClientProvider>
