@@ -25,31 +25,47 @@ export default defineConfig({
   vite: {
     plugins: [
       VitePWA({
+        // injectManifest: usa nosso SW customizado (src/sw.ts) com Workbox injetado
+        strategies: 'injectManifest',
+        srcDir: 'src',
+        filename: 'sw.ts',
         registerType: 'autoUpdate',
+        injectRegister: 'auto',
+        // Permite o SW rodar em dev para testar notificações
+        devOptions: {
+          enabled: true,
+          type: 'module',
+        },
         manifest: {
           name: 'Focus',
           short_name: 'Focus',
-          description: 'Gerenciador minimalista',
+          description: 'Gerenciador pessoal offline-first',
           theme_color: '#000000',
           background_color: '#000000',
           display: 'standalone',
           orientation: 'portrait',
+          start_url: '/',
+          scope: '/',
           icons: [
             {
               src: 'pwa-192x192.png',
               sizes: '192x192',
-              type: 'image/png'
+              type: 'image/png',
+              purpose: 'any maskable',
             },
             {
               src: 'pwa-512x512.png',
               sizes: '512x512',
-              type: 'image/png'
-            }
-          ]
+              type: 'image/png',
+              purpose: 'any maskable',
+            },
+          ],
         },
-        workbox: {
-          navigateFallbackDenylist: [/^\/~oauth/],
-        }
+        // Config do injectManifest
+        injectManifest: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,woff,woff2}'],
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+        },
       })
     ]
   }
